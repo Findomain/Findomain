@@ -36,5 +36,8 @@ Usage:
 findomain -i             Return the subdomain list with IP address if resolved.
 findomain                Return the subdomain list without IP address.
 ```
+# Demo
+<a href="https://asciinema.org/a/qUEfVtgEO0h2AMNBd3gsGckyv" target="_blank"><img src="https://asciinema.org/a/qUEfVtgEO0h2AMNBd3gsGckyv.svg" /></a>
 
+# Issues and requests
 If you have problems or want and enhancement request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
