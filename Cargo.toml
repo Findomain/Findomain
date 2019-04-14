@@ -1,0 +1,12 @@
+[package]
+name = "findomain"
+version = "0.1.0"
+authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0.90", features = ["derive"] }
+serde_derive = "1.0.90"
+reqwest = "0.9.14"
+error-chain = "0.12.0"
+trust-dns-resolver = "0.10.3"
