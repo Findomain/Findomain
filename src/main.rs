@@ -7,7 +7,7 @@ extern crate reqwest;
 use std::env;
 use std::fs::File;
 use std::io;
-use std::io::{BufRead, BufReader, Result as OtherResult};
+use std::io::{BufRead, BufReader};
 use trust_dns_resolver::Resolver;
 
 #[derive(Deserialize, Debug)]
@@ -27,7 +27,7 @@ fn banner() {
                                  --- Findomain ---
             A tool that use Certificates Transparency logs to find subdomains.
                           Autor: Eduard Tolosa - @edu4rdshl
-                                   Version: 0.1.0
+                                   Version: 0.1.1
 
             Usage:
 
