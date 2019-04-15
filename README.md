@@ -39,7 +39,7 @@ findomain -f <file>       Return the subdomain list for host specified in a file
 findomain -i -f <file>    Return the subdomain list for host specified in a file with IP address if resolved.
 ```
 # Demo
-<a href=”https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa" target=”_blank”><img src=”https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa.svg" /></a>
+<a href="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa" target="_blank"><img src="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa.svg" /></a>
 
 # Issues and requests
 If you have problems or want and enhancement request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
