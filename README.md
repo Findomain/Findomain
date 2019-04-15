@@ -35,6 +35,8 @@ Usage:
 
 findomain -i             Return the subdomain list with IP address if resolved.
 findomain                Return the subdomain list without IP address.
+findomain -f <file>      Return the subdomain list for host specified in a file.
+findomain -i -f <file>   Return the subdomain list for host specified in a file with IP address if resolved.
 ```
 # Demo
 <a href="https://asciinema.org/a/qUEfVtgEO0h2AMNBd3gsGckyv" target="_blank"><img src="https://asciinema.org/a/qUEfVtgEO0h2AMNBd3gsGckyv.svg" /></a>
