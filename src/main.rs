@@ -101,7 +101,15 @@ fn read_from_file(file: &str, with_ip: &str) -> io::Result<()> {
     if let Ok(f) = File::open(&file) {
         let f = BufReader::new(f);
         for line in f.lines() {
-            get_subdomains(line.unwrap(), with_ip);
+            get_subdomains(
+                line.unwrap()
+                    .to_string()
+                    .replace("www.", "")
+                    .replace("https://", "")
+                    .replace("http://", "")
+                    .replace("/", ""),
+                with_ip,
+            );
         }
     } else {
         println!(
