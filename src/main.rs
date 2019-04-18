@@ -53,11 +53,12 @@ fn get_subdomains(target: String, with_ip: &str) -> Result<()> {
         println!("\nThe following hosts were found for ==>  {}", target);
         for domain in &domains {
             for subdomain in domain.dns_names.iter() {
-                if with_ip.is_empty() || with_ip != "-i" {
-                    println!(" --> {}", subdomain);
-                } else {
+                //if with_ip.is_empty() || with_ip != "-i" {
+                if with_ip == "-i" {
                     let ipadress = get_ip(&subdomain);
                     println!(" --> {} : {}", subdomain, ipadress);
+                } else {
+                    println!(" --> {}", subdomain);
                 }
             }
         }
