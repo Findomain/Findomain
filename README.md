@@ -53,7 +53,7 @@ OPTIONS:
     -t, --target <target>    Target host
 ```
 # Demo
-<a href="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa" target="_blank"><img src="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa.svg" /></a>
+<a href="https://asciinema.org/a/gAyQxtZkQ0LO792olEEXUkpCz" target="_blank"><img src="https://asciinema.org/a/gAyQxtZkQ0LO792olEEXUkpCz.svg" /></a>
 
 # Issues and requests
 If you have problems or want and enhancement request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
