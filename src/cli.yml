@@ -1,0 +1,27 @@
+name: findomain
+version: "0.1.2"
+author: Eduard Tolosa <tolosaeduard@gmail.com>
+settings:
+    - ArgRequiredElseHelp
+    - StrictUtf8
+about: A tool that use Certificates Transparency logs to find subdomains.
+args:
+    - target:
+        short: t
+        long: target
+        help: Target host
+        takes_value: true
+        conflicts_with:
+          - file
+    - ip:
+        short: i
+        long: get-ip
+        help: Return the subdomain list with IP address if resolved.
+        takes_value: false
+    - file:
+        short: f
+        long: file
+        help: Sets the input file to use.
+        takes_value: true
+        conflicts_with:
+          - target
