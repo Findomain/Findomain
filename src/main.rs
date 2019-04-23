@@ -80,8 +80,8 @@ fn read_from_file(file: &str, with_ip: &str) -> io::Result<()> {
                     .unwrap()
                     .to_string()
                     .replace("www.", "")
-                    .replace("https:", "")
-                    .replace("http:", "")
+                    .replace("https://", "")
+                    .replace("http://", "")
                     .replace("/", ""),
                 &with_ip,
             )
