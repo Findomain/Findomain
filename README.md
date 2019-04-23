@@ -25,6 +25,11 @@ $ git clone https://github.com/Edu4rdSHL/findomain.git
 $ sudo cp findomain/bin/findomain /usr/bin
 $ findomain
 ```
+**If you are using the [BlackArch Linux](https://blackarch.org) distribution, you just need to use:**
+
+```
+$ sudo pacman -S findomain
+```
 
 # Usage
 
