@@ -31,12 +31,21 @@ $ findomain
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-Usage:
+findomain 0.1.2
+Eduard Tolosa <tolosaeduard@gmail.com>
+A tool that use Certificates Transparency logs to find subdomains.
 
-findomain -i             Return the subdomain list with IP address if resolved.
-findomain                Return the subdomain list without IP address.
-findomain -f <file>       Return the subdomain list for host specified in a file.
-findomain -i -f <file>    Return the subdomain list for host specified in a file with IP address if resolved.
+USAGE:
+    findomain [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -i, --get-ip     Return the subdomain list with IP address if resolved.
+    -V, --version    Prints version information
+
+OPTIONS:
+    -f, --file <file>        Sets the input file to use.
+    -t, --target <target>    Target host
 ```
 # Demo
 <a href="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa" target="_blank"><img src="https://asciinema.org/a/k5KdfXZ62db9xgPF9p619FYGa.svg" /></a>
