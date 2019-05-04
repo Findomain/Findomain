@@ -1,10 +1,10 @@
 # Findomain
-A tool that use Certificates Transparency logs to find subdomains.
+A cross-platform tool that use Certificates Transparency logs to find subdomains.
 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
-# Installation
+# Installation Linux
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
 **Manually:**
@@ -30,6 +30,14 @@ $ findomain
 ```
 $ sudo pacman -S findomain
 ```
+
+# Installation Windows
+
+Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/windows and use it.
+
+# Installation MacOS
+
+Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/osx
 
 # Usage
 
