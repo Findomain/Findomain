@@ -10,8 +10,11 @@ extern crate clap;
 use clap::App;
 
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io;
+use std::io::Write;
 use std::io::{BufRead, BufReader};
+use std::path::Path;
 use trust_dns_resolver::Resolver;
 
 #[derive(Deserialize, Debug)]
@@ -25,7 +28,12 @@ error_chain! {
     }
 }
 
-fn get_subdomains(target: &str, with_ip: &str) -> Result<()> {
+fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &str) -> Result<()> {
+    let target = target
+        .replace("www.", "")
+        .replace("https://", "")
+        .replace("http://", "")
+        .replace("/", "");
     let ct_api_url = [
         "https://api.certspotter.com/v1/issuances?domain=",
         &target,
@@ -33,18 +41,23 @@ fn get_subdomains(target: &str, with_ip: &str) -> Result<()> {
     ]
     .concat();
     let mut ct_data = reqwest::get(&ct_api_url)?;
-    println!("\nTarget: ==> {}", &target);
+    println!("\nTarget ==> {}", &target);
     if ct_data.status() == 200 {
-        //        fn foo(domains: &Vec<Vec<String>>) -> std::collections::HashSet<&String> {
-        //            domains.iter().flat_map(|sub| sub.iter()).collect()
-        //        }
         let domains: Vec<Subdomains> = ct_data.json()?;
         println!("\nThe following subdomains were found for ==>  {}", &target);
         for domain in &domains {
             for subdomain in domain.dns_names.iter() {
-                if with_ip == "y" {
+                if with_ip == "y" && with_output == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_ip == "y" {
                     let ipadress = get_ip(&subdomain);
                     println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_output == "y" {
+                    let ipadress = "";
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {}", &subdomain);
                 } else {
                     println!(" --> {}", &subdomain);
                 }
@@ -71,19 +84,20 @@ fn get_ip(domain: &str) -> String {
     }
 }
 
-fn read_from_file(file: &str, with_ip: &str) -> io::Result<()> {
+fn read_from_file(
+    file: &str,
+    with_ip: &str,
+    with_output: &str,
+    file_format: &str,
+) -> io::Result<()> {
     if let Ok(f) = File::open(&file) {
         let f = BufReader::new(f);
         for line in f.lines() {
             get_subdomains(
-                &line
-                    .unwrap()
-                    .to_string()
-                    .replace("www.", "")
-                    .replace("https://", "")
-                    .replace("http://", "")
-                    .replace("/", ""),
+                &line.unwrap().to_string(),
                 &with_ip,
+                &with_output,
+                &file_format,
             )
             .unwrap();
         }
@@ -96,42 +110,85 @@ fn read_from_file(file: &str, with_ip: &str) -> io::Result<()> {
     Ok(())
 }
 
+// The following code is an in-progress implementation in order to remove duplicate
+// domains.
+//
+//fn concat_domains(domains: &Vec<Vec<String>>) -> std::collections::HashSet<&String> {
+//    domains.iter().flat_map(|sub| sub.iter()).collect()
+//}
+
+fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str) {
+    let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
+    let filename = &[target, ".", file_format].concat();
+    if Path::new(&filename).exists() {
+        let mut output_file = OpenOptions::new()
+            .append(true)
+            .open(&filename)
+            .expect("Can't open file.");
+        output_file
+            .write_all(&data.as_bytes())
+            .expect("Failed writing to file.");
+    } else {
+        File::create(&filename).expect("Failed to create file.");
+        let mut output_file = OpenOptions::new()
+            .append(true)
+            .open(&filename)
+            .expect("Can't open file.");
+        output_file
+            .write_all("domain,ip\n".as_bytes())
+            .expect("Failed writing to file.");
+        output_file
+            .write_all(&data.as_bytes())
+            .expect("Failed writing to file.");
+    }
+}
+
 fn main() {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
-    if matches.is_present("target") {
+    if matches.is_present("target") && matches.is_present("output") {
         let target: String = matches.values_of("target").unwrap().collect();
+        let with_output = "y";
+        let file_format: String = matches.values_of("output").unwrap().collect();
         if matches.is_present("ip") {
             let with_ip = "y";
-            get_subdomains(
-                &target
-                    .replace("www.", "")
-                    .replace("https://", "")
-                    .replace("http://", "")
-                    .replace("/", ""),
-                &with_ip,
-            )
-            .unwrap();
+            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
         } else {
             let with_ip = "";
-            get_subdomains(
-                &target
-                    .replace("www.", "")
-                    .replace("https://", "")
-                    .replace("http://", "")
-                    .replace("/", ""),
-                &with_ip,
-            )
-            .unwrap();
+            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
         }
-    } else if matches.is_present("file") {
+    } else if matches.is_present("target") {
+        let target: String = matches.values_of("target").unwrap().collect();
+        let with_output = "n";
+        let file_format = "n";
+        if matches.is_present("ip") {
+            let with_ip = "y";
+            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
+        } else {
+            let with_ip = "";
+            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
+        }
+    } else if matches.is_present("file") && matches.is_present("output") {
+        let with_output = "y";
+        let file_format: String = matches.values_of("output").unwrap().collect();
         let file: String = matches.values_of("file").unwrap().collect();
         if matches.is_present("ip") {
             let with_ip = "y";
-            read_from_file(&file, &with_ip).unwrap();
+            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
         } else {
             let with_ip = "";
-            read_from_file(&file, &with_ip).unwrap();
+            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
+        }
+    } else if matches.is_present("file") {
+        let with_output = "n";
+        let file_format = "n";
+        let file: String = matches.values_of("file").unwrap().collect();
+        if matches.is_present("ip") {
+            let with_ip = "y";
+            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
+        } else {
+            let with_ip = "";
+            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
         }
     }
 }

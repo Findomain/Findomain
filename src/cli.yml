@@ -1,5 +1,5 @@
 name: findomain
-version: "0.1.2"
+version: "0.1.3"
 author: Eduard Tolosa <tolosaeduard@gmail.com>
 settings:
     - ArgRequiredElseHelp
@@ -25,3 +25,9 @@ args:
         takes_value: true
         conflicts_with:
           - target
+    - output:
+        short: o
+        long: output
+        help: Write data to output file in the specified format.
+        takes_value: true
+        possible_values: [ txt, csv, json ]
