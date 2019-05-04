@@ -37,7 +37,7 @@ Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/
 
 # Installation MacOS
 
-Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/osx
+Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/osx and use it.
 
 # Usage
 
@@ -70,6 +70,7 @@ OPTIONS:
 * Write output to TXT file.
 * Write output to CSV file.
 * Write output to JSON file.
+* Cross platform support: Linux, Windows, MacOS.
 
 # Issues and requests
 
