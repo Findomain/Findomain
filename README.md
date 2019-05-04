@@ -36,7 +36,7 @@ $ sudo pacman -S findomain
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-findomain 0.1.2
+findomain 0.1.3
 Eduard Tolosa <tolosaeduard@gmail.com>
 A tool that use Certificates Transparency logs to find subdomains.
 
@@ -50,10 +50,9 @@ FLAGS:
 
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
+    -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
     -t, --target <target>    Target host
 ```
-# Demo
-<a href="https://asciinema.org/a/gAyQxtZkQ0LO792olEEXUkpCz" target="_blank"><img src="https://asciinema.org/a/gAyQxtZkQ0LO792olEEXUkpCz.svg" /></a>
-
 # Issues and requests
-If you have problems or want and enhancement request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
+
+If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
