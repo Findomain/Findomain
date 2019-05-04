@@ -53,6 +53,16 @@ OPTIONS:
     -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
     -t, --target <target>    Target host
 ```
+# Features
+
+* Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
+* Discover subdomains with or without IP address according to user arguments.
+* Read target from user argument (-t).
+* Read a list of targets from file and discover their subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
+* Write output to TXT file.
+* Write output to CSV file.
+* Write output to JSON file.
+
 # Issues and requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
