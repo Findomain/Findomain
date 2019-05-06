@@ -17,7 +17,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 use trust_dns_resolver::Resolver;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct Subdomains {
     dns_names: Vec<String>,
 }
@@ -111,9 +111,9 @@ fn read_from_file(
 }
 
 // The following code is an in-progress implementation in order to remove duplicate
-// domains.
+// subdomains.
 //
-//fn concat_domains(domains: &Vec<Vec<String>>) -> std::collections::HashSet<&String> {
+//fn concat_domains(domains: &Vec<Subdomains>) -> std::collections::HashSet<&String> {
 //    domains.iter().flat_map(|sub| sub.iter()).collect()
 //}
 
