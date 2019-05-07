@@ -45,22 +45,20 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
     if ct_data.status() == 200 {
         let domains: Vec<Subdomains> = ct_data.json()?;
         println!("\nThe following subdomains were found for ==>  {}", &target);
-        for domain in &domains {
-            for subdomain in domain.dns_names.iter() {
-                if with_ip == "y" && with_output == "y" {
-                    let ipadress = get_ip(&subdomain);
-                    write_to_file(&subdomain, &target, &ipadress, &file_format);
-                    println!(" --> {} : {}", &subdomain, &ipadress);
-                } else if with_ip == "y" {
-                    let ipadress = get_ip(&subdomain);
-                    println!(" --> {} : {}", &subdomain, &ipadress);
-                } else if with_output == "y" {
-                    let ipadress = "";
-                    write_to_file(&subdomain, &target, &ipadress, &file_format);
-                    println!(" --> {}", &subdomain);
-                } else {
-                    println!(" --> {}", &subdomain);
-                }
+        for subdomain in concat_domains(&domains) {
+            if with_ip == "y" && with_output == "y" {
+                let ipadress = get_ip(&subdomain);
+                write_to_file(&subdomain, &target, &ipadress, &file_format);
+                println!(" --> {} : {}", &subdomain, &ipadress);
+            } else if with_ip == "y" {
+                let ipadress = get_ip(&subdomain);
+                println!(" --> {} : {}", &subdomain, &ipadress);
+            } else if with_output == "y" {
+                let ipadress = "";
+                write_to_file(&subdomain, &target, &ipadress, &file_format);
+                println!(" --> {}", &subdomain);
+            } else {
+                println!(" --> {}", &subdomain);
             }
         }
         println!("\nGood luck Hax0r!\n")
@@ -110,12 +108,12 @@ fn read_from_file(
     Ok(())
 }
 
-// The following code is an in-progress implementation in order to remove duplicate
-// subdomains.
-//
-//fn concat_domains(domains: &Vec<Subdomains>) -> std::collections::HashSet<&String> {
-//    domains.iter().flat_map(|sub| sub.iter()).collect()
-//}
+fn concat_domains(domains: &Vec<Subdomains>) -> std::collections::HashSet<&String> {
+    domains
+        .iter()
+        .flat_map(|sub| sub.dns_names.iter())
+        .collect()
+}
 
 fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str) {
     let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
