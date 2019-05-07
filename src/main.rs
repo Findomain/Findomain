@@ -1,3 +1,4 @@
+#![allow(deprecated)] // In order to remove the warning for error_chain! when compiling.
 #[macro_use]
 extern crate error_chain;
 #[macro_use]
