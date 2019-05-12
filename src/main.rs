@@ -62,7 +62,10 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
         let domains: Vec<Subdomains> = ct_data.json()?;
         // Check if we contain or not data from the request.
         if domains.is_empty() {
-            println!("No data was found for the target: {} :'(", &target);
+            println!(
+                "\nNo data was found for the target: {} ¡Sad 😭!",
+                &target
+            );
         } else {
             println!("\nThe following subdomains were found for ==>  {}", &target);
             // Concat the domains vectors and iter over every subdomain, then print that.
@@ -84,7 +87,7 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
                     println!(" --> {}", &subdomain);
                 }
             }
-            println!("\nGood luck Hax0r!\n")
+            println!("\nGood luck Hax0r 💀!\n")
         }
     } else {
         println!(
