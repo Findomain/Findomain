@@ -193,7 +193,7 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
     if ct_data_sublist3r.status() != 200 {
         println!(
             "An error as ocurred with the Sublist3r API. Error code: {}",
-            ct_data_sublist3r.status()
+            ct_data_crtsh.status()
         );
     }
     if ct_data_sublist3r.status() == 200 {
