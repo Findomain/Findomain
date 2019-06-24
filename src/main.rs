@@ -35,7 +35,7 @@ struct SubdomainsVirustotal {
 }
 
 #[derive(Deserialize)]
-struct ResponseData {
+struct ResponseDataVirusTotal {
     data: Vec<SubdomainsVirustotal>,
 }
 
@@ -92,22 +92,24 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
             );
             domains_certspotter.sort();
             domains_certspotter.dedup();
-            for subdomain in &domains_certspotter {
-                for subdomain_fixed in &subdomain.dns_names {
-                    if with_ip == "y" && with_output == "y" {
-                        let ipadress = get_ip(&subdomain_fixed);
-                        write_to_file(&subdomain_fixed, &target, &ipadress, &file_format);
-                        println!(" --> {} : {}", &subdomain_fixed, &ipadress);
-                    } else if with_ip == "y" {
-                        let ipadress = get_ip(&subdomain_fixed);
-                        println!(" --> {} : {}", &subdomain_fixed, &ipadress);
-                    } else if with_output == "y" {
-                        let ipadress = "";
-                        write_to_file(&subdomain_fixed, &target, &ipadress, &file_format);
-                        println!(" --> {}", &subdomain_fixed);
-                    } else {
-                        println!(" --> {}", &subdomain_fixed);
-                    }
+            let fixed_subdomains: Vec<&String> = domains_certspotter
+                .iter()
+                .flat_map(|sub| sub.dns_names.iter())
+                .collect();
+            for subdomain in &fixed_subdomains {
+                if with_ip == "y" && with_output == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_ip == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_output == "y" {
+                    let ipadress = "";
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {}", &subdomain);
+                } else {
+                    println!(" --> {}", &subdomain);
                 }
             }
         }
@@ -158,7 +160,7 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
         );
     }
     if ct_data_virustotal.status() == 200 {
-        let mut domains_virustotal = ct_data_virustotal.json::<ResponseData>()?.data;
+        let mut domains_virustotal = ct_data_virustotal.json::<ResponseDataVirusTotal>()?.data;
         if domains_virustotal.is_empty() {
             println!(
                 "\nNo data was found for the target: {} in Virustotal, ¡Sad 😭!",
