@@ -290,7 +290,7 @@ dependencies = [
 
 [[package]]
 name = "findomain"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",

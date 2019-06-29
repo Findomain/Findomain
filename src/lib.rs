@@ -6,10 +6,6 @@ extern crate error_chain;
 extern crate serde_derive;
 extern crate reqwest;
 
-#[macro_use]
-extern crate clap;
-use clap::App;
-
 use trust_dns_resolver::Resolver;
 
 use std::fs::File;
@@ -35,7 +31,7 @@ struct SubdomainsVirustotal {
 }
 
 #[derive(Deserialize)]
-struct ResponseData {
+struct ResponseDataVirusTotal {
     data: Vec<SubdomainsVirustotal>,
 }
 
@@ -45,7 +41,12 @@ error_chain! {
     }
 }
 
-fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &str) -> Result<()> {
+pub fn get_subdomains(
+    target: &str,
+    with_ip: &str,
+    with_output: &str,
+    file_format: &str,
+) -> Result<()> {
     let target = target
         .replace("www.", "")
         .replace("https://", "")
@@ -72,7 +73,8 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
     let mut ct_data_sublist3r = reqwest::get(&ct_api_url_sublist3r)?;
 
     println!("\nTarget ==> {}", &target);
-    if ct_data_certspotter.status() != 200 {
+
+    if ct_data_certspotter.status() != 200 || ct_data_certspotter.status().is_server_error() {
         println!(
             "An error as ocurred with the CertSpotter API. Error code: {}",
             ct_data_certspotter.status()
@@ -92,27 +94,29 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
             );
             domains_certspotter.sort();
             domains_certspotter.dedup();
-            for subdomain in &domains_certspotter {
-                for subdomain_fixed in &subdomain.dns_names {
-                    if with_ip == "y" && with_output == "y" {
-                        let ipadress = get_ip(&subdomain_fixed);
-                        write_to_file(&subdomain_fixed, &target, &ipadress, &file_format);
-                        println!(" --> {} : {}", &subdomain_fixed, &ipadress);
-                    } else if with_ip == "y" {
-                        let ipadress = get_ip(&subdomain_fixed);
-                        println!(" --> {} : {}", &subdomain_fixed, &ipadress);
-                    } else if with_output == "y" {
-                        let ipadress = "";
-                        write_to_file(&subdomain_fixed, &target, &ipadress, &file_format);
-                        println!(" --> {}", &subdomain_fixed);
-                    } else {
-                        println!(" --> {}", &subdomain_fixed);
-                    }
+            let fixed_subdomains: Vec<&String> = domains_certspotter
+                .iter()
+                .flat_map(|sub| sub.dns_names.iter())
+                .collect();
+            for subdomain in &fixed_subdomains {
+                if with_ip == "y" && with_output == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_ip == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    println!(" --> {} : {}", &subdomain, &ipadress);
+                } else if with_output == "y" {
+                    let ipadress = "";
+                    write_to_file(&subdomain, &target, &ipadress, &file_format);
+                    println!(" --> {}", &subdomain);
+                } else {
+                    println!(" --> {}", &subdomain);
                 }
             }
         }
     }
-    if ct_data_crtsh.status() != 200 {
+    if ct_data_crtsh.status() != 200 || ct_data_crtsh.status().is_server_error() {
         println!(
             "An error as ocurred with the crt.sh API. Error code: {}",
             ct_data_crtsh.status()
@@ -151,14 +155,14 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
             }
         }
     }
-    if ct_data_virustotal.status() != 200 {
+    if ct_data_virustotal.status() != 200 || ct_data_virustotal.status().is_server_error() {
         println!(
             "An error as ocurred with the Virustotal API. Error code: {}",
             ct_data_virustotal.status()
         );
     }
     if ct_data_virustotal.status() == 200 {
-        let mut domains_virustotal = ct_data_virustotal.json::<ResponseData>()?.data;
+        let mut domains_virustotal = ct_data_virustotal.json::<ResponseDataVirusTotal>()?.data;
         if domains_virustotal.is_empty() {
             println!(
                 "\nNo data was found for the target: {} in Virustotal, ¡Sad 😭!",
@@ -190,10 +194,10 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
             }
         }
     }
-    if ct_data_sublist3r.status() != 200 {
+    if ct_data_sublist3r.status() != 200 || ct_data_sublist3r.status().is_server_error() {
         println!(
             "An error as ocurred with the Sublist3r API. Error code: {}",
-            ct_data_crtsh.status()
+            ct_data_sublist3r.status()
         );
     }
     if ct_data_sublist3r.status() == 200 {
@@ -232,7 +236,23 @@ fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &
     Ok(())
 }
 
-fn get_ip(domain: &str) -> String {
+//fn make_request(target: String) -> Result<reqwest::Response> {
+//  let response = reqwest::get(&target)?;
+//match response {
+//        Err(e) => {
+//          if e.is_redirect() {
+//            if let Some(final_stop) = e.url() {
+//              println!("redirect loop at {}", final_stop);
+//        }
+//  } else if e.is_timeout() {
+//    println!("A timeout error has ocurred while processing {}", &target);
+//            }
+//      }
+//    Ok(res) => res.json()?,
+//    }
+//}
+
+pub fn get_ip(domain: &str) -> String {
     let resolver =
         Resolver::from_system_conf().expect("Error reading system resolver configuration.");
     if let Ok(ip_address) = resolver.lookup_ip(&domain) {
@@ -243,7 +263,7 @@ fn get_ip(domain: &str) -> String {
     }
 }
 
-fn read_from_file(
+pub fn read_from_file(
     file: &str,
     with_ip: &str,
     with_output: &str,
@@ -269,7 +289,7 @@ fn read_from_file(
     Ok(())
 }
 
-fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str) {
+pub fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str) {
     let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
     let filename = &[target, ".", file_format].concat();
     if Path::new(&filename).exists() {
@@ -292,55 +312,5 @@ fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str
         output_file
             .write_all(&data.as_bytes())
             .expect("Failed writing to file.");
-    }
-}
-
-fn main() {
-    let yaml = load_yaml!("cli.yml");
-    let matches = App::from_yaml(yaml).get_matches();
-    if matches.is_present("target") && matches.is_present("output") {
-        let target: String = matches.values_of("target").unwrap().collect();
-        let with_output = "y";
-        let file_format: String = matches.values_of("output").unwrap().collect();
-        if matches.is_present("ip") {
-            let with_ip = "y";
-            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
-        } else {
-            let with_ip = "";
-            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
-        }
-    } else if matches.is_present("target") {
-        let target: String = matches.values_of("target").unwrap().collect();
-        let with_output = "n";
-        let file_format = "n";
-        if matches.is_present("ip") {
-            let with_ip = "y";
-            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
-        } else {
-            let with_ip = "";
-            get_subdomains(&target, &with_ip, &with_output, &file_format).unwrap();
-        }
-    } else if matches.is_present("file") && matches.is_present("output") {
-        let with_output = "y";
-        let file_format: String = matches.values_of("output").unwrap().collect();
-        let file: String = matches.values_of("file").unwrap().collect();
-        if matches.is_present("ip") {
-            let with_ip = "y";
-            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
-        } else {
-            let with_ip = "";
-            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
-        }
-    } else if matches.is_present("file") {
-        let with_output = "n";
-        let file_format = "n";
-        let file: String = matches.values_of("file").unwrap().collect();
-        if matches.is_present("ip") {
-            let with_ip = "y";
-            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
-        } else {
-            let with_ip = "";
-            read_from_file(&file, &with_ip, &with_output, &file_format).unwrap();
-        }
     }
 }
