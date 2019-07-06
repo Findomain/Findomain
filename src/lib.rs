@@ -93,11 +93,11 @@ pub fn get_subdomains(
         );
         println!("\nGood luck Hax0r 💀!")
     }
-    if with_ip == "y" {
+    if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
         let filename: String = [&target, with_ip, ".", file_format].concat();
         fix_duplicated(&filename)
-    } else {
+    } else if with_output == "y" {
         let filename: String = [&target, ".", file_format].concat();
         fix_duplicated(&filename)
     }
