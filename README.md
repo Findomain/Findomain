@@ -2,7 +2,7 @@
 A cross-platform tool that use Certificates Transparency logs to find subdomains. We currently support Linux, Windows and MacOS.
 
 # How it works?
-It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
+It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
 # Installation Linux
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
@@ -44,7 +44,7 @@ Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-findomain 0.1.3
+findomain 0.1.4
 Eduard Tolosa <tolosaeduard@gmail.com>
 A tool that use Certificates Transparency logs to find subdomains.
 
@@ -52,15 +52,48 @@ USAGE:
     findomain [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help       Prints help information
-    -i, --get-ip     Return the subdomain list with IP address if resolved.
-    -V, --version    Prints version information
+    -a, --all-apis    Use all the available APIs to perform the search. It take more time but you will have a lot of
+                      more results.
+    -h, --help        Prints help information
+    -i, --get-ip      Return the subdomain list with IP address if resolved.
+    -V, --version     Prints version information
 
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
     -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
     -t, --target <target>    Target host
 ```
+
+# Examples
+
+1. Make a simple search of subdomains and print the info in the screen:
+
+`findomain -t example.com`
+
+2. Make a simple search of subdomains using all the APIs and print the info in the screen:
+
+`findomain -t example.com -a`
+
+3. Make a search of subdomains and export the data to a CSV file:
+
+`findomain -t example.com -o csv`
+
+4. Make a search of subdomains using all the APIs and export the data to a CSV file:
+
+`findomain -t example.com -a -o csv`
+
+5. Make a search of subdomains and resolve the IP address of subdomains (if possible):
+
+`findomain -t example.com -i`
+
+6. Make a search of subdomains with all the APIs and resolve the IP address of subdomains (if possible):
+
+`findomain -t example.com -i -a`
+
+7. Make a search of subdomains with all the APIs and resolve the IP address of subdomains (if possible), exporting the data to a CSV file:
+
+`findomain -t example.com -i -a -o csv`
+
 # Features
 
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
