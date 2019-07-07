@@ -31,6 +31,16 @@ struct ResponseDataVirusTotal {
     data: Vec<SubdomainsVirustotal>,
 }
 
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Clone)]
+struct SubdomainsFacebook {
+    domains: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct ResponseDataFacebook {
+    data: Vec<SubdomainsFacebook>,
+}
+
 pub fn get_subdomains(
     target: &str,
     with_ip: &str,
@@ -57,6 +67,12 @@ pub fn get_subdomains(
     .concat();
     let ct_api_url_crtsh = ["https://crt.sh/?q=%", &target, "&output=json"].concat();
     let ct_api_url_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
+    let ct_api_url_fb = [
+        "https://graph.facebook.com/certificates?query=",
+        &target,
+        "&fields=domains&limit=10000&access_token=298348064419358|RrUIvPdydH023XhrMh1xBzv9dTM",
+    ]
+    .concat();
 
     println!("\nTarget ==> {}", &target);
 
@@ -86,6 +102,13 @@ pub fn get_subdomains(
         );
         get_sublist3r_subdomains(
             &ct_api_url_sublist3r,
+            &target,
+            &with_ip,
+            &with_output,
+            &file_format,
+        );
+        get_facebook_subdomains(
+            &ct_api_url_fb,
             &target,
             &with_ip,
             &with_output,
@@ -128,11 +151,12 @@ fn get_certspotter_subdomains(
                         );
                         domains_certspotter.sort();
                         domains_certspotter.dedup();
-                        let fixed_subdomains: Vec<&String> = domains_certspotter
+                        let mut fixed_certspotter_subdomains: Vec<&String> = domains_certspotter
                             .iter()
                             .flat_map(|sub| sub.dns_names.iter())
                             .collect();
-                        for subdomain in &fixed_subdomains {
+                        fixed_certspotter_subdomains.retain(|sub| !sub.contains("*."));
+                        for subdomain in &fixed_certspotter_subdomains {
                             if with_ip == "y" && with_output == "y" {
                                 let ipadress = get_ip(&subdomain);
                                 write_to_file(
@@ -191,6 +215,7 @@ fn get_crtsh_subdomains(
                 } else {
                     domains_crtsh.sort();
                     domains_crtsh.dedup();
+                    domains_crtsh.retain(|sub| !sub.name_value.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in crt.sh\n",
                         &target
@@ -240,6 +265,7 @@ fn get_virustotal_subdomains(
                 } else {
                     domains_virustotal.sort();
                     domains_virustotal.dedup();
+                    domains_virustotal.retain(|sub| !sub.id.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Virustotal\n",
                         &target
@@ -288,6 +314,7 @@ fn get_sublist3r_subdomains(
                 } else {
                     domains_sublist3r.sort();
                     domains_sublist3r.dedup();
+                    domains_sublist3r.retain(|sub| !sub.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Sublist3r\n",
                         &target
@@ -313,6 +340,59 @@ fn get_sublist3r_subdomains(
             Err(e) => check_json_errors(e, "Sublist3r"),
         },
         Err(e) => check_request_errors(e, "Sublist3r"),
+    }
+}
+
+fn get_facebook_subdomains(
+    ct_api_url_fb: &str,
+    target: &str,
+    with_ip: &str,
+    with_output: &str,
+    file_format: &str,
+) {
+    println!("\nSearching in the Facebook API...");
+    match reqwest::get(ct_api_url_fb) {
+        Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
+            Ok(fb_json) => {
+                let fb_subdomains = fb_json.data;
+                let mut fixed_fb_subdomains: Vec<&String> = fb_subdomains
+                    .iter()
+                    .flat_map(|sub| sub.domains.iter())
+                    .collect();
+                if fixed_fb_subdomains.is_empty() {
+                    println!(
+                        "\nNo data was found for the target: {} in Facebook, ¡Sad 😭!",
+                        &target
+                    );
+                } else {
+                    fixed_fb_subdomains.sort();
+                    fixed_fb_subdomains.dedup();
+                    fixed_fb_subdomains.retain(|sub| !sub.contains("*."));
+                    println!(
+                        "\nThe following subdomains were found for ==>  {} in Facebook\n",
+                        &target
+                    );
+                    for subdomain in &fixed_fb_subdomains {
+                        if with_ip == "y" && with_output == "y" {
+                            let ipadress = get_ip(&subdomain);
+                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                            println!(" --> {} : {}", &subdomain, &ipadress);
+                        } else if with_ip == "y" {
+                            let ipadress = get_ip(&subdomain);
+                            println!(" --> {} : {}", &subdomain, &ipadress);
+                        } else if with_output == "y" {
+                            let ipadress = "";
+                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                            println!(" --> {}", &subdomain);
+                        } else {
+                            println!(" --> {}", &subdomain);
+                        }
+                    }
+                }
+            }
+            Err(e) => check_json_errors(e, "Facebook"),
+        },
+        Err(e) => check_request_errors(e, "Facebook"),
     }
 }
 
@@ -387,8 +467,8 @@ pub fn write_to_file(
     file_format: &str,
     with_ip: &str,
 ) {
-    let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
     if with_ip == "y" {
+        let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
         let with_ip = "-ip";
         let filename = &[target, with_ip, ".", file_format].concat();
         if Path::new(&filename).exists() {
@@ -410,6 +490,7 @@ pub fn write_to_file(
                 .expect("Failed writing to file.");
         }
     } else {
+        let data = &[data, ",", "\n"].concat();
         let filename = &[target, ".", file_format].concat();
         if Path::new(&filename).exists() {
             let mut output_file = OpenOptions::new()
@@ -464,10 +545,14 @@ pub fn fix_duplicated(filename: &str) {
 pub fn get_ip(domain: &str) -> String {
     let resolver =
         Resolver::from_system_conf().expect("Error reading system resolver configuration.");
-    if let Ok(ip_address) = resolver.lookup_ip(&domain) {
-        let address = ip_address.iter().next().expect("An error as ocurred.");
-        address.to_string()
-    } else {
-        String::from("Domain not resolved")
+    match resolver.lookup_ip(&domain) {
+        Ok(ip_address) => {
+            let address = ip_address
+                .iter()
+                .next()
+                .expect("An error as ocurred getting the IP address.");
+            address.to_string()
+        }
+        Err(_) => String::from("No IP address found"),
     }
 }
