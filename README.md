@@ -21,9 +21,9 @@ $ findomain
 **Using the binary:**
 
 ```
-$ git clone https://github.com/Edu4rdSHL/findomain.git
-$ sudo cp findomain/bin/findomain /usr/bin
-$ findomain
+$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
+$ chmod +x findomain-linux
+$ ./findomain-linux
 ```
 **If you are using the [BlackArch Linux](https://blackarch.org) distribution, you just need to use:**
 
@@ -33,11 +33,20 @@ $ sudo pacman -S findomain
 
 # Installation Windows
 
-Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/windows and use it.
+Download the binary from https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-windows.exe
+
+Open a CMD shell and go to the dir where findomain-windows.exe was downloaded.
+
+Exec: `findomain-windows` in the CMD shell.
+
 
 # Installation MacOS
 
-Download the binary from https://github.com/Edu4rdSHL/findomain/tree/master/bin/osx and use it.
+```
+$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-osx
+$ chmod +x findomain-osx.dms
+$ ./findomain-osx.dms
+```
 
 # Usage
 
