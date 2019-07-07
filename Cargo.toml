@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "0.1.4"
+version = "0.1.41"
 authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
 edition = "2018"
 

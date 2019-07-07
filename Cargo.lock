@@ -290,7 +290,7 @@ dependencies = [
 
 [[package]]
 name = "findomain"
-version = "0.1.4"
+version = "0.1.41"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest 0.9.14 (registry+https://github.com/rust-lang/crates.io-index)",
