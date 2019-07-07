@@ -119,10 +119,22 @@ pub fn get_subdomains(
     if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
         let filename: String = [&target, with_ip, ".", file_format].concat();
-        fix_duplicated(&filename)
+        if Path::new(&filename).exists() {
+            fix_duplicated(&filename);
+            println!(
+                "\n 📁 Filename for the target {} was saved in: ./{} 😀",
+                &target, &filename
+            )
+        }
     } else if with_output == "y" {
         let filename: String = [&target, ".", file_format].concat();
-        fix_duplicated(&filename)
+        if Path::new(&filename).exists() {
+            fix_duplicated(&filename);
+            println!(
+                "\n📁 Filename for the target {} was saved in: ./{} 😀",
+                &target, &filename
+            )
+        }
     }
 }
 
@@ -134,7 +146,7 @@ fn get_certspotter_subdomains(
     file_format: &str,
     all_apis: &u32,
 ) {
-    println!("\nSearching in the CertSpotter API...");
+    println!("\nSearching in the CertSpotter API... 🔍");
     match reqwest::get(ct_api_url_certspotter) {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
@@ -146,7 +158,7 @@ fn get_certspotter_subdomains(
                         );
                     } else {
                         println!(
-                            "\nThe following subdomains were found for ==>  {} in CertSpotter.\n",
+                            "\nThe following subdomains were found for ==>  {} in CertSpotter 👽\n",
                             &target
                         );
                         domains_certspotter.sort();
@@ -203,7 +215,7 @@ fn get_crtsh_subdomains(
     with_output: &str,
     file_format: &str,
 ) {
-    println!("\nSearching in the Crtsh API...");
+    println!("\nSearching in the Crtsh API... 🔍");
     match reqwest::get(ct_api_url_crtsh) {
         Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(mut domains_crtsh) => {
@@ -217,7 +229,7 @@ fn get_crtsh_subdomains(
                     domains_crtsh.dedup();
                     domains_crtsh.retain(|sub| !sub.name_value.contains("*."));
                     println!(
-                        "\nThe following subdomains were found for ==>  {} in crt.sh\n",
+                        "\nThe following subdomains were found for ==>  {} in crt.sh 👽\n",
                         &target
                     );
                     for subdomain in &domains_crtsh {
@@ -252,7 +264,7 @@ fn get_virustotal_subdomains(
     with_output: &str,
     file_format: &str,
 ) {
-    println!("\nSearching in the Virustotal API...");
+    println!("\nSearching in the Virustotal API... 🔍");
     match reqwest::get(ct_api_url_virustotal) {
         Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
@@ -267,7 +279,7 @@ fn get_virustotal_subdomains(
                     domains_virustotal.dedup();
                     domains_virustotal.retain(|sub| !sub.id.contains("*."));
                     println!(
-                        "\nThe following subdomains were found for ==>  {} in Virustotal\n",
+                        "\nThe following subdomains were found for ==>  {} in Virustotal 👽\n",
                         &target
                     );
                     for subdomain in &domains_virustotal {
@@ -302,7 +314,7 @@ fn get_sublist3r_subdomains(
     with_output: &str,
     file_format: &str,
 ) {
-    println!("\nSearching in the Sublist3r API...");
+    println!("\nSearching in the Sublist3r API... 🔍");
     match reqwest::get(ct_api_url_sublist3r) {
         Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
             Ok(mut domains_sublist3r) => {
@@ -316,7 +328,7 @@ fn get_sublist3r_subdomains(
                     domains_sublist3r.dedup();
                     domains_sublist3r.retain(|sub| !sub.contains("*."));
                     println!(
-                        "\nThe following subdomains were found for ==>  {} in Sublist3r\n",
+                        "\nThe following subdomains were found for ==>  {} in Sublist3r 👽\n",
                         &target
                     );
                     for subdomain in &domains_sublist3r {
@@ -350,7 +362,7 @@ fn get_facebook_subdomains(
     with_output: &str,
     file_format: &str,
 ) {
-    println!("\nSearching in the Facebook API...");
+    println!("\nSearching in the Facebook API... 🔍");
     match reqwest::get(ct_api_url_fb) {
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => {
@@ -369,7 +381,7 @@ fn get_facebook_subdomains(
                     fixed_fb_subdomains.dedup();
                     fixed_fb_subdomains.retain(|sub| !sub.contains("*."));
                     println!(
-                        "\nThe following subdomains were found for ==>  {} in Facebook\n",
+                        "\nThe following subdomains were found for ==>  {} in Facebook 👽\n",
                         &target
                     );
                     for subdomain in &fixed_fb_subdomains {
@@ -400,29 +412,29 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
     use std::error::Error;
     if error.is_timeout() {
         println!(
-            "\nA timeout error as occured while processing the request in the {} API. Error description: {}",
+            "\nA timeout ⏳ error as occured while processing the request in the {} API. Error description: {}",
             &api, &error.description())
     } else if error.is_redirect() {
         println!(
-            "\nA redirect was found while processing the {} API. Error description: {}",
+            "\nA redirect ↪️  was found while processing the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_client_error() {
         println!(
-            "\nA client error as occured sending the request to the {} API. Error description: {}",
+            "\nA client error 🧑❌ as occured sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_server_error() {
         println!(
-            "\nA server error as occured sending the request to the {} API. Error description: {}",
+            "\nA server error 🖥️❌ as occured sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else {
         println!(
-            "\nAn error as occured while procesing the request in the {} API. Error description: {}",
+            "\nAn error ❌ as occured while procesing the request in the {} API. Error description: {}",
             &api,
             &error.description()
         )
@@ -431,7 +443,7 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
 
 pub fn check_json_errors(error: reqwest::Error, api: &str) {
     use std::error::Error;
-    println!("\nAn error as ocurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
+    println!("\nAn error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
 pub fn read_from_file(
@@ -454,7 +466,7 @@ pub fn read_from_file(
         }
     } else {
         println!(
-            "Error: can't open file {}, please check the filename and try again.",
+            "Error: can't open file 📁 {}, please check the filename and try again.",
             &file
         );
     }
