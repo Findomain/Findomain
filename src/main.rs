@@ -7,7 +7,6 @@ extern crate findomain;
 fn main() {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
-    if matches.is_present("config") {}
     if matches.is_present("target") && matches.is_present("output") {
         let target: String = matches.values_of("target").unwrap().collect();
         let with_output = "y";
