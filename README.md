@@ -113,6 +113,7 @@ OPTIONS:
 * Write output to CSV file.
 * Write output to JSON file.
 * Cross platform support: Linux, Windows, MacOS.
+* Optional multiple API support.
 
 # Issues and requests
 
