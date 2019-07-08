@@ -1,4 +1,4 @@
-![alt text](findomain.png?raw=true "Findomain")
+![alt text](findomain.jpg "Findomain")
 
 # Findomain
 A cross-platform tool that use Certificates Transparency logs to find subdomains. We currently support Linux, Windows and MacOS.
