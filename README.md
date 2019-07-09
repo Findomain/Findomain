@@ -11,7 +11,7 @@ APIs that we using at the moment:
 - Certspotter: https://api.certspotter.com/
 - Crt.sh : https://crt.sh
 - Virustotal: https://www.virustotal.com/ui/domains/
-- Sublit3r: https://api.sublist3r.com/search.php?domain=
+- Sublit3r: https://api.sublist3r.com/
 - Facebook: https://developers.facebook.com/docs/certificate-transparency
 
 If you know other that should be added, open an issue.
