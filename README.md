@@ -120,3 +120,7 @@ OPTIONS:
 # Issues and requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
+
+# Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/Edu4rdSHL/findomain.svg)](https://starchart.cc/Edu4rdSHL/findomain)
