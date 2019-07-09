@@ -16,7 +16,7 @@ APIs that we using at the moment:
 
 If you know other that should be added, open an issue.
 
-# Installation Linux
+# Installation Linux desde código fuente
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
 **Manually:**
@@ -30,7 +30,7 @@ $ sudo cp target/release/findomain /usr/bin/
 $ findomain
 ```
 
-**Using the binary:**
+# Instalación Linux desde binarios
 
 ```
 $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
