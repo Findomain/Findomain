@@ -6,6 +6,16 @@ A cross-platform tool that use Certificates Transparency logs to find subdomains
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
+APIs that we using at the moment:
+
+- Certspotter: https://api.certspotter.com/
+- Crt.sh : https://crt.sh
+- Virustotal: https://www.virustotal.com/ui/domains/
+- Sublit3r: https://api.sublist3r.com/search.php?domain=
+- Facebook: https://developers.facebook.com/docs/certificate-transparency
+
+If you know other that should be added, open an issue.
+
 # Installation Linux
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
