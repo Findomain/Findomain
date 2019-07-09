@@ -1,7 +1,7 @@
 ![alt text](findomain.png "Findomain")
 
 # Findomain
-A cross-platform tool that use Certificates Transparency logs to find subdomains. We currently support Linux, Windows and MacOS.
+A cross-platform tool that use Certificates Transparency logs to find subdomains. We currently support Linux, Windows and MacOS. All supported platforms are 64 bits.
 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
