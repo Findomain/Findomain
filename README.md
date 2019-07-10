@@ -1,3 +1,5 @@
+Follow in Twitter: https://twitter.com/sechacklabs (Team) and https://twitter.com/edu4rdshl (Developer)
+
 ![alt text](findomain.png "Findomain")
 
 # Findomain
