@@ -1,7 +1,7 @@
 Follow in Twitter:
 
-https://twitter.com/sechacklabs (Team)
-https://twitter.com/edu4rdshl (Developer)
+* https://twitter.com/sechacklabs (Team)
+* https://twitter.com/edu4rdshl (Developer)
 
 ![alt text](findomain.png "Findomain")
 
