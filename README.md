@@ -59,6 +59,22 @@ $ ./findomain-linux
 $ sudo pacman -S findomain
 ```
 
+# Installation ARM
+
+```
+$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-arm
+$ chmod +x findomain-arm
+$ ./findomain-arm
+```
+
+# Installation Aarch64 (Raspberry Pi)
+
+```
+$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-aarch64
+$ chmod +x findomain-aarch64
+$ ./findomain-aarch64
+```
+
 # Installation Windows
 
 Download the binary from https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-windows.exe
