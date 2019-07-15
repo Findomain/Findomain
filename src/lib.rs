@@ -150,7 +150,7 @@ fn get_certspotter_subdomains(
     match reqwest::get(ct_api_url_certspotter) {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
-                Ok(mut domains_certspotter) => {
+                Ok(domains_certspotter) => {
                     if domains_certspotter.is_empty() {
                         println!(
                             "\nNo data was found for the target: {} in CertSpotter, ¡Sad 😭!",
@@ -161,12 +161,12 @@ fn get_certspotter_subdomains(
                             "\nThe following subdomains were found for ==>  {} in CertSpotter 👽\n",
                             &target
                         );
-                        domains_certspotter.sort();
-                        domains_certspotter.dedup();
                         let mut fixed_certspotter_subdomains: Vec<&String> = domains_certspotter
                             .iter()
                             .flat_map(|sub| sub.dns_names.iter())
                             .collect();
+                        fixed_certspotter_subdomains.sort();
+                        fixed_certspotter_subdomains.dedup();
                         fixed_certspotter_subdomains.retain(|sub| !sub.contains("*."));
                         for subdomain in &fixed_certspotter_subdomains {
                             if with_ip == "y" && with_output == "y" {
