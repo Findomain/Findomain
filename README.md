@@ -1,9 +1,23 @@
-Follow in Twitter: https://twitter.com/sechacklabs (Team) and https://twitter.com/edu4rdshl (Developer)
+Follow in Twitter:
+
+https://twitter.com/sechacklabs (Team)
+https://twitter.com/edu4rdshl (Developer)
 
 ![alt text](findomain.png "Findomain")
 
 # Findomain
-A cross-platform tool that use Certificates Transparency logs to find subdomains. We currently support Linux, Windows and MacOS. All supported platforms are 64 bits.
+
+A cross-platform tool that use Certificates Transparency logs to find subdomains.
+
+# Supportted platforms
+
+All supported platforms are 64 bits only and we don't have plans to add support for 32 bits, if you want to have support for 32 bits you can fork the repo and made it.
+
+* Linux
+* Windows
+* MacOS
+* ARM
+* Aarch64
 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
