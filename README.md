@@ -46,7 +46,7 @@ $ sudo cp target/release/findomain /usr/bin/
 $ findomain
 ```
 
-# Instalación Linux using compiled artifacts
+# Linux installation using compiled artifacts
 
 ```
 $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
