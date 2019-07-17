@@ -32,7 +32,7 @@ APIs that we using at the moment:
 
 If you know other that should be added, open an issue.
 
-# Linux Installation using source code
+# Linux installation using source code
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
 **Manually:**
