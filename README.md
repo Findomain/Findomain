@@ -32,7 +32,7 @@ APIs that we using at the moment:
 
 If you know other that should be added, open an issue.
 
-# Linux installation using source code
+# Installation in Linux using source code
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
 **Manually:**
@@ -46,7 +46,7 @@ $ sudo cp target/release/findomain /usr/bin/
 $ findomain
 ```
 
-# Linux installation using compiled artifacts
+# Installation in Linux using compiled artifacts
 
 ```
 $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
