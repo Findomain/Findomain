@@ -22,7 +22,7 @@ All supported platforms are 64 bits only and we don't have plans to add support 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
-APIs that we using at the moment:
+APIs that we are using at the moment:
 
 - Certspotter: https://api.certspotter.com/
 - Crt.sh : https://crt.sh
