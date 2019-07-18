@@ -1,3 +1,6 @@
 /target
 **/*.rs.bk
 test.*
+*.txt
+*.csv
+*.json
