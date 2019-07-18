@@ -6,13 +6,8 @@ extern crate lazy_static;
 
 use trust_dns_resolver::Resolver;
 
-use std::collections::HashSet;
-use std::fs;
-use std::fs::File;
-use std::fs::OpenOptions;
-use std::io::Read;
-use std::io::Write;
-use std::io::{BufRead, BufReader};
+use std::fs::{remove_file, File, OpenOptions};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::time::Duration;
 
@@ -21,22 +16,22 @@ struct SubdomainsCertSpotter {
     dns_names: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Hash)]
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsCrtsh {
     name_value: String,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Hash)]
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsVirustotal {
     id: String,
 }
 
 #[derive(Deserialize)]
 struct ResponseDataVirusTotal {
-    data: HashSet<SubdomainsVirustotal>,
+    data: Vec<SubdomainsVirustotal>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Clone)]
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsFacebook {
     domains: Vec<String>,
 }
@@ -173,11 +168,12 @@ fn get_certspotter_subdomains(
                             "\nThe following subdomains were found for ==>  {} in CertSpotter 👽\n",
                             &target
                         );
-                        let mut fixed_certspotter_subdomains: HashSet<&String> =
-                            domains_certspotter
-                                .iter()
-                                .flat_map(|sub| sub.dns_names.iter())
-                                .collect();
+                        let mut fixed_certspotter_subdomains: Vec<&String> = domains_certspotter
+                            .iter()
+                            .flat_map(|sub| sub.dns_names.iter())
+                            .collect();
+                        fixed_certspotter_subdomains.sort();
+                        fixed_certspotter_subdomains.dedup();
                         fixed_certspotter_subdomains.retain(|sub| !sub.contains("*."));
                         for subdomain in &fixed_certspotter_subdomains {
                             if with_ip == "y" && with_output == "y" {
@@ -228,7 +224,7 @@ fn get_crtsh_subdomains(
 ) {
     println!("\nSearching in the Crtsh API... 🔍");
     match CLIENT.get(ct_api_url_crtsh).send() {
-        Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
+        Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(mut domains_crtsh) => {
                 if domains_crtsh.is_empty() {
                     println!(
@@ -236,6 +232,8 @@ fn get_crtsh_subdomains(
                         &target
                     );
                 } else {
+                    domains_crtsh.sort();
+                    domains_crtsh.dedup();
                     domains_crtsh.retain(|sub| !sub.name_value.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in crt.sh 👽\n",
@@ -284,6 +282,8 @@ fn get_virustotal_subdomains(
                         &target
                     );
                 } else {
+                    domains_virustotal.sort();
+                    domains_virustotal.dedup();
                     domains_virustotal.retain(|sub| !sub.id.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Virustotal 👽\n",
@@ -323,7 +323,7 @@ fn get_sublist3r_subdomains(
 ) {
     println!("\nSearching in the Sublist3r API... 🔍");
     match CLIENT.get(ct_api_url_sublist3r).send() {
-        Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<HashSet<String>>() {
+        Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
             Ok(mut domains_sublist3r) => {
                 if domains_sublist3r.is_empty() {
                     println!(
@@ -331,6 +331,8 @@ fn get_sublist3r_subdomains(
                         &target
                     );
                 } else {
+                    domains_sublist3r.sort();
+                    domains_sublist3r.dedup();
                     domains_sublist3r.retain(|sub| !sub.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Sublist3r 👽\n",
@@ -372,7 +374,7 @@ fn get_facebook_subdomains(
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => {
                 let fb_subdomains = fb_json.data;
-                let mut fixed_fb_subdomains: HashSet<&String> = fb_subdomains
+                let mut fixed_fb_subdomains: Vec<&String> = fb_subdomains
                     .iter()
                     .flat_map(|sub| sub.domains.iter())
                     .collect();
@@ -382,6 +384,8 @@ fn get_facebook_subdomains(
                         &target
                     );
                 } else {
+                    fixed_fb_subdomains.sort();
+                    fixed_fb_subdomains.dedup();
                     fixed_fb_subdomains.retain(|sub| !sub.contains("*."));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Facebook 👽\n",
@@ -541,7 +545,7 @@ pub fn fix_duplicated(filename: &str) {
         .split("\n")
         .map(|s: &str| s.to_string())
         .collect();
-    fs::remove_file(&filename).unwrap();
+    remove_file(&filename).unwrap();
     File::create(&filename).expect("Failed to create file.");
     let mut output_file = OpenOptions::new()
         .append(true)
