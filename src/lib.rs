@@ -48,7 +48,7 @@ struct ResponseDataFacebook {
 
 lazy_static! {
     static ref CLIENT: reqwest::Client = reqwest::Client::builder()
-        .timeout(Duration::from_millis(10000))
+        .timeout(Duration::from_millis(20000))
         .build()
         .unwrap();
 }
