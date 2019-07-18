@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate serde_derive;
 
+#[macro_use]
+extern crate lazy_static;
+
 use trust_dns_resolver::Resolver;
 
 use std::fs;
@@ -10,6 +13,7 @@ use std::io::Read;
 use std::io::Write;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::time::Duration;
 
 #[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsCertSpotter {
@@ -39,6 +43,13 @@ struct SubdomainsFacebook {
 #[derive(Deserialize)]
 struct ResponseDataFacebook {
     data: Vec<SubdomainsFacebook>,
+}
+
+lazy_static! {
+    static ref CLIENT: reqwest::Client = reqwest::Client::builder()
+        .timeout(Duration::from_millis(10000))
+        .build()
+        .unwrap();
 }
 
 pub fn get_subdomains(
@@ -147,7 +158,7 @@ fn get_certspotter_subdomains(
     all_apis: &u32,
 ) {
     println!("\nSearching in the CertSpotter API... 🔍");
-    match reqwest::get(ct_api_url_certspotter) {
+    match CLIENT.get(ct_api_url_certspotter).send() {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
                 Ok(domains_certspotter) => {
@@ -216,7 +227,7 @@ fn get_crtsh_subdomains(
     file_format: &str,
 ) {
     println!("\nSearching in the Crtsh API... 🔍");
-    match reqwest::get(ct_api_url_crtsh) {
+    match CLIENT.get(ct_api_url_crtsh).send() {
         Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(mut domains_crtsh) => {
                 if domains_crtsh.is_empty() {
@@ -265,7 +276,7 @@ fn get_virustotal_subdomains(
     file_format: &str,
 ) {
     println!("\nSearching in the Virustotal API... 🔍");
-    match reqwest::get(ct_api_url_virustotal) {
+    match CLIENT.get(ct_api_url_virustotal).send() {
         Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
                 let mut domains_virustotal = virustotal_json.data;
@@ -315,7 +326,7 @@ fn get_sublist3r_subdomains(
     file_format: &str,
 ) {
     println!("\nSearching in the Sublist3r API... 🔍");
-    match reqwest::get(ct_api_url_sublist3r) {
+    match CLIENT.get(ct_api_url_sublist3r).send() {
         Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
             Ok(mut domains_sublist3r) => {
                 if domains_sublist3r.is_empty() {
@@ -363,7 +374,7 @@ fn get_facebook_subdomains(
     file_format: &str,
 ) {
     println!("\nSearching in the Facebook API... 🔍");
-    match reqwest::get(ct_api_url_fb) {
+    match CLIENT.get(ct_api_url_fb).send() {
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => {
                 let fb_subdomains = fb_json.data;
