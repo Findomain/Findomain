@@ -9,7 +9,7 @@ Follow in Twitter:
 
 A cross-platform tool that use Certificates Transparency logs to find subdomains.
 
-# Supportted platforms
+# Supported platforms
 
 All supported platforms are 64 bits only and we don't have plans to add support for 32 bits, if you want to have support for 32 bits you can fork the repo and made it.
 
