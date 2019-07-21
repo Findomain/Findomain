@@ -4,12 +4,11 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
-use trust_dns_resolver::Resolver;
-
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::time::Duration;
+use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
 #[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsCertSpotter {
@@ -562,8 +561,7 @@ pub fn fix_duplicated(filename: &str) {
 }
 
 pub fn get_ip(domain: &str) -> String {
-    let resolver =
-        Resolver::from_system_conf().expect("Error reading system resolver configuration.");
+    let resolver = get_resolver();
     match resolver.lookup_ip(&domain) {
         Ok(ip_address) => {
             let address = ip_address
@@ -573,5 +571,22 @@ pub fn get_ip(domain: &str) -> String {
             address.to_string()
         }
         Err(_) => String::from("No IP address found"),
+    }
+}
+
+pub fn get_resolver() -> Resolver {
+    match Resolver::from_system_conf() {
+        Ok(system_resolver) => system_resolver,
+        Err(_) => match Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()) {
+            Ok(quad9_resolver) => quad9_resolver,
+            Err(_) => match Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()) {
+                Ok(cloudflare_resolver) => cloudflare_resolver,
+                Err(_) => {
+                    let defaul_resolver =
+                        Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+                    defaul_resolver
+                }
+            },
+        },
     }
 }
