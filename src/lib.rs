@@ -173,7 +173,8 @@ fn get_certspotter_subdomains(
                             .collect();
                         fixed_certspotter_subdomains.sort();
                         fixed_certspotter_subdomains.dedup();
-                        fixed_certspotter_subdomains.retain(|sub| !sub.contains("*."));
+                        fixed_certspotter_subdomains
+                            .retain(|sub| !sub.contains("*.") && sub.contains(&target));
                         for subdomain in &fixed_certspotter_subdomains {
                             if with_ip == "y" && with_output == "y" {
                                 let ipadress = get_ip(&subdomain);
@@ -233,7 +234,9 @@ fn get_crtsh_subdomains(
                 } else {
                     domains_crtsh.sort();
                     domains_crtsh.dedup();
-                    domains_crtsh.retain(|sub| !sub.name_value.contains("*."));
+                    domains_crtsh.retain(|sub| {
+                        !sub.name_value.contains("*.") && sub.name_value.contains(&target)
+                    });
                     println!(
                         "\nThe following subdomains were found for ==>  {} in crt.sh 👽\n",
                         &target
@@ -283,7 +286,8 @@ fn get_virustotal_subdomains(
                 } else {
                     domains_virustotal.sort();
                     domains_virustotal.dedup();
-                    domains_virustotal.retain(|sub| !sub.id.contains("*."));
+                    domains_virustotal
+                        .retain(|sub| !sub.id.contains("*.") && sub.id.contains(&target));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Virustotal 👽\n",
                         &target
@@ -332,7 +336,7 @@ fn get_sublist3r_subdomains(
                 } else {
                     domains_sublist3r.sort();
                     domains_sublist3r.dedup();
-                    domains_sublist3r.retain(|sub| !sub.contains("*."));
+                    domains_sublist3r.retain(|sub| !sub.contains("*.") && sub.contains(&target));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Sublist3r 👽\n",
                         &target
@@ -385,7 +389,7 @@ fn get_facebook_subdomains(
                 } else {
                     fixed_fb_subdomains.sort();
                     fixed_fb_subdomains.dedup();
-                    fixed_fb_subdomains.retain(|sub| !sub.contains("*."));
+                    fixed_fb_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&target));
                     println!(
                         "\nThe following subdomains were found for ==>  {} in Facebook 👽\n",
                         &target
