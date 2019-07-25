@@ -123,7 +123,7 @@ pub fn get_subdomains(
             )
         }
     } else if with_output == "y" {
-        let filename: String = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
+        let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
         if Path::new(&filename).exists() {
             println!(
                 ">> 📁 Filename for the target {} was saved in: ./{} 😀",
