@@ -154,6 +154,7 @@ fn manage_subdomains_data(
     for mut vec_subdomains in data {
         vec_subdomains.sort();
         vec_subdomains.dedup();
+        vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&target));
         if vec_subdomains.is_empty() {
             println!(
                 "\nNo subdomains were found for the target: {} ¡😭!\n",
