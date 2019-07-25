@@ -4,8 +4,9 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
-use std::fs::{remove_file, File, OpenOptions};
-use std::io::{BufRead, BufReader, Read, Write};
+use rand::Rng;
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::time::Duration;
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
@@ -45,6 +46,7 @@ lazy_static! {
         .timeout(Duration::from_secs(20))
         .build()
         .unwrap();
+    static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
 }
 
 pub fn get_subdomains(
@@ -80,341 +82,211 @@ pub fn get_subdomains(
     ]
     .concat();
 
-    println!("\nTarget ==> {}", &target);
-
-    get_certspotter_subdomains(
-        &ct_api_url_certspotter,
-        &target,
-        &with_ip,
-        &with_output,
-        &file_format,
-        &all_apis,
-    );
+    println!("\nTarget ==> {}\n", &target);
 
     if all_apis == &1 {
-        get_crtsh_subdomains(
-            &ct_api_url_crtsh,
+        let all_subdomains = vec![
+            get_certspotter_subdomains(&ct_api_url_certspotter),
+            get_crtsh_subdomains(&ct_api_url_crtsh),
+            get_virustotal_subdomains(&ct_api_url_virustotal),
+            get_sublist3r_subdomains(&ct_api_url_sublist3r),
+            get_facebook_subdomains(&ct_api_url_fb),
+        ];
+
+        let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
+
+        manage_subdomains_data(
+            all_subdomains_vec,
             &target,
             &with_ip,
             &with_output,
             &file_format,
         );
-        get_virustotal_subdomains(
-            &ct_api_url_virustotal,
+        println!("\nGood luck Hax0r 💀!");
+    } else {
+        manage_subdomains_data(
+            get_certspotter_subdomains(&ct_api_url_certspotter),
             &target,
             &with_ip,
             &with_output,
             &file_format,
         );
-        get_sublist3r_subdomains(
-            &ct_api_url_sublist3r,
-            &target,
-            &with_ip,
-            &with_output,
-            &file_format,
-        );
-        get_facebook_subdomains(
-            &ct_api_url_fb,
-            &target,
-            &with_ip,
-            &with_output,
-            &file_format,
-        );
-        println!("\nGood luck Hax0r 💀!")
+        println!("\nGood luck Hax0r 💀! If you want more results, use the -a option to check in all APIs.\n");
     }
     if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
-        let filename: String = [&target, with_ip, ".", file_format].concat();
+        let filename = [&target, "_", &RNUM.to_string(), with_ip, ".", file_format].concat();
         if Path::new(&filename).exists() {
-            fix_duplicated(&filename);
             println!(
-                "\n 📁 Filename for the target {} was saved in: ./{} 😀",
+                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
                 &target, &filename
             )
         }
     } else if with_output == "y" {
-        let filename: String = [&target, ".", file_format].concat();
+        let filename: String = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
         if Path::new(&filename).exists() {
-            fix_duplicated(&filename);
             println!(
-                "\n📁 Filename for the target {} was saved in: ./{} 😀",
+                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
                 &target, &filename
             )
         }
     }
 }
 
-fn get_certspotter_subdomains(
-    ct_api_url_certspotter: &str,
+fn concat_options<T>(l: Option<Vec<T>>, r: Option<Vec<T>>) -> Option<Vec<T>> {
+    match (l, r) {
+        (Some(mut l), Some(mut r)) => {
+            l.append(&mut r);
+            Some(l)
+        }
+        (x @ Some(_), None) => x,
+        (None, x) => x,
+    }
+}
+
+fn manage_subdomains_data(
+    data: Option<Vec<String>>,
     target: &str,
     with_ip: &str,
     with_output: &str,
     file_format: &str,
-    all_apis: &u32,
 ) {
-    println!("\nSearching in the CertSpotter API... 🔍");
+    for mut vec_subdomains in data {
+        vec_subdomains.sort();
+        vec_subdomains.dedup();
+        if vec_subdomains.is_empty() {
+            println!(
+                "\nNo subdomains were found for the target: {} ¡😭!\n",
+                &target
+            );
+        } else {
+            println!(
+                "\nThe following subdomains were found for ==>  {} 👽\n",
+                &target
+            );
+            for subdomain in vec_subdomains {
+                if with_ip == "y" && with_output == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                    println!(" >> {} => {}", &subdomain, &ipadress);
+                } else if with_ip == "y" {
+                    let ipadress = get_ip(&subdomain);
+                    println!(" >> {} => {}", &subdomain, &ipadress);
+                } else if with_output == "y" {
+                    let ipadress = "";
+                    write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                    println!(" >> {}", &subdomain);
+                } else {
+                    println!(" >> {}", &subdomain);
+                }
+            }
+        }
+    }
+}
+
+fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String>> {
+    println!("Searching in the CertSpotter API... 🔍");
     match CLIENT.get(ct_api_url_certspotter).send() {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
-                Ok(domains_certspotter) => {
-                    if domains_certspotter.is_empty() {
-                        println!(
-                            "\nNo data was found for the target: {} in CertSpotter, ¡Sad 😭!",
-                            &target
-                        );
-                    } else {
-                        println!(
-                            "\nThe following subdomains were found for ==>  {} in CertSpotter 👽\n",
-                            &target
-                        );
-                        let mut fixed_certspotter_subdomains: Vec<&String> = domains_certspotter
-                            .iter()
-                            .flat_map(|sub| sub.dns_names.iter())
-                            .collect();
-                        fixed_certspotter_subdomains.sort();
-                        fixed_certspotter_subdomains.dedup();
-                        fixed_certspotter_subdomains
-                            .retain(|sub| !sub.contains("*.") && sub.contains(&target));
-                        for subdomain in &fixed_certspotter_subdomains {
-                            if with_ip == "y" && with_output == "y" {
-                                let ipadress = get_ip(&subdomain);
-                                write_to_file(
-                                    &subdomain,
-                                    &target,
-                                    &ipadress,
-                                    &file_format,
-                                    &with_ip,
-                                );
-                                println!(" --> {} : {}", &subdomain, &ipadress);
-                            } else if with_ip == "y" {
-                                let ipadress = get_ip(&subdomain);
-                                println!(" --> {} : {}", &subdomain, &ipadress);
-                            } else if with_output == "y" {
-                                let ipadress = "";
-                                write_to_file(
-                                    &subdomain,
-                                    &target,
-                                    &ipadress,
-                                    &file_format,
-                                    &with_ip,
-                                );
-                                println!(" --> {}", &subdomain);
-                            } else {
-                                println!(" --> {}", &subdomain);
-                            }
-                        }
-                    }
+                Ok(domains_certspotter) => Some(
+                    domains_certspotter
+                        .into_iter()
+                        .flat_map(|sub| sub.dns_names.into_iter())
+                        .collect(),
+                ),
+                Err(e) => {
+                    check_json_errors(e, "CertSpotter");
+                    None
                 }
-                Err(e) => check_json_errors(e, "CertSpotter"),
-            }
-            if all_apis != &1 {
-                println!("\nGood luck Hax0r 💀! If you want more results, use the -a option to check in all APIs.\n");
             }
         }
-        Err(e) => check_request_errors(e, "CertSpotter"),
+        Err(e) => {
+            check_request_errors(e, "CertSpotter");
+            None
+        }
     }
 }
 
-fn get_crtsh_subdomains(
-    ct_api_url_crtsh: &str,
-    target: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-) {
-    println!("\nSearching in the Crtsh API... 🔍");
+fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
+    println!("Searching in the Crtsh API... 🔍");
     match CLIENT.get(ct_api_url_crtsh).send() {
         Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
-            Ok(mut domains_crtsh) => {
-                if domains_crtsh.is_empty() {
-                    println!(
-                        "\nNo data was found for the target: {} in crt.sh, ¡Sad 😭!",
-                        &target
-                    );
-                } else {
-                    domains_crtsh.sort();
-                    domains_crtsh.dedup();
-                    domains_crtsh.retain(|sub| {
-                        !sub.name_value.contains("*.") && sub.name_value.contains(&target)
-                    });
-                    println!(
-                        "\nThe following subdomains were found for ==>  {} in crt.sh 👽\n",
-                        &target
-                    );
-                    for subdomain in &domains_crtsh {
-                        let subdomain = &subdomain.name_value;
-                        if with_ip == "y" && with_output == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_ip == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_output == "y" {
-                            let ipadress = "";
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {}", &subdomain);
-                        } else {
-                            println!(" --> {}", &subdomain);
-                        }
-                    }
-                }
+            Ok(domains_crtsh) => Some(
+                domains_crtsh
+                    .into_iter()
+                    .map(|sub| sub.name_value)
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Crtsh");
+                None
             }
-            Err(e) => check_json_errors(e, "Crtsh"),
         },
-        Err(e) => check_request_errors(e, "Crtsh"),
+        Err(e) => {
+            check_request_errors(e, "Crtsh");
+            None
+        }
     }
 }
 
-fn get_virustotal_subdomains(
-    ct_api_url_virustotal: &str,
-    target: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-) {
-    println!("\nSearching in the Virustotal API... 🔍");
+fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>> {
+    println!("Searching in the Virustotal API... 🔍");
     match CLIENT.get(ct_api_url_virustotal).send() {
         Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
-                let mut domains_virustotal = virustotal_json.data;
-                if domains_virustotal.is_empty() {
-                    println!(
-                        "\nNo data was found for the target: {} in Virustotal, ¡Sad 😭!",
-                        &target
-                    );
-                } else {
-                    domains_virustotal.sort();
-                    domains_virustotal.dedup();
-                    domains_virustotal
-                        .retain(|sub| !sub.id.contains("*.") && sub.id.contains(&target));
-                    println!(
-                        "\nThe following subdomains were found for ==>  {} in Virustotal 👽\n",
-                        &target
-                    );
-                    for subdomain in &domains_virustotal {
-                        let subdomain = &subdomain.id;
-                        if with_ip == "y" && with_output == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_ip == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_output == "y" {
-                            let ipadress = "";
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {}", &subdomain);
-                        } else {
-                            println!(" --> {}", &subdomain);
-                        }
-                    }
-                }
+                let domains_virustotal = virustotal_json.data;
+                Some(domains_virustotal.into_iter().map(|sub| sub.id).collect())
             }
-            Err(e) => check_json_errors(e, "Virustotal"),
+            Err(e) => {
+                check_json_errors(e, "Virustotal");
+                None
+            }
         },
-        Err(e) => check_request_errors(e, "Virustotal"),
+        Err(e) => {
+            check_request_errors(e, "Virustotal");
+            None
+        }
     }
 }
 
-fn get_sublist3r_subdomains(
-    ct_api_url_sublist3r: &str,
-    target: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-) {
-    println!("\nSearching in the Sublist3r API... 🔍");
+fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
+    println!("Searching in the Sublist3r API... 🔍");
     match CLIENT.get(ct_api_url_sublist3r).send() {
         Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
-            Ok(mut domains_sublist3r) => {
-                if domains_sublist3r.is_empty() {
-                    println!(
-                        "\nNo data was found for the target: {} in Sublist3r, ¡Sad 😭!",
-                        &target
-                    );
-                } else {
-                    domains_sublist3r.sort();
-                    domains_sublist3r.dedup();
-                    domains_sublist3r.retain(|sub| !sub.contains("*.") && sub.contains(&target));
-                    println!(
-                        "\nThe following subdomains were found for ==>  {} in Sublist3r 👽\n",
-                        &target
-                    );
-                    for subdomain in &domains_sublist3r {
-                        if with_ip == "y" && with_output == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_ip == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_output == "y" {
-                            let ipadress = "";
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {}", &subdomain);
-                        } else {
-                            println!(" --> {}", &subdomain);
-                        }
-                    }
-                }
+            Ok(domains_sublist3r) => Some(domains_sublist3r),
+            Err(e) => {
+                check_json_errors(e, "Sublist3r");
+                None
             }
-            Err(e) => check_json_errors(e, "Sublist3r"),
         },
-        Err(e) => check_request_errors(e, "Sublist3r"),
+        Err(e) => {
+            check_request_errors(e, "Sublist3r");
+            None
+        }
     }
 }
 
-fn get_facebook_subdomains(
-    ct_api_url_fb: &str,
-    target: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-) {
-    println!("\nSearching in the Facebook API... 🔍");
+fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
+    println!("Searching in the Facebook API... 🔍");
     match CLIENT.get(ct_api_url_fb).send() {
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
-            Ok(fb_json) => {
-                let fb_subdomains = fb_json.data;
-                let mut fixed_fb_subdomains: Vec<&String> = fb_subdomains
-                    .iter()
-                    .flat_map(|sub| sub.domains.iter())
-                    .collect();
-                if fixed_fb_subdomains.is_empty() {
-                    println!(
-                        "\nNo data was found for the target: {} in Facebook, ¡Sad 😭!",
-                        &target
-                    );
-                } else {
-                    fixed_fb_subdomains.sort();
-                    fixed_fb_subdomains.dedup();
-                    fixed_fb_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&target));
-                    println!(
-                        "\nThe following subdomains were found for ==>  {} in Facebook 👽\n",
-                        &target
-                    );
-                    for subdomain in &fixed_fb_subdomains {
-                        if with_ip == "y" && with_output == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_ip == "y" {
-                            let ipadress = get_ip(&subdomain);
-                            println!(" --> {} : {}", &subdomain, &ipadress);
-                        } else if with_output == "y" {
-                            let ipadress = "";
-                            write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                            println!(" --> {}", &subdomain);
-                        } else {
-                            println!(" --> {}", &subdomain);
-                        }
-                    }
-                }
+            Ok(fb_json) => Some(
+                fb_json
+                    .data
+                    .into_iter()
+                    .flat_map(|sub| sub.domains.into_iter())
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Facebook");
+                None
             }
-            Err(e) => check_json_errors(e, "Facebook"),
         },
-        Err(e) => check_request_errors(e, "Facebook"),
+        Err(e) => {
+            check_request_errors(e, "Facebook");
+            None
+        }
     }
 }
 
@@ -422,29 +294,29 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
     use std::error::Error;
     if error.is_timeout() {
         println!(
-            "\nA timeout ⏳ error as occured while processing the request in the {} API. Error description: {}",
+            "A timeout ⏳ error as occured while processing the request in the {} API. Error description: {}\n",
             &api, &error.description())
     } else if error.is_redirect() {
         println!(
-            "\nA redirect ↪️  was found while processing the {} API. Error description: {}",
+            "A redirect ↪️  was found while processing the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
     } else if error.is_client_error() {
         println!(
-            "\nA client error 🧑❌ as occured sending the request to the {} API. Error description: {}",
+            "A client error 🧑❌ as occured sending the request to the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
     } else if error.is_server_error() {
         println!(
-            "\nA server error 🖥️❌ as occured sending the request to the {} API. Error description: {}",
+            "A server error 🖥️❌ as occured sending the request to the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
     } else {
         println!(
-            "\nAn error ❌ as occured while procesing the request in the {} API. Error description: {}",
+            "An error ❌ as occured while procesing the request in the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
@@ -453,7 +325,7 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
 
 pub fn check_json_errors(error: reqwest::Error, api: &str) {
     use std::error::Error;
-    println!("\nAn error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
+    println!("An error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
 pub fn read_from_file(
@@ -490,9 +362,9 @@ pub fn write_to_file(
     with_ip: &str,
 ) {
     if with_ip == "y" {
-        let data = &[data, ",", subdomain_ip, ",", "\n"].concat();
+        let data = &[data, ",", subdomain_ip, "\n"].concat();
         let with_ip = "-ip";
-        let filename = &[target, with_ip, ".", file_format].concat();
+        let filename = &[target, "_", &RNUM, with_ip, ".", file_format].concat();
         if Path::new(&filename).exists() {
             let mut output_file = OpenOptions::new()
                 .append(true)
@@ -507,13 +379,16 @@ pub fn write_to_file(
                 .append(true)
                 .open(&filename)
                 .expect("Can't open file.");
+            output_file
+                .write_all("subdomain,ip\n".as_bytes())
+                .expect("Failed writing to file.");
             output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
         }
     } else {
-        let data = &[data, ",", "\n"].concat();
-        let filename = &[target, ".", file_format].concat();
+        let data = &[data, "\n"].concat();
+        let filename = &[target, "_", &RNUM, ".", file_format].concat();
         if Path::new(&filename).exists() {
             let mut output_file = OpenOptions::new()
                 .append(true)
@@ -529,38 +404,12 @@ pub fn write_to_file(
                 .open(&filename)
                 .expect("Can't open file.");
             output_file
+                .write_all("subdomain\n".as_bytes())
+                .expect("Failed writing to file.");
+            output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
         }
-    }
-}
-
-pub fn fix_duplicated(filename: &str) {
-    let mut file = match File::open(filename) {
-        Ok(file) => file,
-        Err(_) => panic!("Error opening file!"),
-    };
-    let mut file_contents = String::new();
-    file.read_to_string(&mut file_contents)
-        .ok()
-        .expect("Failed to read file!");
-    let mut lines: Vec<String> = file_contents
-        .split("\n")
-        .map(|s: &str| s.to_string())
-        .collect();
-    remove_file(&filename).unwrap();
-    File::create(&filename).expect("Failed to create file.");
-    let mut output_file = OpenOptions::new()
-        .append(true)
-        .open(&filename)
-        .expect("Can't open file.");
-    lines.sort();
-    lines.dedup();
-    for mut line in lines {
-        line = [&line, "\n"].concat();
-        output_file
-            .write_all(&line.as_bytes())
-            .expect("Failed writing to file.");
     }
 }
 
