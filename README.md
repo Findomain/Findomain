@@ -9,6 +9,19 @@ Follow in Twitter:
 
 A cross-platform tool that use Certificates Transparency logs to find subdomains.
 
+# Features
+
+* Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
+* Discover subdomains with or without IP address according to user arguments.
+* Read target from user argument (-t).
+* Read a list of targets from file and discover their subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
+* Write output to TXT file.
+* Write output to CSV file.
+* Write output to JSON file.
+* Cross platform support: Linux, Windows, MacOS.
+* Optional multiple API support.
+* Proxy support.
+
 # Supported platforms
 
 All supported platforms are 64 bits only and we don't have plans to add support for 32 bits, if you want to have support for 32 bits you can fork the repo and made it.
@@ -97,7 +110,7 @@ $ ./findomain-osx.dms
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-findomain 0.1.4
+findomain 0.2.0
 Eduard Tolosa <tolosaeduard@gmail.com>
 A tool that use Certificates Transparency logs to find subdomains.
 
@@ -114,6 +127,7 @@ FLAGS:
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
     -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
+    -p, --proxy <proxy>      Use a proxy to make the requests to the APIs.
     -t, --target <target>    Target host
 ```
 
@@ -146,18 +160,6 @@ OPTIONS:
 7. Make a search of subdomains with all the APIs and resolve the IP address of subdomains (if possible), exporting the data to a CSV file:
 
 `findomain -t example.com -i -a -o csv`
-
-# Features
-
-* Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
-* Discover subdomains with or without IP address according to user arguments.
-* Read target from user argument (-t).
-* Read a list of targets from file and discover their subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
-* Write output to TXT file.
-* Write output to CSV file.
-* Write output to JSON file.
-* Cross platform support: Linux, Windows, MacOS.
-* Optional multiple API support.
 
 # Issues and requests
 
