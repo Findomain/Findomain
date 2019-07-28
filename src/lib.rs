@@ -153,17 +153,18 @@ fn manage_subdomains_data(
 ) {
     let base_target = [".", &target].concat();
     for mut vec_subdomains in data {
-        vec_subdomains.sort();
-        vec_subdomains.dedup();
-        vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
         if vec_subdomains.is_empty() {
             println!(
                 "\nNo subdomains were found for the target: {} ¡😭!\n",
                 &target
             );
         } else {
+            vec_subdomains.sort();
+            vec_subdomains.dedup();
+            vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
             println!(
-                "\nThe following subdomains were found for ==>  {} 👽\n",
+                "\nA total of {} subdomains were found for ==>  {} 👽\n",
+                &vec_subdomains.len(),
                 &target
             );
             for subdomain in vec_subdomains {
