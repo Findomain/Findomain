@@ -36,3 +36,8 @@ args:
         long: all-apis
         help: Use all the available APIs to perform the search. It take more time but you will have a lot of more results.
         takes_value: false
+    - proxy:
+        short: p
+        long: proxy
+        help: Use a proxy to make the requests to the APIs.
+        takes_value: true

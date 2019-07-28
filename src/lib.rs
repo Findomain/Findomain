@@ -5,11 +5,13 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 use rand::Rng;
+use std::error::Error;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::time::Duration;
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
+use url::Url;
 
 #[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsCertSpotter {
@@ -42,10 +44,6 @@ struct ResponseDataFacebook {
 }
 
 lazy_static! {
-    static ref CLIENT: reqwest::Client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(20))
-        .build()
-        .unwrap();
     static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
 }
 
@@ -55,6 +53,8 @@ pub fn get_subdomains(
     with_output: &str,
     file_format: &str,
     all_apis: &u32,
+    with_proxy: &str,
+    proxy: &str,
 ) {
     let target = target
         .replace("www.", "")
@@ -86,11 +86,11 @@ pub fn get_subdomains(
 
     if all_apis == &1 {
         let all_subdomains = vec![
-            get_certspotter_subdomains(&ct_api_url_certspotter),
-            get_crtsh_subdomains(&ct_api_url_crtsh),
-            get_virustotal_subdomains(&ct_api_url_virustotal),
-            get_sublist3r_subdomains(&ct_api_url_sublist3r),
-            get_facebook_subdomains(&ct_api_url_fb),
+            get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
+            get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
+            get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
+            get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
+            get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
         ];
 
         let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
@@ -105,7 +105,7 @@ pub fn get_subdomains(
         println!("\nGood luck Hax0r 💀!");
     } else {
         manage_subdomains_data(
-            get_certspotter_subdomains(&ct_api_url_certspotter),
+            get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
             &target,
             &with_ip,
             &with_output,
@@ -185,9 +185,14 @@ fn manage_subdomains_data(
     }
 }
 
-fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String>> {
+fn get_certspotter_subdomains(
+    ct_api_url_certspotter: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
     println!("Searching in the CertSpotter API... 🔍");
-    match CLIENT.get(ct_api_url_certspotter).send() {
+    match client.get(ct_api_url_certspotter).send() {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
                 Ok(domains_certspotter) => Some(
@@ -209,9 +214,14 @@ fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String
     }
 }
 
-fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
+fn get_crtsh_subdomains(
+    ct_api_url_crtsh: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
     println!("Searching in the Crtsh API... 🔍");
-    match CLIENT.get(ct_api_url_crtsh).send() {
+    match client.get(ct_api_url_crtsh).send() {
         Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(domains_crtsh) => Some(
                 domains_crtsh
@@ -231,9 +241,14 @@ fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>> {
+fn get_virustotal_subdomains(
+    ct_api_url_virustotal: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
     println!("Searching in the Virustotal API... 🔍");
-    match CLIENT.get(ct_api_url_virustotal).send() {
+    match client.get(ct_api_url_virustotal).send() {
         Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
                 let domains_virustotal = virustotal_json.data;
@@ -251,9 +266,14 @@ fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>>
     }
 }
 
-fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
+fn get_sublist3r_subdomains(
+    ct_api_url_sublist3r: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
     println!("Searching in the Sublist3r API... 🔍");
-    match CLIENT.get(ct_api_url_sublist3r).send() {
+    match client.get(ct_api_url_sublist3r).send() {
         Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
             Ok(domains_sublist3r) => Some(domains_sublist3r),
             Err(e) => {
@@ -268,9 +288,14 @@ fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
+fn get_facebook_subdomains(
+    ct_api_url_fb: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
     println!("Searching in the Facebook API... 🔍");
-    match CLIENT.get(ct_api_url_fb).send() {
+    match client.get(ct_api_url_fb).send() {
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => Some(
                 fb_json
@@ -292,7 +317,6 @@ fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
 }
 
 pub fn check_request_errors(error: reqwest::Error, api: &str) {
-    use std::error::Error;
     if error.is_timeout() {
         println!(
             "A timeout ⏳ error as occured while processing the request in the {} API. Error description: {}\n",
@@ -325,7 +349,6 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
 }
 
 pub fn check_json_errors(error: reqwest::Error, api: &str) {
-    use std::error::Error;
     println!("An error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
@@ -335,6 +358,8 @@ pub fn read_from_file(
     with_output: &str,
     file_format: &str,
     all_apis: &u32,
+    with_proxy: &str,
+    proxy: &str,
 ) {
     if let Ok(f) = File::open(&file) {
         let f = BufReader::new(f);
@@ -345,6 +370,8 @@ pub fn read_from_file(
                 &with_output,
                 &file_format,
                 &all_apis,
+                &with_proxy,
+                &proxy,
             )
         }
     } else {
@@ -442,5 +469,31 @@ pub fn get_resolver() -> Resolver {
                 }
             },
         },
+    }
+}
+
+pub fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
+    if with_proxy == "y" {
+        match Url::parse(&proxy) {
+            Ok(proxy) => {
+                let proxy = proxy.as_str();
+                Some(
+                    reqwest::Client::builder()
+                        .proxy(reqwest::Proxy::all(proxy).unwrap())
+                        .timeout(Duration::from_secs(20))
+                        .build()
+                        .unwrap(),
+                )
+            }
+            Err(e) => {
+                println!(
+                    "An error ❌ as occured while parsing the proxy URL, your proxy is {} and the generated error is: {}\nMake sure that your proxy URL follow the syntax: [http/https]://[host]:[port]. Example: http://127.0.0.1:8080",
+                    &proxy ,e.description()
+                );
+                std::process::exit(1)
+            }
+        }
+    } else {
+        Some(reqwest::Client::builder().build().unwrap())
     }
 }
