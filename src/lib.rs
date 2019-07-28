@@ -489,7 +489,7 @@ pub fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
             Err(e) => {
                 println!(
                     "An error ❌ as occured while parsing the proxy URL, your proxy is {} and the generated error is: {}\nMake sure that your proxy URL follow the syntax: [http/https]://[host]:[port]. Example: http://127.0.0.1:8080",
-                    &proxy ,e.description()
+                    &proxy, e.description()
                 );
                 std::process::exit(1)
             }
