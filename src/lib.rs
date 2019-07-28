@@ -495,6 +495,11 @@ pub fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
             }
         }
     } else {
-        Some(reqwest::Client::builder().build().unwrap())
+        Some(
+            reqwest::Client::builder()
+                .timeout(Duration::from_secs(20))
+                .build()
+                .unwrap(),
+        )
     }
 }
