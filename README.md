@@ -161,6 +161,10 @@ OPTIONS:
 
 `findomain -t example.com -i -a -o csv`
 
+8. Make a search of subdomains using a proxy (http://127.0.0.1:8080 in it case, the rest of aguments continue working in the same way, you just need to add the -p flag to the before commands):
+
+`findomain -t example.com -p http://127.0.0.1:8080`
+
 # Issues and requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
