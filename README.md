@@ -24,13 +24,25 @@ A cross-platform tool that use Certificates Transparency logs to find subdomains
 
 # Supported platforms
 
-All supported platforms are 64 bits only and we don't have plans to add support for 32 bits, if you want to have support for 32 bits you can fork the repo and made it.
+All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the **Build for 32 bits** section.
 
 * Linux
 * Windows
 * MacOS
 * ARM
 * Aarch64
+
+# Build for 32 bits or another platform
+
+If you want to build the tool for your 32 bits system or another platform, follow it steps:
+
+**Note:** You need to have Rust installed in your system first. Read https://www.rust-lang.org/tools/install
+
+1. Clone the [repository](https://github.com/Edu4rdSHL/findomain) or download the [release source code](https://github.com/Edu4rdSHL/findomain/releases).
+2. Extract the release source code (only needed if you downloaded the compressed file).
+3. Go to the folder where the source code is.
+4. Execute `cargo build --release`
+5. Now your binary is in `target/release/findomain` and you can use it.
 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
