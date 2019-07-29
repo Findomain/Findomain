@@ -22,9 +22,9 @@ A cross-platform tool that use Certificates Transparency logs to find subdomains
 * Optional multiple API support.
 * Proxy support. **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
-# Supported platforms
+# Supported platforms in our binary releases
 
-All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the **Build for 32 bits** section.
+All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain#build-for-32-bits-or-another-platform).
 
 * Linux
 * Windows
