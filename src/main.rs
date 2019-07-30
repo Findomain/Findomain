@@ -2,7 +2,7 @@
 extern crate clap;
 use clap::App;
 
-extern crate findomain;
+use findomain::{get_subdomains, read_from_file};
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
@@ -18,7 +18,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -29,7 +29,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -43,7 +43,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -54,7 +54,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -73,7 +73,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -84,7 +84,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -98,7 +98,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -109,7 +109,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -128,7 +128,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -139,7 +139,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -153,7 +153,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -164,7 +164,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -183,7 +183,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -194,7 +194,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -208,7 +208,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -219,7 +219,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -242,7 +242,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -253,7 +253,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -267,7 +267,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -278,7 +278,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -297,7 +297,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -308,7 +308,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -322,7 +322,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -333,7 +333,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::get_subdomains(
+                    get_subdomains(
                         &target,
                         &with_ip,
                         &with_output,
@@ -352,7 +352,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -363,7 +363,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -377,7 +377,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -388,7 +388,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -407,7 +407,7 @@ fn main() {
                 let all_apis = 1;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -418,7 +418,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -432,7 +432,7 @@ fn main() {
                 let all_apis = 0;
                 if matches.is_present("ip") {
                     let with_ip = "y";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
@@ -443,7 +443,7 @@ fn main() {
                     )
                 } else {
                     let with_ip = "";
-                    findomain::read_from_file(
+                    read_from_file(
                         &file,
                         &with_ip,
                         &with_output,
