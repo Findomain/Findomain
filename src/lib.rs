@@ -9,6 +9,7 @@ use std::error::Error;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
+use std::process;
 use std::time::Duration;
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 use url::Url;
@@ -102,7 +103,6 @@ pub fn get_subdomains(
             &with_output,
             &file_format,
         );
-        println!("\nGood luck Hax0r 💀!");
     } else {
         manage_subdomains_data(
             get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
@@ -183,6 +183,7 @@ fn manage_subdomains_data(
                     println!(" >> {}", &subdomain);
                 }
             }
+            println!("\nGood luck Hax0r 💀!");
         }
     }
 }
@@ -477,22 +478,19 @@ pub fn get_resolver() -> Resolver {
 pub fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
     if with_proxy == "y" {
         match Url::parse(&proxy) {
-            Ok(proxy) => {
-                let proxy = proxy.as_str();
-                Some(
-                    reqwest::Client::builder()
-                        .proxy(reqwest::Proxy::all(proxy).unwrap())
-                        .timeout(Duration::from_secs(20))
-                        .build()
-                        .unwrap(),
-                )
-            }
+            Ok(proxy) => Some(
+                reqwest::Client::builder()
+                    .proxy(reqwest::Proxy::all(proxy.as_str()).unwrap())
+                    .timeout(Duration::from_secs(20))
+                    .build()
+                    .unwrap(),
+            ),
             Err(e) => {
                 println!(
                     "An error ❌ as occured while parsing the proxy URL, your proxy is {} and the generated error is: {}\nMake sure that your proxy URL follow the syntax: [http/https]://[host]:[port]. Example: http://127.0.0.1:8080",
                     &proxy, e.description()
                 );
-                std::process::exit(1)
+                process::exit(1)
             }
         }
     } else {
