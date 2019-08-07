@@ -111,7 +111,7 @@ pub fn get_subdomains(
             &with_output,
             &file_format,
         );
-        println!("\nGood luck Hax0r 💀! If you want more results, use the -a option to check in all APIs.\n");
+        println!("Tip: Try using the -a flag to check in all APIs.\n");
     }
     if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
@@ -183,7 +183,7 @@ fn manage_subdomains_data(
                     println!(" >> {}", &subdomain);
                 }
             }
-            println!("\nGood luck Hax0r 💀!");
+            println!("\nGood luck Hax0r 💀!\n");
         }
     }
 }
