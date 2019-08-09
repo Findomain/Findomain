@@ -177,6 +177,11 @@ OPTIONS:
 
 `findomain -t example.com -p http://127.0.0.1:8080`
 
+# TODO
+
+- [ ] Improve JSON output.
+- [-] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
+
 # Issues and requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
