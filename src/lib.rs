@@ -74,7 +74,7 @@ pub fn get_subdomains(
         "/subdomains?limit=40",
     ]
     .concat();
-    let ct_api_url_crtsh = ["https://crt.sh/?q=%", &target, "&output=json"].concat();
+    let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
     let ct_api_url_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
     let ct_api_url_fb = [
         "https://graph.facebook.com/certificates?query=",
