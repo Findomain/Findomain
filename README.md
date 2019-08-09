@@ -180,7 +180,7 @@ OPTIONS:
 # TODO
 
 - [ ] Improve JSON output.
-- [-] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
+- [ ] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
 
 # Issues and requests
 
