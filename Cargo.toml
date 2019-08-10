@@ -5,7 +5,7 @@ authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
 repository = "https://githut.com/edu4rdshl/findomain"
-license = "GPL3"
+license = "GPL-3.0-or-later"
 keywords = ["findomain", "subdomain-discover", "find-subdomains"]
 readme = "README.md"
 
