@@ -9,6 +9,28 @@ Follow in Twitter:
 
 The fastest and cross-platform subdomain enumerator.
 
+# Comparision
+
+It comparision gives you a idea why you should use findomain instead of another tools. The domain used for the test was microsoft.com in the following [BlackArch](https://blackarch.org) virtual machine:
+
+```
+Host: KVM/QEMU (Standard PC (i440FX + PIIX, 1996) pc-i440fx-3.1)
+Kernel: 5.2.6-arch1-1-ARCH
+CPU: Intel (Skylake, IBRS) (4) @ 2.904GHz
+Memory: 139MiB / 3943MiB
+```
+The tool used to calculate the time, is the `time` command in Linux. You can see all the details of the tests in [it link](https://github.com/Edu4rdSHL/findomain/blob/master/comparision_log.md).
+
+|Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
+|---|---|---|---|---|
+|Findomain|real	0m38.701s|5622|Very Low|Very Low|
+|Subl1st3r|real	7m14.996s|996|Low|Low|
+|Amass*|real 29m20.301s|332|Very Hight|Very Hight|
+|assetfinder|real	6m1.117s|4630|Very Low|Very Low|
+
+
+* I can't wait to the amass test for finish, looks like it will never ends and aditionally the resources usage is very hight.
+
 # Features
 
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
