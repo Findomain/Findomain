@@ -1,10 +1,10 @@
 name: findomain
-version: "0.2.0"
+version: "0.2.1"
 author: Eduard Tolosa <tolosaeduard@gmail.com>
 settings:
     - ArgRequiredElseHelp
     - StrictUtf8
-about: A tool that use Certificates Transparency logs to find subdomains.
+about: The fastest and cross-platform subdomain enumerator, don't waste your time.
 args:
     - target:
         short: t
