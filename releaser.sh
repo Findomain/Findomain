@@ -24,7 +24,7 @@ fi
 
 # ARM Build
 echo "Building ARM artifact."
-if cargo build -q --release --target="arm-unknown-linux-gnueabihf"; then
+if cargo build -q --release --target="$ARM_TARGET"; then
   echo "ARM artifact build: SUCCESS"
   cp "target/$ARM_TARGET/release/findomain" "target/$ARM_TARGET/release/findomain-arm"
 else
@@ -33,7 +33,7 @@ fi
 
 # Aarch64 build
 echo "Building Aarch64 artifact."
-if cargo build -q --release --target="aarch64-unknown-linux-gnu"; then
+if cargo build -q --release --target="$AARCH_TARGET"; then
   echo "Aarch64 artifact build: SUCCESS"
   cp "target/$AARCH_TARGET/release/findomain" "target/$AARCH_TARGET/release/findomain-aarch64"
 else
@@ -42,7 +42,7 @@ fi
 
 # Mac OS build
 echo "Building OSX artifact."
-if CC=o64-clang CXX=o64-clang++ LIBZ_SYS_STATIC=1 cargo build -q --release --target="x86_64-apple-darwin"; then
+if CC=o64-clang CXX=o64-clang++ LIBZ_SYS_STATIC=1 cargo build -q --release --target="$OSX_TARGET"; then
   echo "OSX artifact build: SUCCESS"
   cp "target/$OSX_TARGET/release/findomain" "target/$OSX_TARGET/release/findomain-osx"
 else
