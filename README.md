@@ -40,7 +40,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 * Write output to TXT file.
 * Write output to CSV file.
 * Write output to JSON file.
-* Cross platform support: Linux, Windows, MacOS.
+* Cross platform support: Any platform.
 * Optional multiple API support.
 * Proxy support. **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
