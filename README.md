@@ -44,6 +44,19 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 * Optional multiple API support.
 * Proxy support. **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
+# How it works?
+It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
+
+APIs that we are using at the moment:
+
+- Certspotter: https://api.certspotter.com/
+- Crt.sh : https://crt.sh
+- Virustotal: https://www.virustotal.com/ui/domains/
+- Sublit3r: https://api.sublist3r.com/
+- Facebook: https://developers.facebook.com/docs/certificate-transparency
+
+If you know other that should be added, open an issue.
+
 # Supported platforms in our binary releases
 
 All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain#build-for-32-bits-or-another-platform).
@@ -60,24 +73,16 @@ If you want to build the tool for your 32 bits system or another platform, follo
 
 **Note:** You need to have Rust installed in your system first. Read https://www.rust-lang.org/tools/install
 
+Using the [crate](https://crates.io/crates/findomain):
+
+1. `cargo install findomain`
+2. Execute the tool from `$HOME/.cargo/bin`. See the [cargo-install documentation](https://doc.rust-lang.org/cargo/commands/cargo-install.html).
+
 1. Clone the [repository](https://github.com/Edu4rdSHL/findomain) or download the [release source code](https://github.com/Edu4rdSHL/findomain/releases).
 2. Extract the release source code (only needed if you downloaded the compressed file).
 3. Go to the folder where the source code is.
 4. Execute `cargo build --release`
 5. Now your binary is in `target/release/findomain` and you can use it.
-
-# How it works?
-It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
-
-APIs that we are using at the moment:
-
-- Certspotter: https://api.certspotter.com/
-- Crt.sh : https://crt.sh
-- Virustotal: https://www.virustotal.com/ui/domains/
-- Sublit3r: https://api.sublist3r.com/
-- Facebook: https://developers.facebook.com/docs/certificate-transparency
-
-If you know other that should be added, open an issue.
 
 # Installation in Linux using source code
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
