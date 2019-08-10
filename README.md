@@ -24,12 +24,13 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
 |Findomain|real	0m38.701s|5622|Very Low|Very Low|
+|assetfinder|real	6m1.117s|4630|Very Low|Very Low|
 |Subl1st3r|real	7m14.996s|996|Low|Low|
 |Amass*|real 29m20.301s|332|Very Hight|Very Hight|
-|assetfinder|real	6m1.117s|4630|Very Low|Very Low|
-
 
 * I can't wait to the amass test for finish, looks like it will never ends and aditionally the resources usage is very hight.
+
+**Note:** The benchmark was made the 10/08/2019, since it point other tools can improve things and you will got different results.
 
 # Features
 
@@ -42,7 +43,9 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 * Write output to JSON file.
 * Cross platform support: Any platform.
 * Optional multiple API support.
-* Proxy support. **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
+* Proxy support. 
+
+**Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
