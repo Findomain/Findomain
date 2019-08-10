@@ -7,7 +7,7 @@ Follow in Twitter:
 
 # Findomain
 
-A cross-platform tool that use Certificates Transparency logs to find subdomains.
+The fastest and cross-platform subdomain enumerator.
 
 # Features
 
@@ -45,7 +45,7 @@ If you want to build the tool for your 32 bits system or another platform, follo
 5. Now your binary is in `target/release/findomain` and you can use it.
 
 # How it works?
-It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool very faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
+It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
 APIs that we are using at the moment:
 
