@@ -78,6 +78,8 @@ Using the [crate](https://crates.io/crates/findomain):
 1. `cargo install findomain`
 2. Execute the tool from `$HOME/.cargo/bin`. See the [cargo-install documentation](https://doc.rust-lang.org/cargo/commands/cargo-install.html).
 
+Using the Github source code:
+
 1. Clone the [repository](https://github.com/Edu4rdSHL/findomain) or download the [release source code](https://github.com/Edu4rdSHL/findomain/releases).
 2. Extract the release source code (only needed if you downloaded the compressed file).
 3. Go to the folder where the source code is.
