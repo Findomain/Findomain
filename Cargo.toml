@@ -6,7 +6,7 @@ edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
 repository = "https://githut.com/edu4rdshl/findomain"
 license = "GPL3"
-keywords = ["certificate-transparency", "subdomain-discover", "find-subdomains", "subdomain-tool", "find-subdomain"]
+keywords = ["findomain", "subdomain-discover", "find-subdomains"]
 readme = "README.md"
 
 [dependencies]
