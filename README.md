@@ -89,6 +89,17 @@ Using the Github source code:
 4. Execute `cargo build --release`
 5. Now your binary is in `target/release/findomain` and you can use it.
 
+# Installation Android (Termux)
+
+Install the [Termux](https://termux.com/) package, open it and follow it commands:
+
+```
+$ pkg install rust make perl
+$ cargo install findomain
+$ cd $HOME/.cargo/bin
+$ ./findomain
+```
+
 # Installation in Linux using source code
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
