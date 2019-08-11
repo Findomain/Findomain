@@ -74,7 +74,7 @@ All supported platforms in the binarys that we give are 64 bits only and we don'
 
 If you want to build the tool for your 32 bits system or another platform, follow it steps:
 
-**Note:** You need to have Rust installed in your system first. Read https://www.rust-lang.org/tools/install
+**Note:** You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
 Using the [crate](https://crates.io/crates/findomain):
 
