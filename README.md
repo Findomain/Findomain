@@ -64,11 +64,11 @@ If you know other that should be added, open an issue.
 
 All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain#build-for-32-bits-or-another-platform).
 
-* Linux
-* Windows
-* MacOS
-* ARM
-* Aarch64
+* [Linux](https://github.com/Edu4rdSHL/findomain#installation-in-linux-using-compiled-artifacts)
+* [Windows](https://github.com/Edu4rdSHL/findomain#installation-windows)
+* [MacOS](https://github.com/Edu4rdSHL/findomain#installation-macos)
+* [ARM](https://github.com/Edu4rdSHL/findomain#installation-arm)
+* [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain#installation-aarch64-raspberry-pi)
 
 # Build for 32 bits or another platform
 
