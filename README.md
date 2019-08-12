@@ -7,6 +7,9 @@ Follow in Twitter:
 
 # Findomain
 
+[![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
+[![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
+
 The fastest and cross-platform subdomain enumerator.
 
 # Comparision
