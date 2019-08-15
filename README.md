@@ -108,7 +108,7 @@ $ ./findomain
 If you want to install it, you can do that manually compiling the source or using the precompiled binary.
 
 **Manually:**
-You need to have [Rust](https://www.rust-lang.org/) installed in your computer first.
+You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
 ```
 $ git clone https://github.com/Edu4rdSHL/findomain.git
