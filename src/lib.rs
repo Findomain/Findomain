@@ -319,7 +319,7 @@ fn get_facebook_subdomains(
     }
 }
 
-pub fn check_request_errors(error: reqwest::Error, api: &str) {
+fn check_request_errors(error: reqwest::Error, api: &str) {
     if error.is_timeout() {
         println!(
             "A timeout ⏳ error as occured while processing the request in the {} API. Error description: {}\n",
@@ -351,7 +351,7 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
     }
 }
 
-pub fn check_json_errors(error: reqwest::Error, api: &str) {
+fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("An error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
@@ -385,13 +385,7 @@ pub fn read_from_file(
     }
 }
 
-pub fn write_to_file(
-    data: &str,
-    target: &str,
-    subdomain_ip: &str,
-    file_format: &str,
-    with_ip: &str,
-) {
+fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str, with_ip: &str) {
     if with_ip == "y" {
         let data = &[data, ",", subdomain_ip, "\n"].concat();
         let with_ip = "-ip";
@@ -444,7 +438,7 @@ pub fn write_to_file(
     }
 }
 
-pub fn get_ip(domain: &str) -> String {
+fn get_ip(domain: &str) -> String {
     let resolver = get_resolver();
     match resolver.lookup_ip(&domain) {
         Ok(ip_address) => {
@@ -458,7 +452,7 @@ pub fn get_ip(domain: &str) -> String {
     }
 }
 
-pub fn get_resolver() -> Resolver {
+fn get_resolver() -> Resolver {
     match Resolver::from_system_conf() {
         Ok(system_resolver) => system_resolver,
         Err(_) => match Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()) {
@@ -475,7 +469,7 @@ pub fn get_resolver() -> Resolver {
     }
 }
 
-pub fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
+fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
     if with_proxy == "y" {
         match Url::parse(&proxy) {
             Ok(proxy) => Some(
