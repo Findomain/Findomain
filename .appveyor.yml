@@ -13,4 +13,4 @@ install:
   - if defined MINGW_PATH set PATH=%PATH%;%MINGW_PATH%
   - rustc -vV
   - cargo -vV
-build: false
+build: true
