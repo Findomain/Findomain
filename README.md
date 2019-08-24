@@ -65,9 +65,9 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** a access token to work. Search in the Findomain documentation how to configure and use it.
+APIs marked with `**`, **require** a access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
 
-APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs.
+APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it. 
 
 **More APIs?**
 
@@ -75,13 +75,13 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 # Supported platforms in our binary releases
 
-All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain#build-for-32-bits-or-another-platform).
+All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform).
 
-* [Linux](https://github.com/Edu4rdSHL/findomain#installation-in-linux-using-compiled-artifacts)
-* [Windows](https://github.com/Edu4rdSHL/findomain#installation-windows)
-* [MacOS](https://github.com/Edu4rdSHL/findomain#installation-macos)
-* [ARM](https://github.com/Edu4rdSHL/findomain#installation-arm)
-* [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain#installation-aarch64-raspberry-pi)
+* [Linux](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-in-linux-using-compiled-artifacts)
+* [Windows](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-windows)
+* [MacOS](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-macos)
+* [ARM](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-arm)
+* [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-aarch64-raspberry-pi)
 
 # Build for 32 bits or another platform
 
@@ -173,6 +173,10 @@ $ chmod +x findomain-osx.dms
 $ ./findomain-osx.dms
 ```
 
+# Access tokens configuration
+
+In in section you can found the steps about how to configure APIs that need or can be used with access tokens.
+
 # Configuring the Facebook API
 
 **History**
@@ -257,9 +261,9 @@ Put in the CMD command prompt:
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-findomain 0.2.0
+findomain 0.2.2
 Eduard Tolosa <tolosaeduard@gmail.com>
-A tool that use Certificates Transparency logs to find subdomains.
+The fastest and cross-platform subdomain enumerator, don't waste your time.
 
 USAGE:
     findomain [FLAGS] [OPTIONS]
@@ -274,7 +278,7 @@ FLAGS:
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
     -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
-    -p, --proxy <proxy>      Use a proxy to make the requests to the APIs.
+    -p, --proxy <proxy>      Use a proxy to make APIs requests.
     -t, --target <target>    Target host
 ```
 
