@@ -468,13 +468,11 @@ fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str
 fn get_ip(domain: &str) -> String {
     let resolver = get_resolver();
     match resolver.lookup_ip(&domain) {
-        Ok(ip_address) => {
-            let address = ip_address
-                .iter()
-                .next()
-                .expect("An error as ocurred getting the IP address.");
-            address.to_string()
-        }
+        Ok(ip_address) => ip_address
+            .iter()
+            .next()
+            .expect("An error as ocurred getting the IP address.")
+            .to_string(),
         Err(_) => String::from("No IP address found"),
     }
 }
