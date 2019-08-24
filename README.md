@@ -210,7 +210,7 @@ Put in the CMD command prompt:
 > set findomain_fb_token=YourAccessToken && findomain -(options)
 ```
 
-**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `findomain_fb_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_fb_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, add an alias in Unix based systems like `alias findomain='findomain_fb_token="YourAccessToken" findomain'` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
