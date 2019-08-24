@@ -56,11 +56,16 @@ It tool doesn't use the common methods for sub(domains) discover, the tool uses 
 
 APIs that we are using at the moment:
 
-- Certspotter: https://api.certspotter.com/
-- Crt.sh : https://crt.sh
-- Virustotal: https://www.virustotal.com/ui/domains/
-- Sublit3r: https://api.sublist3r.com/
-- Facebook: https://developers.facebook.com/docs/certificate-transparency
+- [Certspotter](https://api.certspotter.com/)
+- [Crt.sh](https://crt.sh)
+- [Virustotal](https://www.virustotal.com/ui/domains/)
+- [Sublit3r](https://api.sublist3r.com/)
+- [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
+- [Spyce (CertDB)](https://certdb.com/apidocs#/Subdomains)
+
+**Notes**
+
+APIs marked with `**`, **require** a access token to work. Search in the Findomain documentation how to configure and use it.
 
 If you know other that should be added, open an issue.
 
