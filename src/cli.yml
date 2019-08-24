@@ -1,5 +1,5 @@
 name: findomain
-version: "0.2.1"
+version: "0.2.2"
 author: Eduard Tolosa <tolosaeduard@gmail.com>
 settings:
     - ArgRequiredElseHelp

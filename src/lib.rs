@@ -14,6 +14,8 @@ use std::time::Duration;
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 use url::Url;
 
+mod auth;
+
 #[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsCertSpotter {
     dns_names: Vec<String>,
@@ -68,41 +70,66 @@ pub fn get_subdomains(
         "&include_subdomains=true&expand=dns_names",
     ]
     .concat();
-    let ct_api_url_virustotal = [
-        "https://www.virustotal.com/ui/domains/",
-        &target,
-        "/subdomains?limit=40",
-    ]
-    .concat();
-    let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
-    let ct_api_url_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
-    let ct_api_url_fb = [
-        "https://graph.facebook.com/certificates?query=",
-        &target,
-        "&fields=domains&limit=10000&access_token=298348064419358|RrUIvPdydH023XhrMh1xBzv9dTM",
-    ]
-    .concat();
 
     println!("\nTarget ==> {}\n", &target);
 
     if all_apis == &1 {
-        let all_subdomains = vec![
-            get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
-            get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
-            get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
-            get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
-            get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
-        ];
-
-        let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
-
-        manage_subdomains_data(
-            all_subdomains_vec,
+        let ct_api_url_virustotal = [
+            "https://www.virustotal.com/ui/domains/",
             &target,
-            &with_ip,
-            &with_output,
-            &file_format,
-        );
+            "/subdomains?limit=40",
+        ]
+        .concat();
+        let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
+        let ct_api_url_sublist3r =
+            ["https://api.sublist3r.com/search.php?domain=", &target].concat();
+
+        let facebook_access_token = auth::get_auth_token("facebook");
+
+        if facebook_access_token.is_empty() {
+            let all_subdomains = vec![
+                get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
+                get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
+                get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
+                get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
+            ];
+
+            let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
+
+            manage_subdomains_data(
+                all_subdomains_vec,
+                &target,
+                &with_ip,
+                &with_output,
+                &file_format,
+            );
+            println!("If you want to search in the Facebook API, don't forget to set the findomain_fb_token variable in your system\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
+        } else {
+            let ct_api_url_fb = [
+                "https://graph.facebook.com/certificates?query=",
+                &target,
+                "&fields=domains&limit=10000&access_token=",
+                &facebook_access_token,
+            ]
+            .concat();
+            let all_subdomains = vec![
+                get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
+                get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
+                get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
+                get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
+                get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
+            ];
+
+            let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
+
+            manage_subdomains_data(
+                all_subdomains_vec,
+                &target,
+                &with_ip,
+                &with_output,
+                &file_format,
+            );
+        }
     } else {
         manage_subdomains_data(
             get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
