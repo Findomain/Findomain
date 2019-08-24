@@ -61,13 +61,17 @@ APIs that we are using at the moment:
 - [Virustotal](https://www.virustotal.com/ui/domains/)
 - [Sublit3r](https://api.sublist3r.com/)
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
-- [Spyce (CertDB)](https://certdb.com/apidocs#/Subdomains)
+- [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
 
 **Notes**
 
 APIs marked with `**`, **require** a access token to work. Search in the Findomain documentation how to configure and use it.
 
-If you know other that should be added, open an issue.
+APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs.
+
+**More APIs?**
+
+If you know other APIs that should be added, comment [here](https://github.com/Edu4rdSHL/findomain/issues/7).
 
 # Supported platforms in our binary releases
 
@@ -195,7 +199,7 @@ The first step is get your Facebook application token. You need to create a Webh
   "token_type": "bearer"
 }
 ```
-Save the `access_token` value.
+7. Save the `access_token` value.
 
 Now you can use that value to set the access token as following:
 
@@ -217,7 +221,36 @@ Put in the CMD command prompt:
 
 **Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_fb_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
-**Tip:** If you don't want to write the access token everytime that you run findomain, add an alias in Unix based systems like `alias findomain='findomain_fb_token="YourAccessToken" findomain'` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_fb_token` in Unix based systems like putting `export findomain_fb_token="YourAccessToken"` into your `.bashrc` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+
+# Configuring the Spyse API to use with token
+
+1. Open https://account.spyse.com/register and make the registration process (include email verification).
+2. Log in into your spyse account and go to https://account.spyse.com/user
+3. Search for the "API token" section and clic in "Show".
+4. Save that access token.
+
+Now you can use that value to set the access token as following:
+
+**Unix based systems (Linux, BSD, MacOS, Android with Termux, etc):**
+
+Put in your terminal:
+
+```
+$ findomain_spyse_token="YourAccessToken" findomain -(options)
+```
+
+**Windows systems:**
+
+Put in the CMD command prompt:
+
+```
+> set findomain_spyse_token=YourAccessToken && findomain -(options)
+```
+
+**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_spyse_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_spyse_token` in Unix based systems like putting `export findomain_spyse_token="YourAccessToken"` into your `.bashrc` and set the `findomain_spyse_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
 # Usage
 
