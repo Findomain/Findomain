@@ -164,6 +164,54 @@ $ chmod +x findomain-osx.dms
 $ ./findomain-osx.dms
 ```
 
+# Configuring the Facebook API
+
+**History**
+
+When I added the [Facebook CT API](https://developers.facebook.com/docs/certificate-transparency-api) in the beginning I was providing a [Webhook token](https://developers.facebook.com/docs/certificate-transparency/certificates-webhook) to search in the API, as consecuence when a lot of users were using the same token the limit was reached and user can't search in the Facebook API anymore until Facebook unlocked it again. Since Findomain version 0.2.3, users can set their own Facebook Access Token for the webook and pass it to findomain setting the `findomain_fb_token` system variable.
+
+**Getting the Webhook token**
+
+The first step is get your Facebook application token. You need to create a Webhook, follow the next steps:
+
+1. Open https://developers.facebook.com/apps/
+2. Clic in "Create App", put the name that you want and send the information.
+3. In the next screen, select "Configure" in the Webhooks option.
+4. Go to "Configuration" -> "Basic" and clic on "Show" in the "App secret key" option.
+5. Now open in your browser the following URL: https://graph.facebook.com/oauth/access_token?client_id=your-app-id&client_secret=your-secret-key&grant_type=client_credentials
+
+**Note:** replace `your-app-id` by the number of your webhook identifier and `your-secret-key` for the key that you got in the 4th step.
+
+6. You should have a JSON like:
+
+```json
+{
+  "access_token": "xxxxxxxxxx|yyyyyyyyyyyyyyyyyyyyyyy",
+  "token_type": "bearer"
+}
+```
+Save the `access_token` value.
+
+Now you can use that value to set the access token as following:
+
+**Unix based systems (Linux, BSD, MacOS, Android with Termux, etc):**
+
+Put in your terminal:
+
+```
+$ findomain_fb_token="YourAccessToken" findomain -(options)
+```
+
+**Windows systems:**
+
+Put in the CMD command prompt:
+
+```
+> set findomain_fb_token="YourAccessToken" && findomain -(options)
+```
+
+**Tip:** If you don't want to write the access token everytime that you run findomain, add an alias in Unix based systems like `alias findomain=findomain_fb_token="YourAccessToken" findomain` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+
 # Usage
 
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
