@@ -46,6 +46,16 @@ struct ResponseDataFacebook {
     data: Vec<SubdomainsFacebook>,
 }
 
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+struct SubdomainsSpyse {
+    domain: String,
+}
+
+#[derive(Deserialize)]
+struct ResponseDataSpyse {
+    records: Vec<SubdomainsSpyse>,
+}
+
 lazy_static! {
     static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
 }
@@ -74,6 +84,9 @@ pub fn get_subdomains(
     println!("\nTarget ==> {}\n", &target);
 
     if all_apis == &1 {
+        let spyse_access_token = auth::get_auth_token("spyse");
+        let facebook_access_token = auth::get_auth_token("facebook");
+
         let ct_api_url_virustotal = [
             "https://www.virustotal.com/ui/domains/",
             &target,
@@ -83,8 +96,13 @@ pub fn get_subdomains(
         let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
         let ct_api_url_sublist3r =
             ["https://api.sublist3r.com/search.php?domain=", &target].concat();
-
-        let facebook_access_token = auth::get_auth_token("facebook");
+        let ct_api_url_spyse = [
+            "https://api.spyse.com/v1/subdomains?domain=",
+            &target,
+            "&api_token=",
+            &spyse_access_token,
+        ]
+        .concat();
 
         if facebook_access_token.is_empty() {
             let all_subdomains = vec![
@@ -92,6 +110,7 @@ pub fn get_subdomains(
                 get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
                 get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
                 get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
+                get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
             ];
 
             let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
@@ -118,6 +137,7 @@ pub fn get_subdomains(
                 get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
                 get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
                 get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
+                get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
             ];
 
             let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
@@ -341,6 +361,31 @@ fn get_facebook_subdomains(
         },
         Err(e) => {
             check_request_errors(e, "Facebook");
+            None
+        }
+    }
+}
+
+fn get_spyse_subdomains(
+    ct_api_url_spyse: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
+    println!("Searching in the Spyse API... 🔍");
+    match client.get(ct_api_url_spyse).send() {
+        Ok(mut ct_data_spyse) => match ct_data_spyse.json::<ResponseDataSpyse>() {
+            Ok(spyse_json) => {
+                let domains_spyse = spyse_json.records;
+                Some(domains_spyse.into_iter().map(|sub| sub.domain).collect())
+            }
+            Err(e) => {
+                check_json_errors(e, "Spyse");
+                None
+            }
+        },
+        Err(e) => {
+            check_request_errors(e, "Spyse");
             None
         }
     }
