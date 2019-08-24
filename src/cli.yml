@@ -39,5 +39,5 @@ args:
     - proxy:
         short: p
         long: proxy
-        help: Use a proxy to make the requests to the APIs.
+        help: Use a proxy to make APIs requests.
         takes_value: true
