@@ -7,7 +7,7 @@ Follow in Twitter:
 
 # Mixed feelings with Findomain? Show your love
 
-If you want to support the tool development and make it better, [back us :)](https://opencollective.com/findomain#backer)
+If you want to support the tool development and make it better, [back us :)](https://opencollective.com/findomain#backer) You will appear here.
 
 # Findomain
 
