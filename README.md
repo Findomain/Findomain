@@ -5,6 +5,10 @@ Follow in Twitter:
 
 ![alt text](findomain.png "Findomain")
 
+# Mixed feelings with Findomain? Show your love
+
+If you want to support the tool development and make it better, [back us :)](https://opencollective.com/findomain#backer)
+
 # Findomain
 
 [![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
