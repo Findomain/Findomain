@@ -14,7 +14,7 @@ If you want to support the tool development and make it better, [support us :)](
 [![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
 [![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
 [![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/edu4rdshl/findomain?branch=master&svg=true)](https://ci.appveyor.com/project/edu4rdshl/findomain)
-[![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Rust/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
+[![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Github%20Actions/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
 
 The fastest and cross-platform subdomain enumerator.
 
