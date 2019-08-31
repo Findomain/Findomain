@@ -107,11 +107,26 @@ pub fn get_subdomains(
         .concat();
 
         if facebook_access_token.is_empty() {
+            let findomain_fb_tokens = [
+                "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
+                "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
+                "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
+                "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
+                "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
+            ];
+            let ct_api_url_fb = [
+                "https://graph.facebook.com/certificates?query=",
+                &target,
+                "&fields=domains&limit=10000&access_token=",
+                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
+            ]
+            .concat();
             let all_subdomains = vec![
                 get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
                 get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
                 get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
                 get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
+                get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
                 get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
             ];
 
@@ -124,7 +139,7 @@ pub fn get_subdomains(
                 &with_output,
                 &file_format,
             );
-            println!("If you want to search in the Facebook API, don't forget to set the findomain_fb_token variable in your system\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
+            println!("If you start experiencing issues with the Facebook API, don't forget to set the findomain_fb_token variable in your system to use your own API token.\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
         } else {
             let ct_api_url_fb = [
                 "https://graph.facebook.com/certificates?query=",
