@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
@@ -15,7 +15,7 @@ serde_derive = "1.0.99"
 reqwest = "0.9.20"
 trust-dns-resolver = "0.12.0"
 clap = { version = "2.33.0", features = ["yaml"] }
-lazy_static = "1.3.0"
+lazy_static = "1.4.0"
 rand = "0.7.0"
 url = "2.1.0"
 # json = "0.11.14"
