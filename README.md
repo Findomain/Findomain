@@ -7,7 +7,7 @@ Follow in Twitter:
 
 # Mixed feelings with Findomain? Show your love
 
-If you want to support the tool development and make it better, [back us :)](https://opencollective.com/findomain#backer) You will appear here.
+If you want to support the tool development and make it better, [support us :)](https://opencollective.com/findomain#backer) You will appear here.
 
 # Findomain
 
@@ -69,7 +69,7 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** a access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `**`, **require** a access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it. To make use of Facebook CT API tokens without creating a Facebook account, see [it file](https://github.com/Edu4rdSHL/findomain/blob/master/findomain_fb_tokens.md) provided by us.
 
 APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it. 
 
