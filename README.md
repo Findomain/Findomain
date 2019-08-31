@@ -34,7 +34,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 |Findomain|real	0m38.701s|5622|Very Low|Very Low|
 |assetfinder|real	6m1.117s|4630|Very Low|Very Low|
 |Subl1st3r|real	7m14.996s|996|Low|Low|
-|Amass*|real 29m20.301s|332|Very Hight|Very Hight|
+|Amass*|real 29m20.301s|332|Very High|Very High|
 
 * I can't wait to the amass test for finish, looks like it will never ends and aditionally the resources usage is very hight.
 
