@@ -5,12 +5,14 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 use rand::Rng;
-use std::error::Error;
-use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
-use std::path::Path;
-use std::process;
-use std::time::Duration;
+use std::{
+    error::Error,
+    fs::{File, OpenOptions},
+    io::{BufRead, BufReader, Write},
+    path::Path,
+    process,
+    time::Duration,
+};
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 use url::Url;
 
