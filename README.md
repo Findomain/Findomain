@@ -322,6 +322,7 @@ OPTIONS:
 
 # TODO
 
+- [ ] Implement asyncronous requests.
 - [ ] Improve JSON output.
 - [ ] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
 
