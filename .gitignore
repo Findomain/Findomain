@@ -4,4 +4,3 @@ test.*
 *.txt
 *.csv
 *.json
-Cargo.lock
