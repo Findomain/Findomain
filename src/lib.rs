@@ -58,6 +58,12 @@ struct ResponseDataSpyse {
     records: Vec<SubdomainsSpyse>,
 }
 
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[allow(non_snake_case)]
+struct SubdomainsBufferover {
+    FDNS_A: Vec<String>,
+}
+
 lazy_static! {
     static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
 }
@@ -105,6 +111,7 @@ pub fn get_subdomains(
             &spyse_access_token,
         ]
         .concat();
+        let ct_api_url_bufferover = ["http://dns.bufferover.run/dns?q=", &target, "&rt=5"].concat();
 
         if facebook_access_token.is_empty() {
             let findomain_fb_tokens = [
@@ -128,6 +135,7 @@ pub fn get_subdomains(
                 get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
                 get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
                 get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
+                get_bufferover_subdomains(&ct_api_url_bufferover, &with_proxy, &proxy),
             ];
 
             let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
@@ -155,6 +163,7 @@ pub fn get_subdomains(
                 get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
                 get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
                 get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
+                get_bufferover_subdomains(&ct_api_url_bufferover, &with_proxy, &proxy),
             ];
 
             let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
@@ -403,6 +412,36 @@ fn get_spyse_subdomains(
         },
         Err(e) => {
             check_request_errors(e, "Spyse");
+            None
+        }
+    }
+}
+
+fn get_bufferover_subdomains(
+    ct_api_url_bufferover: &str,
+    with_proxy: &str,
+    proxy: &str,
+) -> Option<Vec<String>> {
+    let client = return_client(&with_proxy, &proxy).unwrap();
+    println!("Searching in the Bufferover API... 🔍");
+    match client.get(ct_api_url_bufferover).send() {
+        Ok(mut ct_data_bufferover) => match ct_data_bufferover.json::<SubdomainsBufferover>() {
+            Ok(bufferover_json) => Some(
+                bufferover_json
+                    .FDNS_A
+                    .iter()
+                    .map(|sub| sub.split(","))
+                    .flatten()
+                    .map(str::to_owned)
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Bufferover");
+                None
+            }
+        },
+        Err(e) => {
+            check_request_errors(e, "Bufferover");
             None
         }
     }
