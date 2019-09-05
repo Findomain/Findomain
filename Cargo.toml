@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
@@ -17,7 +17,6 @@ trust-dns-resolver = "0.12.0"
 clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.0"
-url = "2.1.0"
 # json = "0.11.14"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]

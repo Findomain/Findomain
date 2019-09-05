@@ -11,6 +11,11 @@ pub fn get_auth_token(api: &str) -> String {
             Ok(token) => token,
             Err(_) => String::from(""),
         }
+    } else if api == "virustotal" {
+        match env::var("findomain_virustotal_token") {
+            Ok(token) => token,
+            Err(_) => String::from(""),
+        }
     } else {
         String::from("")
     }

@@ -32,7 +32,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
-|Findomain|real	0m38.701s|5622|Very Low|Very Low|
+|Findomain|real	0m20.148s|20627|Very Low|Very Low|
 |assetfinder|real	6m1.117s|4630|Very Low|Very Low|
 |Subl1st3r|real	7m14.996s|996|Low|Low|
 |Amass*|real 29m20.301s|332|Very High|Very High|
@@ -67,6 +67,9 @@ APIs that we are using at the moment:
 - [Sublit3r](https://api.sublist3r.com/)
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
 - [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
+- [Bufferover](http://dns.bufferover.run/)
+- [Threadcrow](https://threatcrowd.org/)
+- [Virustotal with apikey](https://www.virustotal.com/) `**`
 
 **Notes**
 
@@ -262,6 +265,35 @@ Put in the CMD command prompt:
 **Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_spyse_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_spyse_token` in Unix based systems like putting `export findomain_spyse_token="YourAccessToken"` into your `.bashrc` and set the `findomain_spyse_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+
+# Configuring the Virustotal API to use with token
+
+1. Open https://www.virustotal.com/gui/join-us and make the registration process (include email verification).
+2. Log in into your spyse account and go to https://www.virustotal.com/gui/user/YourUsername/apikey
+3. Search for the "API key" section.
+4. Save that API key.
+
+Now you can use that value to set the access token as following:
+
+**Unix based systems (Linux, BSD, MacOS, Android with Termux, etc):**
+
+Put in your terminal:
+
+```
+$ findomain_virustotal_token="YourAccessToken" findomain -(options)
+```
+
+**Windows systems:**
+
+Put in the CMD command prompt:
+
+```
+> set findomain_virustotal_token=YourAccessToken && findomain -(options)
+```
+
+**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_virustotal_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_virustotal_token` in Unix based systems like putting `export findomain_virustotal_token="YourAccessToken"` into your `.bashrc` and set the `findomain_virustotal_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
 # Usage
 

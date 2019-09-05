@@ -10,11 +10,10 @@ use std::{
     fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
     path::Path,
-    process,
+    thread,
     time::Duration,
 };
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
-use url::Url;
 
 mod auth;
 
@@ -58,124 +57,195 @@ struct ResponseDataSpyse {
     records: Vec<SubdomainsSpyse>,
 }
 
-lazy_static! {
-    static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[allow(non_snake_case)]
+struct SubdomainsBufferover {
+    FDNS_A: Vec<String>,
 }
 
-pub fn get_subdomains(
-    target: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-    all_apis: &u32,
-    with_proxy: &str,
-    proxy: &str,
-) {
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Debug)]
+struct SubdomainsThreadcrowd {
+    subdomains: Vec<String>,
+}
+
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Debug)]
+struct SubdomainsVirustotalApikey {
+    subdomains: Vec<String>,
+}
+
+lazy_static! {
+    static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
+    static ref CLIENT: reqwest::Client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(20))
+        .build()
+        .unwrap();
+}
+
+pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &str) {
     let target = target
         .replace("www.", "")
         .replace("https://", "")
         .replace("http://", "")
         .replace("/", "");
+
+    println!("\nTarget ==> {}\n", &target);
+
+    let spyse_access_token = auth::get_auth_token("spyse");
+    let facebook_access_token = auth::get_auth_token("facebook");
+    let virustotal_access_token = auth::get_auth_token("virustotal");
+
     let ct_api_url_certspotter = [
         "https://api.certspotter.com/v1/issuances?domain=",
         &target,
         "&include_subdomains=true&expand=dns_names",
     ]
     .concat();
+    let ct_api_url_virustotal = [
+        "https://www.virustotal.com/ui/domains/",
+        &target,
+        "/subdomains?limit=40",
+    ]
+    .concat();
+    let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
+    let ct_api_url_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
+    let ct_api_url_spyse = [
+        "https://api.spyse.com/v1/subdomains?domain=",
+        &target,
+        "&api_token=",
+        &spyse_access_token,
+    ]
+    .concat();
+    let ct_api_url_bufferover = ["http://dns.bufferover.run/dns?q=", &target].concat();
+    let ct_api_url_threatcrowd = [
+        "https://threatcrowd.org/searchApi/v2/domain/report/?domain=",
+        &target,
+    ]
+    .concat();
 
-    println!("\nTarget ==> {}\n", &target);
-
-    if all_apis == &1 {
-        let spyse_access_token = auth::get_auth_token("spyse");
-        let facebook_access_token = auth::get_auth_token("facebook");
-
-        let ct_api_url_virustotal = [
-            "https://www.virustotal.com/ui/domains/",
+    if facebook_access_token.is_empty() || virustotal_access_token.is_empty() {
+        let findomain_fb_tokens = [
+            "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
+            "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
+            "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
+            "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
+            "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
+        ];
+        let ct_api_url_fb = [
+            "https://graph.facebook.com/certificates?query=",
             &target,
-            "/subdomains?limit=40",
+            "&fields=domains&limit=10000&access_token=",
+            &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
         ]
         .concat();
-        let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
-        let ct_api_url_sublist3r =
-            ["https://api.sublist3r.com/search.php?domain=", &target].concat();
-        let ct_api_url_spyse = [
-            "https://api.spyse.com/v1/subdomains?domain=",
-            &target,
-            "&api_token=",
-            &spyse_access_token,
-        ]
-        .concat();
-
-        if facebook_access_token.is_empty() {
-            let findomain_fb_tokens = [
-                "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
-                "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
-                "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
-                "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
-                "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
-            ];
-            let ct_api_url_fb = [
-                "https://graph.facebook.com/certificates?query=",
-                &target,
-                "&fields=domains&limit=10000&access_token=",
-                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
-            ]
-            .concat();
+        if virustotal_access_token.is_empty() {
             let all_subdomains = vec![
-                get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
-                get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
-                get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
-                get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
-                get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
-                get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
+                thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
+                thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
+                thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
+                thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
+                thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
+                thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
+                thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+                thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
             ];
 
-            let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
+            let all_subdomains_vec = all_subdomains
+                .into_iter()
+                .map(|j| j.join().unwrap())
+                .collect::<Vec<_>>();
 
             manage_subdomains_data(
-                all_subdomains_vec,
+                all_subdomains_vec
+                    .iter()
+                    .flatten()
+                    .flat_map(|sub| sub)
+                    .collect(),
                 &target,
                 &with_ip,
                 &with_output,
                 &file_format,
             );
-            println!("If you start experiencing issues with the Facebook API, don't forget to set the findomain_fb_token variable in your system to use your own API token.\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
         } else {
-            let ct_api_url_fb = [
-                "https://graph.facebook.com/certificates?query=",
+            let ct_api_url_virustotal_apikey = [
+                "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
+                &virustotal_access_token,
+                "&domain=",
                 &target,
-                "&fields=domains&limit=10000&access_token=",
-                &facebook_access_token,
             ]
             .concat();
             let all_subdomains = vec![
-                get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
-                get_crtsh_subdomains(&ct_api_url_crtsh, &with_proxy, &proxy),
-                get_virustotal_subdomains(&ct_api_url_virustotal, &with_proxy, &proxy),
-                get_sublist3r_subdomains(&ct_api_url_sublist3r, &with_proxy, &proxy),
-                get_facebook_subdomains(&ct_api_url_fb, &with_proxy, &proxy),
-                get_spyse_subdomains(&ct_api_url_spyse, &with_proxy, &proxy),
+                thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
+                thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
+                thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
+                thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
+                thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
+                thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
+                thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+                thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
+                thread::spawn(move || {
+                    get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey)
+                }),
             ];
-
-            let all_subdomains_vec = all_subdomains.into_iter().fold(None, concat_options);
+            let all_subdomains_vec = all_subdomains
+                .into_iter()
+                .map(|j| j.join().unwrap())
+                .collect::<Vec<_>>();
 
             manage_subdomains_data(
-                all_subdomains_vec,
+                all_subdomains_vec
+                    .iter()
+                    .flatten()
+                    .flat_map(|sub| sub)
+                    .collect(),
                 &target,
                 &with_ip,
                 &with_output,
                 &file_format,
-            );
+            )
         }
+        println!("If you start experiencing issues with the Facebook API, don't forget to set the findomain_fb_token variable in your system to use your own API token.\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
     } else {
+        let ct_api_url_fb = [
+            "https://graph.facebook.com/certificates?query=",
+            &target,
+            "&fields=domains&limit=10000&access_token=",
+            &facebook_access_token,
+        ]
+        .concat();
+        let ct_api_url_virustotal_apikey = [
+            "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
+            &virustotal_access_token,
+            "&domain=",
+            &target,
+        ]
+        .concat();
+        let all_subdomains = vec![
+            thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
+            thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
+            thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
+            thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
+            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
+            thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
+            thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+            thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
+            thread::spawn(move || get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey)),
+        ];
+        let all_subdomains_vec = all_subdomains
+            .into_iter()
+            .map(|j| j.join().unwrap())
+            .collect::<Vec<_>>();
+
         manage_subdomains_data(
-            get_certspotter_subdomains(&ct_api_url_certspotter, &with_proxy, &proxy),
+            all_subdomains_vec
+                .iter()
+                .flatten()
+                .flat_map(|sub| sub)
+                .collect(),
             &target,
             &with_ip,
             &with_output,
             &file_format,
         );
-        println!("Tip: Try using the -a flag to check in all APIs.\n");
     }
     if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
@@ -197,69 +267,51 @@ pub fn get_subdomains(
     }
 }
 
-fn concat_options<T>(l: Option<Vec<T>>, r: Option<Vec<T>>) -> Option<Vec<T>> {
-    match (l, r) {
-        (Some(mut l), Some(mut r)) => {
-            l.append(&mut r);
-            Some(l)
-        }
-        (x @ Some(_), None) => x,
-        (None, x) => x,
-    }
-}
-
 fn manage_subdomains_data(
-    data: Option<Vec<String>>,
+    mut vec_subdomains: Vec<&String>,
     target: &str,
     with_ip: &str,
     with_output: &str,
     file_format: &str,
 ) {
     let base_target = [".", &target].concat();
-    for mut vec_subdomains in data {
-        if vec_subdomains.is_empty() {
-            println!(
-                "\nNo subdomains were found for the target: {} ¡😭!\n",
-                &target
-            );
-        } else {
-            vec_subdomains.sort();
-            vec_subdomains.dedup();
-            vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
-            println!(
-                "\nA total of {} subdomains were found for ==>  {} 👽\n",
-                &vec_subdomains.len(),
-                &target
-            );
-            for subdomain in vec_subdomains {
-                if with_ip == "y" && with_output == "y" {
-                    let ipadress = get_ip(&subdomain);
-                    write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                    println!(" >> {} => {}", &subdomain, &ipadress);
-                } else if with_ip == "y" {
-                    let ipadress = get_ip(&subdomain);
-                    println!(" >> {} => {}", &subdomain, &ipadress);
-                } else if with_output == "y" {
-                    let ipadress = "";
-                    write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                    println!(" >> {}", &subdomain);
-                } else {
-                    println!(" >> {}", &subdomain);
-                }
+    if vec_subdomains.is_empty() {
+        println!(
+            "\nNo subdomains were found for the target: {} ¡😭!\n",
+            &target
+        );
+    } else {
+        vec_subdomains.sort();
+        vec_subdomains.dedup();
+        vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
+        println!(
+            "\nA total of {} subdomains were found for ==>  {} 👽\n",
+            &vec_subdomains.len(),
+            &target
+        );
+        for subdomain in vec_subdomains {
+            if with_ip == "y" && with_output == "y" {
+                let ipadress = get_ip(&subdomain);
+                write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                println!(" >> {} => {}", &subdomain, &ipadress);
+            } else if with_ip == "y" {
+                let ipadress = get_ip(&subdomain);
+                println!(" >> {} => {}", &subdomain, &ipadress);
+            } else if with_output == "y" {
+                let ipadress = "";
+                write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                println!(" >> {}", &subdomain);
+            } else {
+                println!(" >> {}", &subdomain);
             }
-            println!("\nGood luck Hax0r 💀!\n");
         }
+        println!("\nGood luck Hax0r 💀!\n");
     }
 }
 
-fn get_certspotter_subdomains(
-    ct_api_url_certspotter: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String>> {
     println!("Searching in the CertSpotter API... 🔍");
-    match client.get(ct_api_url_certspotter).send() {
+    match CLIENT.get(ct_api_url_certspotter).send() {
         Ok(mut ct_data_certspotter) => {
             match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
                 Ok(domains_certspotter) => Some(
@@ -281,14 +333,9 @@ fn get_certspotter_subdomains(
     }
 }
 
-fn get_crtsh_subdomains(
-    ct_api_url_crtsh: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
     println!("Searching in the Crtsh API... 🔍");
-    match client.get(ct_api_url_crtsh).send() {
+    match CLIENT.get(ct_api_url_crtsh).send() {
         Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(domains_crtsh) => Some(
                 domains_crtsh
@@ -308,14 +355,9 @@ fn get_crtsh_subdomains(
     }
 }
 
-fn get_virustotal_subdomains(
-    ct_api_url_virustotal: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>> {
     println!("Searching in the Virustotal API... 🔍");
-    match client.get(ct_api_url_virustotal).send() {
+    match CLIENT.get(ct_api_url_virustotal).send() {
         Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
                 let domains_virustotal = virustotal_json.data;
@@ -333,14 +375,9 @@ fn get_virustotal_subdomains(
     }
 }
 
-fn get_sublist3r_subdomains(
-    ct_api_url_sublist3r: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
     println!("Searching in the Sublist3r API... 🔍");
-    match client.get(ct_api_url_sublist3r).send() {
+    match CLIENT.get(ct_api_url_sublist3r).send() {
         Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
             Ok(domains_sublist3r) => Some(domains_sublist3r),
             Err(e) => {
@@ -355,14 +392,9 @@ fn get_sublist3r_subdomains(
     }
 }
 
-fn get_facebook_subdomains(
-    ct_api_url_fb: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
     println!("Searching in the Facebook API... 🔍");
-    match client.get(ct_api_url_fb).send() {
+    match CLIENT.get(ct_api_url_fb).send() {
         Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => Some(
                 fb_json
@@ -383,14 +415,9 @@ fn get_facebook_subdomains(
     }
 }
 
-fn get_spyse_subdomains(
-    ct_api_url_spyse: &str,
-    with_proxy: &str,
-    proxy: &str,
-) -> Option<Vec<String>> {
-    let client = return_client(&with_proxy, &proxy).unwrap();
+fn get_spyse_subdomains(ct_api_url_spyse: &str) -> Option<Vec<String>> {
     println!("Searching in the Spyse API... 🔍");
-    match client.get(ct_api_url_spyse).send() {
+    match CLIENT.get(ct_api_url_spyse).send() {
         Ok(mut ct_data_spyse) => match ct_data_spyse.json::<ResponseDataSpyse>() {
             Ok(spyse_json) => {
                 let domains_spyse = spyse_json.records;
@@ -403,6 +430,79 @@ fn get_spyse_subdomains(
         },
         Err(e) => {
             check_request_errors(e, "Spyse");
+            None
+        }
+    }
+}
+
+fn get_bufferover_subdomains(ct_api_url_bufferover: &str) -> Option<Vec<String>> {
+    println!("Searching in the Bufferover API... 🔍");
+    match CLIENT.get(ct_api_url_bufferover).send() {
+        Ok(mut ct_data_bufferover) => match ct_data_bufferover.json::<SubdomainsBufferover>() {
+            Ok(bufferover_json) => Some(
+                bufferover_json
+                    .FDNS_A
+                    .iter()
+                    .map(|sub| sub.split(","))
+                    .flatten()
+                    .map(str::to_owned)
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Bufferover");
+                None
+            }
+        },
+        Err(e) => {
+            check_request_errors(e, "Bufferover");
+            None
+        }
+    }
+}
+
+fn get_threatcrowd_subdomains(ct_api_url_threatcrowd: &str) -> Option<Vec<String>> {
+    println!("Searching in the Threadcrowd API... 🔍");
+    match CLIENT.get(ct_api_url_threatcrowd).send() {
+        Ok(mut ct_data_threatcrowd) => match ct_data_threatcrowd.json::<SubdomainsThreadcrowd>() {
+            Ok(threatcrowd_json) => Some(
+                threatcrowd_json
+                    .subdomains
+                    .into_iter()
+                    .map(|sub| sub)
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Threadcrowd");
+                None
+            }
+        },
+        Err(e) => {
+            check_request_errors(e, "Threadcrowd");
+            None
+        }
+    }
+}
+
+fn get_virustotal_apikey_subdomains(ct_api_url_virustotal_apikey: &str) -> Option<Vec<String>> {
+    println!("Searching in the Virustotal API using apikey... 🔍");
+    match CLIENT.get(ct_api_url_virustotal_apikey).send() {
+        Ok(mut ct_data_virustotal_apikey) => {
+            match ct_data_virustotal_apikey.json::<SubdomainsVirustotalApikey>() {
+                Ok(virustotal_apikey_json) => Some(
+                    virustotal_apikey_json
+                        .subdomains
+                        .into_iter()
+                        .map(|sub| sub)
+                        .collect(),
+                ),
+                Err(e) => {
+                    check_json_errors(e, "Virustotal API using apikey");
+                    None
+                }
+            }
+        }
+        Err(e) => {
+            check_request_errors(e, "Virustotal API using apikey");
             None
         }
     }
@@ -444,15 +544,7 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("An error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
-pub fn read_from_file(
-    file: &str,
-    with_ip: &str,
-    with_output: &str,
-    file_format: &str,
-    all_apis: &u32,
-    with_proxy: &str,
-    proxy: &str,
-) {
+pub fn read_from_file(file: &str, with_ip: &str, with_output: &str, file_format: &str) {
     if let Ok(f) = File::open(&file) {
         let f = BufReader::new(f);
         for line in f.lines() {
@@ -461,9 +553,6 @@ pub fn read_from_file(
                 &with_ip,
                 &with_output,
                 &file_format,
-                &all_apis,
-                &with_proxy,
-                &proxy,
             )
         }
     } else {
@@ -553,33 +642,5 @@ fn get_resolver() -> Resolver {
                 }
             },
         },
-    }
-}
-
-fn return_client(with_proxy: &str, proxy: &str) -> Option<reqwest::Client> {
-    if with_proxy == "y" {
-        match Url::parse(&proxy) {
-            Ok(proxy) => Some(
-                reqwest::Client::builder()
-                    .proxy(reqwest::Proxy::all(proxy.as_str()).unwrap())
-                    .timeout(Duration::from_secs(20))
-                    .build()
-                    .unwrap(),
-            ),
-            Err(e) => {
-                println!(
-                    "An error ❌ as occured while parsing the proxy URL, your proxy is {} and the generated error is: {}\nMake sure that your proxy URL follow the syntax: [http/https]://[host]:[port]. Example: http://127.0.0.1:8080",
-                    &proxy, e.description()
-                );
-                process::exit(1)
-            }
-        }
-    } else {
-        Some(
-            reqwest::Client::builder()
-                .timeout(Duration::from_secs(20))
-                .build()
-                .unwrap(),
-        )
     }
 }

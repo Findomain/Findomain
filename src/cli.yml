@@ -1,5 +1,5 @@
 name: findomain
-version: "0.2.4"
+version: "0.2.5"
 author: Eduard Tolosa <tolosaeduard@gmail.com>
 settings:
     - ArgRequiredElseHelp
@@ -31,13 +31,3 @@ args:
         help: Write data to output file in the specified format.
         takes_value: true
         possible_values: [ txt, csv, json ]
-    - all-apis:
-        short: a
-        long: all-apis
-        help: Use all the available APIs to perform the search. It take more time but you will have a lot of more results.
-        takes_value: false
-    - proxy:
-        short: p
-        long: proxy
-        help: Use a proxy to make APIs requests.
-        takes_value: true
