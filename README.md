@@ -148,14 +148,6 @@ $ ./findomain-linux
 $ sudo pacman -S findomain
 ```
 
-# Installation ARM
-
-```
-$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-arm
-$ chmod +x findomain-arm
-$ ./findomain-arm
-```
-
 # Installation Aarch64 (Raspberry Pi)
 
 ```
@@ -300,7 +292,7 @@ Put in the CMD command prompt:
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 ```
-findomain 0.2.2
+findomain 0.2.5
 Eduard Tolosa <tolosaeduard@gmail.com>
 The fastest and cross-platform subdomain enumerator, don't waste your time.
 
@@ -308,16 +300,13 @@ USAGE:
     findomain [FLAGS] [OPTIONS]
 
 FLAGS:
-    -a, --all-apis    Use all the available APIs to perform the search. It take more time but you will have a lot of
-                      more results.
-    -h, --help        Prints help information
-    -i, --get-ip      Return the subdomain list with IP address if resolved.
-    -V, --version     Prints version information
+    -h, --help       Prints help information
+    -i, --get-ip     Return the subdomain list with IP address if resolved.
+    -V, --version    Prints version information
 
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
     -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
-    -p, --proxy <proxy>      Use a proxy to make APIs requests.
     -t, --target <target>    Target host
 ```
 
@@ -327,37 +316,28 @@ OPTIONS:
 
 `findomain -t example.com`
 
-2. Make a simple search of subdomains using all the APIs and print the info in the screen:
+2. Make a search of subdomains and print the info in the screen:
 
-`findomain -t example.com -a`
+`findomain -t example.com`
 
 3. Make a search of subdomains and export the data to a CSV file:
 
 `findomain -t example.com -o csv`
 
-4. Make a search of subdomains using all the APIs and export the data to a CSV file:
-
-`findomain -t example.com -a -o csv`
-
-5. Make a search of subdomains and resolve the IP address of subdomains (if possible):
+4. Make a search of subdomains and resolve the IP address of subdomains (if possible):
 
 `findomain -t example.com -i`
 
-6. Make a search of subdomains with all the APIs and resolve the IP address of subdomains (if possible):
+5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a CSV file:
 
-`findomain -t example.com -i -a`
+`findomain -t example.com -i -o csv`
 
-7. Make a search of subdomains with all the APIs and resolve the IP address of subdomains (if possible), exporting the data to a CSV file:
+6. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
 
-`findomain -t example.com -i -a -o csv`
-
-8. Make a search of subdomains using a proxy (http://127.0.0.1:8080 in it case, the rest of aguments continue working in the same way, you just need to add the -p flag to the before commands):
-
-`findomain -t example.com -p http://127.0.0.1:8080`
+`findomain -f file_with_domains.txt`
 
 # TODO
 
-- [ ] Implement asyncronous requests.
 - [ ] Improve JSON output.
 - [ ] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
 
