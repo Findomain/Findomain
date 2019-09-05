@@ -22,15 +22,6 @@ else
   echo "Windows artifact build: FAILED"
 fi
 
-# ARM Build
-echo "Building ARM artifact."
-if cargo build -q --release --target="$ARM_TARGET"; then
-  echo "ARM artifact build: SUCCESS"
-  cp "target/$ARM_TARGET/release/findomain" "target/$ARM_TARGET/release/findomain-arm"
-else
-  echo "ARM artifact build: FAILED"
-fi
-
 # Aarch64 build
 echo "Building Aarch64 artifact."
 if cargo build -q --release --target="$AARCH_TARGET"; then
