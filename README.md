@@ -30,7 +30,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
-|Findomain|real	0m20.148s|20627|Very Low|Very Low|
+|Findsubdomains|real	0m20.148s|20627|Very Low|Very Low|
 |assetfinder|real	6m1.117s|4630|Very Low|Very Low|
 |Subl1st3r|real	7m14.996s|996|Low|Low|
 |Amass*|real 29m20.301s|332|Very High|Very High|
@@ -38,6 +38,12 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 * I can't wait to the amass test for finish, looks like it will never ends and aditionally the resources usage is very hight.
 
 **Note:** The benchmark was updated the 05/09/2019, since it point other tools can improve things and you will got different results.
+
+**Used Tools**
+1. [Findsubdomains](findsubdomains.com)
+2. [assetfinder](https://github.com/tomnomnom/assetfinder) 
+3. [Subl1st3r](https://github.com/aboul3la/Sublist3r)
+4. [Amass](https://github.com/OWASP/Amass)
 
 # Features
 
