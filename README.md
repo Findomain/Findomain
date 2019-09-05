@@ -1,7 +1,7 @@
 Follow in Twitter:
 
-* https://twitter.com/sechacklabs (Team)
-* https://twitter.com/edu4rdshl (Developer)
+* [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
+* [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
 ![alt text](findomain.png "Findomain")
 
@@ -43,16 +43,16 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 
 # Features
 
-* Discover subdomains without brute-force, it tool uses Certificate Transparency Logs.
+* Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
+* Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover subdomains with or without IP address according to user arguments.
-* Read target from user argument (-t).
-* Read a list of targets from file and discover their subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
+* Read target from user argument (-t) or file (-f).
+* Discover subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
 * Write output to TXT file.
 * Write output to CSV file.
 * Write output to JSON file.
-* Cross platform support: Any platform.
-* Optional multiple API support.
-* Proxy support. 
+* Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
+* Multiple API support.
 
 **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
@@ -88,7 +88,6 @@ All supported platforms in the binarys that we give are 64 bits only and we don'
 * [Linux](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-in-linux-using-compiled-artifacts)
 * [Windows](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-windows)
 * [MacOS](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-macos)
-* [ARM](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-arm)
 * [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-aarch64-raspberry-pi)
 
 # Build for 32 bits or another platform
