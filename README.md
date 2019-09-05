@@ -39,7 +39,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 
 * I can't wait to the amass test for finish, looks like it will never ends and aditionally the resources usage is very hight.
 
-**Note:** The benchmark was made the 10/08/2019, since it point other tools can improve things and you will got different results.
+**Note:** The benchmark was updated the 05/09/2019, since it point other tools can improve things and you will got different results.
 
 # Features
 
@@ -57,7 +57,7 @@ The tool used to calculate the time, is the `time` command in Linux. You can see
 **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
 # How it works?
-It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs to find subdomains and it method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
+It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs and specific well tested APIs to find subdomains. It method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
 APIs that we are using at the moment:
 
@@ -73,7 +73,7 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** a access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
 
 APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it. 
 
