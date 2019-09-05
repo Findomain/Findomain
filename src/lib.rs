@@ -122,49 +122,47 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
     ]
     .concat();
 
-    if facebook_access_token.is_empty() || virustotal_access_token.is_empty() {
-        let findomain_fb_tokens = [
-            "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
-            "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
-            "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
-            "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
-            "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
-        ];
-        let ct_api_url_fb = [
-            "https://graph.facebook.com/certificates?query=",
-            &target,
-            "&fields=domains&limit=10000&access_token=",
-            &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
-        ]
-        .concat();
-        if virustotal_access_token.is_empty() {
-            let all_subdomains = vec![
-                thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
-                thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
-                thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
-                thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
-                thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
-                thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
-                thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
-                thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
+    let all_subdomains = vec![
+        thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
+        thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
+        thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
+        thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
+        if facebook_access_token.is_empty() {
+            let findomain_fb_tokens = [
+                "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
+                "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
+                "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
+                "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
+                "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
+                "434231614102088|pLJSVc9iOqxrG6NO7DDPrlkQ1qE",
+                "431009107520610|AX8VNunXMng-ainHO8Ke0sdeMJI",
+                "893300687707948|KW_O07biKRaW5fpNqeAeSrMU1W8",
+                "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
+                "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
             ];
-
-            let all_subdomains_vec = all_subdomains
-                .into_iter()
-                .map(|j| j.join().unwrap())
-                .collect::<Vec<_>>();
-
-            manage_subdomains_data(
-                all_subdomains_vec
-                    .iter()
-                    .flatten()
-                    .flat_map(|sub| sub)
-                    .collect(),
+            let ct_api_url_fb = [
+                "https://graph.facebook.com/certificates?query=",
                 &target,
-                &with_ip,
-                &with_output,
-                &file_format,
-            );
+                "&fields=domains&limit=10000&access_token=",
+                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
+            ]
+            .concat();
+            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb))
+        } else {
+            let ct_api_url_fb = [
+                "https://graph.facebook.com/certificates?query=",
+                &target,
+                "&fields=domains&limit=10000&access_token=",
+                &facebook_access_token,
+            ]
+            .concat();
+            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb))
+        },
+        thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
+        thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+        thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
+        if virustotal_access_token.is_empty() {
+            thread::spawn(|| None)
         } else {
             let ct_api_url_virustotal_apikey = [
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
@@ -173,80 +171,26 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
                 &target,
             ]
             .concat();
-            let all_subdomains = vec![
-                thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
-                thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
-                thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
-                thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
-                thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
-                thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
-                thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
-                thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
-                thread::spawn(move || {
-                    get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey)
-                }),
-            ];
-            let all_subdomains_vec = all_subdomains
-                .into_iter()
-                .map(|j| j.join().unwrap())
-                .collect::<Vec<_>>();
+            thread::spawn(move || get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey))
+        },
+    ];
 
-            manage_subdomains_data(
-                all_subdomains_vec
-                    .iter()
-                    .flatten()
-                    .flat_map(|sub| sub)
-                    .collect(),
-                &target,
-                &with_ip,
-                &with_output,
-                &file_format,
-            )
-        }
-        println!("If you start experiencing issues with the Facebook API, don't forget to set the findomain_fb_token variable in your system to use your own API token.\nSee the following documentation: https://git.io/fjNMA for setup and more info.")
-    } else {
-        let ct_api_url_fb = [
-            "https://graph.facebook.com/certificates?query=",
-            &target,
-            "&fields=domains&limit=10000&access_token=",
-            &facebook_access_token,
-        ]
-        .concat();
-        let ct_api_url_virustotal_apikey = [
-            "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
-            &virustotal_access_token,
-            "&domain=",
-            &target,
-        ]
-        .concat();
-        let all_subdomains = vec![
-            thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
-            thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
-            thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
-            thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
-            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
-            thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
-            thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
-            thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
-            thread::spawn(move || get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey)),
-        ];
-        let all_subdomains_vec = all_subdomains
-            .into_iter()
-            .map(|j| j.join().unwrap())
-            .collect::<Vec<_>>();
+    let all_subdomains_vec = all_subdomains
+        .into_iter()
+        .map(|j| j.join().unwrap())
+        .collect::<Vec<_>>();
 
-        manage_subdomains_data(
-            all_subdomains_vec
-                .iter()
-                .flatten()
-                .flat_map(|sub| sub)
-                .collect(),
-            &target,
-            &with_ip,
-            &with_output,
-            &file_format,
-        );
-    }
+    manage_subdomains_data(
+        all_subdomains_vec
+            .iter()
+            .flatten()
+            .flat_map(|sub| sub)
+            .collect(),
+        &target,
+        &with_ip,
+        &with_output,
+        &file_format,
+    );
     if with_ip == "y" && with_output == "y" {
         let with_ip = "-ip";
         let filename = [&target, "_", &RNUM.to_string(), with_ip, ".", file_format].concat();
@@ -255,14 +199,14 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
                 ">> 📁 Filename for the target {} was saved in: ./{} 😀",
                 &target, &filename
             )
-        }
-    } else if with_output == "y" {
-        let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
-        if Path::new(&filename).exists() {
-            println!(
-                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-                &target, &filename
-            )
+        } else if with_output == "y" {
+            let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
+            if Path::new(&filename).exists() {
+                println!(
+                    ">> 📁 Filename for the target {} was saved in: ./{} 😀",
+                    &target, &filename
+                )
+            }
         }
     }
 }
