@@ -63,6 +63,11 @@ struct SubdomainsBufferover {
     FDNS_A: Vec<String>,
 }
 
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Debug)]
+struct SubdomainsThreadcrowd {
+    subdomains: Vec<String>,
+}
+
 lazy_static! {
     static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
     static ref CLIENT: reqwest::Client = reqwest::Client::builder()
@@ -105,6 +110,11 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
     ]
     .concat();
     let ct_api_url_bufferover = ["http://dns.bufferover.run/dns?q=", &target].concat();
+    let ct_api_url_threatcrowd = [
+        "https://threatcrowd.org/searchApi/v2/domain/report/?domain=",
+        &target,
+    ]
+    .concat();
 
     if facebook_access_token.is_empty() {
         let findomain_fb_tokens = [
@@ -129,6 +139,7 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
             thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
             thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
             thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+            thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
         ];
 
         let all_subdomains_vec = all_subdomains
@@ -164,6 +175,7 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
             thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb)),
             thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
             thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
+            thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
         ];
         let all_subdomains_vec = all_subdomains
             .into_iter()
@@ -390,6 +402,29 @@ fn get_bufferover_subdomains(ct_api_url_bufferover: &str) -> Option<Vec<String>>
         },
         Err(e) => {
             check_request_errors(e, "Bufferover");
+            None
+        }
+    }
+}
+
+fn get_threatcrowd_subdomains(ct_api_url_threatcrowd: &str) -> Option<Vec<String>> {
+    println!("Searching in the Threadcrowd API... 🔍");
+    match CLIENT.get(ct_api_url_threatcrowd).send() {
+        Ok(mut ct_data_threatcrowd) => match ct_data_threatcrowd.json::<SubdomainsThreadcrowd>() {
+            Ok(threatcrowd_json) => Some(
+                threatcrowd_json
+                    .subdomains
+                    .into_iter()
+                    .map(|sub| sub)
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "Threadcrowd");
+                None
+            }
+        },
+        Err(e) => {
+            check_request_errors(e, "Threadcrowd");
             None
         }
     }
