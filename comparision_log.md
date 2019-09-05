@@ -10,25 +10,31 @@ Target ==> microsoft.com
 
 Searching in the CertSpotter API... 🔍
 Searching in the Crtsh API... 🔍
-A timeout ⏳ error as occured while processing the request in the Crtsh API. Error description: timed out
-
 Searching in the Virustotal API... 🔍
 Searching in the Sublist3r API... 🔍
 Searching in the Facebook API... 🔍
+Searching in the Bufferover API... 🔍
+Searching in the Spyse API... 🔍
+A timeout ⏳ error as occured while processing the request in the Crtsh API. Error description: timed out
 
-A total of 5622 subdomains were found for ==>  microsoft.com 👽
+
+A total of 20627 subdomains were found for ==>  microsoft.com 👽
 
  >> 000dco1l50fe3b.redmond.corp.microsoft.com
- ...snip
- Good luck Hax0r 💀!
+ >> 000dco1l50fe3e.redmond.corp.microsoft.com
+ >> 000dco1l50fe4a.redmond.corp.microsoft.com
+ >> 000dco1l50fe4b.redmond.corp.microsoft.com
+ >> 000dco1l50fe4c.redmond.corp.microsoft.com
+ ... snip
+ >> zunecustpubstdsit.parttest.extranettest.microsoft.com
+ >> zusred011m1091.service.microsoft.com
 
->> 📁 Filename for the target microsoft.com was saved in: ./microsoft.com_1239.txt 😀
+Good luck Hax0r 💀!
 
-real	0m38.701s
-user	0m0.106s
-sys	0m0.079s
-[ blackarch ~ ]# cat ./microsoft.com_1239.txt |wc -l
-5622
+
+real    0m20.148s
+user    0m0.126s
+sys    0m0.060s
 ```
 
 - SUBL1ST3R
