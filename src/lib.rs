@@ -192,22 +192,17 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
         &file_format,
     );
     if with_ip == "y" && with_output == "y" {
-        let with_ip = "-ip";
-        let filename = [&target, "_", &RNUM.to_string(), with_ip, ".", file_format].concat();
-        if Path::new(&filename).exists() {
-            println!(
-                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-                &target, &filename
-            )
-        } else if with_output == "y" {
-            let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
-            if Path::new(&filename).exists() {
-                println!(
-                    ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-                    &target, &filename
-                )
-            }
-        }
+        let filename = [&target, "_", &RNUM.to_string(), "-ip", ".", file_format].concat();
+        println!(
+            ">> 📁 Filename for the target {} was saved in: ./{} 😀",
+            &target, &filename
+        )
+    } else if with_output == "y" {
+        let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
+        println!(
+            ">> 📁 Filename for the target {} was saved in: ./{} 😀",
+            &target, &filename
+        )
     }
 }
 
