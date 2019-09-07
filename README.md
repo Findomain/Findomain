@@ -165,6 +165,16 @@ $ chmod +x findomain-osx.dms
 $ ./findomain-osx.dms
 ```
 
+# Updating Findomain to latest version
+
+To update Findomain to latest version, you can be in some scenarios:
+
+1. **You downloaded a precompiled binary:** If you are using a precompiled binary, then you need to download the new binary.
+2. **You are using it from BlackArch Linux:** Just run `pacman -Syu`
+3. **You have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
+4. **You downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
+5. **I used cargo install findomain:** then just run `cargo install --force findomain`.
+
 # Access tokens configuration
 
 In in section you can found the steps about how to configure APIs that need or can be used with access tokens.
