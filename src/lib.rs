@@ -63,12 +63,12 @@ struct SubdomainsBufferover {
     FDNS_A: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Debug)]
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsThreadcrowd {
     subdomains: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq, Debug)]
+#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
 struct SubdomainsVirustotalApikey {
     subdomains: Vec<String>,
 }
