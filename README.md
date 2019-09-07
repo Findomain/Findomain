@@ -18,7 +18,7 @@ The fastest and cross-platform subdomain enumerator.
 
 # What Findomain can do?
 
-It table gives you a idea why you should use findomain and what it can do for you. The domain used for the test was google.com in the following [BlackArch](https://blackarch.org) virtual machine:
+It table gives you a idea why you should use findomain and what it can do for you. The domain used for the test was aol.com in the following [BlackArch](https://blackarch.org) virtual machine:
 
 ```
 Host: KVM/QEMU (Standard PC (i440FX + PIIX, 1996) pc-i440fx-3.1)
@@ -30,9 +30,9 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
-|Findomain|real	0m14.790s|27329|Very Low|Very Low|
+|Findomain|real	0m6.299s|70582|Very Low|Very Low|
 
-**Summary:** 27329 subdomains in 14.7 seconds.
+**Summary:** 70582 subdomains in 6.3 seconds.
 
 # Features
 
