@@ -17,6 +17,7 @@ trust-dns-resolver = "0.12.0"
 clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.0"
+postgres = "0.15.2"
 # json = "0.11.14"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]

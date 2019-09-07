@@ -4,6 +4,7 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
+use postgres::{Connection, TlsMode};
 use rand::Rng;
 use std::{
     error::Error,
@@ -17,17 +18,22 @@ use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver}
 
 mod auth;
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsCertSpotter {
     dns_names: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsCrtsh {
     name_value: String,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[allow(non_snake_case)]
+struct SubdomainsDBCrtsh {
+    NAME_VALUE: String,
+}
+
+#[derive(Deserialize)]
 struct SubdomainsVirustotal {
     id: String,
 }
@@ -37,7 +43,7 @@ struct ResponseDataVirusTotal {
     data: Vec<SubdomainsVirustotal>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsFacebook {
     domains: Vec<String>,
 }
@@ -47,7 +53,7 @@ struct ResponseDataFacebook {
     data: Vec<SubdomainsFacebook>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsSpyse {
     domain: String,
 }
@@ -57,18 +63,18 @@ struct ResponseDataSpyse {
     records: Vec<SubdomainsSpyse>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 #[allow(non_snake_case)]
 struct SubdomainsBufferover {
     FDNS_A: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsThreadcrowd {
     subdomains: Vec<String>,
 }
 
-#[derive(Deserialize, PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Deserialize)]
 struct SubdomainsVirustotalApikey {
     subdomains: Vec<String>,
 }
@@ -94,39 +100,39 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
     let facebook_access_token = auth::get_auth_token("facebook");
     let virustotal_access_token = auth::get_auth_token("virustotal");
 
-    let ct_api_url_certspotter = [
+    let url_api_certspotter = [
         "https://api.certspotter.com/v1/issuances?domain=",
         &target,
         "&include_subdomains=true&expand=dns_names",
     ]
     .concat();
-    let ct_api_url_virustotal = [
+    let url_api_virustotal = [
         "https://www.virustotal.com/ui/domains/",
         &target,
         "/subdomains?limit=40",
     ]
     .concat();
-    let ct_api_url_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
-    let ct_api_url_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
-    let ct_api_url_spyse = [
+    let url_api_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
+    let crtsh_db_query = ["SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.", &target, "'))"].concat();
+    let url_api_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
+    let url_api_spyse = [
         "https://api.spyse.com/v1/subdomains?domain=",
         &target,
         "&api_token=",
         &spyse_access_token,
     ]
     .concat();
-    let ct_api_url_bufferover = ["http://dns.bufferover.run/dns?q=", &target].concat();
-    let ct_api_url_threatcrowd = [
+    let url_api_bufferover = ["http://dns.bufferover.run/dns?q=", &target].concat();
+    let url_api_threatcrowd = [
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain=",
         &target,
     ]
     .concat();
-
     let all_subdomains = vec![
-        thread::spawn(move || get_certspotter_subdomains(&ct_api_url_certspotter)),
-        thread::spawn(move || get_crtsh_subdomains(&ct_api_url_crtsh)),
-        thread::spawn(move || get_virustotal_subdomains(&ct_api_url_virustotal)),
-        thread::spawn(move || get_sublist3r_subdomains(&ct_api_url_sublist3r)),
+        thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter)),
+        thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh)),
+        thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal)),
+        thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r)),
         if facebook_access_token.is_empty() {
             let findomain_fb_tokens = [
                 "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
@@ -140,38 +146,38 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
                 "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
                 "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
             ];
-            let ct_api_url_fb = [
+            let url_api_fb = [
                 "https://graph.facebook.com/certificates?query=",
                 &target,
                 "&fields=domains&limit=10000&access_token=",
                 &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
             ]
             .concat();
-            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb))
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb))
         } else {
-            let ct_api_url_fb = [
+            let url_api_fb = [
                 "https://graph.facebook.com/certificates?query=",
                 &target,
                 "&fields=domains&limit=10000&access_token=",
                 &facebook_access_token,
             ]
             .concat();
-            thread::spawn(move || get_facebook_subdomains(&ct_api_url_fb))
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb))
         },
-        thread::spawn(move || get_spyse_subdomains(&ct_api_url_spyse)),
-        thread::spawn(move || get_bufferover_subdomains(&ct_api_url_bufferover)),
-        thread::spawn(move || get_threatcrowd_subdomains(&ct_api_url_threatcrowd)),
+        thread::spawn(move || get_spyse_subdomains(&url_api_spyse)),
+        thread::spawn(move || get_bufferover_subdomains(&url_api_bufferover)),
+        thread::spawn(move || get_threatcrowd_subdomains(&url_api_threatcrowd)),
         if virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
-            let ct_api_url_virustotal_apikey = [
+            let url_virustotal_apikey = [
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
                 &virustotal_access_token,
                 "&domain=",
                 &target,
             ]
             .concat();
-            thread::spawn(move || get_virustotal_apikey_subdomains(&ct_api_url_virustotal_apikey))
+            thread::spawn(move || get_virustotal_apikey_subdomains(&url_virustotal_apikey))
         },
     ];
 
@@ -248,23 +254,21 @@ fn manage_subdomains_data(
     }
 }
 
-fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String>> {
+fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<Vec<String>> {
     println!("Searching in the CertSpotter API... 🔍");
-    match CLIENT.get(ct_api_url_certspotter).send() {
-        Ok(mut ct_data_certspotter) => {
-            match ct_data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
-                Ok(domains_certspotter) => Some(
-                    domains_certspotter
-                        .into_iter()
-                        .flat_map(|sub| sub.dns_names.into_iter())
-                        .collect(),
-                ),
-                Err(e) => {
-                    check_json_errors(e, "CertSpotter");
-                    None
-                }
+    match CLIENT.get(url_api_certspotter).send() {
+        Ok(mut data_certspotter) => match data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
+            Ok(domains_certspotter) => Some(
+                domains_certspotter
+                    .into_iter()
+                    .flat_map(|sub| sub.dns_names.into_iter())
+                    .collect(),
+            ),
+            Err(e) => {
+                check_json_errors(e, "CertSpotter");
+                None
             }
-        }
+        },
         Err(e) => {
             check_request_errors(e, "CertSpotter");
             None
@@ -272,10 +276,10 @@ fn get_certspotter_subdomains(ct_api_url_certspotter: &str) -> Option<Vec<String
     }
 }
 
-fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
+fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<Vec<String>> {
     println!("Searching in the Crtsh API... 🔍");
-    match CLIENT.get(ct_api_url_crtsh).send() {
-        Ok(mut ct_data_crtsh) => match ct_data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
+    match CLIENT.get(url_api_crtsh).send() {
+        Ok(mut data_crtsh) => match data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
             Ok(domains_crtsh) => Some(
                 domains_crtsh
                     .into_iter()
@@ -294,10 +298,43 @@ fn get_crtsh_subdomains(ct_api_url_crtsh: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>> {
+fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<Vec<String>> {
+    println!("Searching in the Crtsh database... 🔍");
+    match Connection::connect("postgres://guest@crt.sh:5432/certwatch", TlsMode::None) {
+        Ok(crtsh_db_client) => match crtsh_db_client.query(&crtsh_db_query, &[]) {
+            Ok(crtsh_db_subdomains) => Some(
+                crtsh_db_subdomains
+                    .iter()
+                    .map(|row| {
+                        let subdomain = SubdomainsDBCrtsh {
+                            NAME_VALUE: row.get("NAME_VALUE"),
+                        };
+                        subdomain.NAME_VALUE
+                    })
+                    .collect(),
+            ),
+            Err(e) => {
+                println!(
+                    "A error ❌ has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
+                    e.description()
+                );
+                get_crtsh_subdomains(&url_api_crtsh)
+            }
+        },
+        Err(e) => {
+            println!(
+                "A error ❌ has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
+                e.description()
+            );
+            get_crtsh_subdomains(&url_api_crtsh)
+        }
+    }
+}
+
+fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<Vec<String>> {
     println!("Searching in the Virustotal API... 🔍");
-    match CLIENT.get(ct_api_url_virustotal).send() {
-        Ok(mut ct_data_virustotal) => match ct_data_virustotal.json::<ResponseDataVirusTotal>() {
+    match CLIENT.get(url_api_virustotal).send() {
+        Ok(mut data_virustotal) => match data_virustotal.json::<ResponseDataVirusTotal>() {
             Ok(virustotal_json) => {
                 let domains_virustotal = virustotal_json.data;
                 Some(domains_virustotal.into_iter().map(|sub| sub.id).collect())
@@ -314,10 +351,10 @@ fn get_virustotal_subdomains(ct_api_url_virustotal: &str) -> Option<Vec<String>>
     }
 }
 
-fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
+fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<Vec<String>> {
     println!("Searching in the Sublist3r API... 🔍");
-    match CLIENT.get(ct_api_url_sublist3r).send() {
-        Ok(mut ct_data_sublist3r) => match ct_data_sublist3r.json::<Vec<String>>() {
+    match CLIENT.get(url_api_sublist3r).send() {
+        Ok(mut data_sublist3r) => match data_sublist3r.json::<Vec<String>>() {
             Ok(domains_sublist3r) => Some(domains_sublist3r),
             Err(e) => {
                 check_json_errors(e, "Sublist3r");
@@ -331,10 +368,10 @@ fn get_sublist3r_subdomains(ct_api_url_sublist3r: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
+fn get_facebook_subdomains(url_api_fb: &str) -> Option<Vec<String>> {
     println!("Searching in the Facebook API... 🔍");
-    match CLIENT.get(ct_api_url_fb).send() {
-        Ok(mut ct_data_fb) => match ct_data_fb.json::<ResponseDataFacebook>() {
+    match CLIENT.get(url_api_fb).send() {
+        Ok(mut data_fb) => match data_fb.json::<ResponseDataFacebook>() {
             Ok(fb_json) => Some(
                 fb_json
                     .data
@@ -354,10 +391,10 @@ fn get_facebook_subdomains(ct_api_url_fb: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_spyse_subdomains(ct_api_url_spyse: &str) -> Option<Vec<String>> {
+fn get_spyse_subdomains(url_api_spyse: &str) -> Option<Vec<String>> {
     println!("Searching in the Spyse API... 🔍");
-    match CLIENT.get(ct_api_url_spyse).send() {
-        Ok(mut ct_data_spyse) => match ct_data_spyse.json::<ResponseDataSpyse>() {
+    match CLIENT.get(url_api_spyse).send() {
+        Ok(mut data_spyse) => match data_spyse.json::<ResponseDataSpyse>() {
             Ok(spyse_json) => {
                 let domains_spyse = spyse_json.records;
                 Some(domains_spyse.into_iter().map(|sub| sub.domain).collect())
@@ -374,10 +411,10 @@ fn get_spyse_subdomains(ct_api_url_spyse: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_bufferover_subdomains(ct_api_url_bufferover: &str) -> Option<Vec<String>> {
+fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<Vec<String>> {
     println!("Searching in the Bufferover API... 🔍");
-    match CLIENT.get(ct_api_url_bufferover).send() {
-        Ok(mut ct_data_bufferover) => match ct_data_bufferover.json::<SubdomainsBufferover>() {
+    match CLIENT.get(url_api_bufferover).send() {
+        Ok(mut data_bufferover) => match data_bufferover.json::<SubdomainsBufferover>() {
             Ok(bufferover_json) => Some(
                 bufferover_json
                     .FDNS_A
@@ -399,10 +436,10 @@ fn get_bufferover_subdomains(ct_api_url_bufferover: &str) -> Option<Vec<String>>
     }
 }
 
-fn get_threatcrowd_subdomains(ct_api_url_threatcrowd: &str) -> Option<Vec<String>> {
+fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<Vec<String>> {
     println!("Searching in the Threadcrowd API... 🔍");
-    match CLIENT.get(ct_api_url_threatcrowd).send() {
-        Ok(mut ct_data_threatcrowd) => match ct_data_threatcrowd.json::<SubdomainsThreadcrowd>() {
+    match CLIENT.get(url_api_threatcrowd).send() {
+        Ok(mut data_threatcrowd) => match data_threatcrowd.json::<SubdomainsThreadcrowd>() {
             Ok(threatcrowd_json) => Some(
                 threatcrowd_json
                     .subdomains
@@ -422,11 +459,11 @@ fn get_threatcrowd_subdomains(ct_api_url_threatcrowd: &str) -> Option<Vec<String
     }
 }
 
-fn get_virustotal_apikey_subdomains(ct_api_url_virustotal_apikey: &str) -> Option<Vec<String>> {
+fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<Vec<String>> {
     println!("Searching in the Virustotal API using apikey... 🔍");
-    match CLIENT.get(ct_api_url_virustotal_apikey).send() {
-        Ok(mut ct_data_virustotal_apikey) => {
-            match ct_data_virustotal_apikey.json::<SubdomainsVirustotalApikey>() {
+    match CLIENT.get(url_virustotal_apikey).send() {
+        Ok(mut data_virustotal_apikey) => {
+            match data_virustotal_apikey.json::<SubdomainsVirustotalApikey>() {
                 Ok(virustotal_apikey_json) => Some(
                     virustotal_apikey_json
                         .subdomains
@@ -450,7 +487,7 @@ fn get_virustotal_apikey_subdomains(ct_api_url_virustotal_apikey: &str) -> Optio
 fn check_request_errors(error: reqwest::Error, api: &str) {
     if error.is_timeout() {
         println!(
-            "A timeout ⏳ error as occured while processing the request in the {} API. Error description: {}\n",
+            "A timeout ⏳ error has occurred while processing the request in the {} API. Error description: {}\n",
             &api, &error.description())
     } else if error.is_redirect() {
         println!(
@@ -460,19 +497,19 @@ fn check_request_errors(error: reqwest::Error, api: &str) {
         )
     } else if error.is_client_error() {
         println!(
-            "A client error 🧑❌ as occured sending the request to the {} API. Error description: {}\n",
+            "A client error 🧑❌ has occurred sending the request to the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
     } else if error.is_server_error() {
         println!(
-            "A server error 🖥️❌ as occured sending the request to the {} API. Error description: {}\n",
+            "A server error 🖥️❌ has occurred sending the request to the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
     } else {
         println!(
-            "An error ❌ as occured while procesing the request in the {} API. Error description: {}\n",
+            "An error ❌ has occurred while procesing the request in the {} API. Error description: {}\n",
             &api,
             &error.description()
         )
@@ -480,7 +517,7 @@ fn check_request_errors(error: reqwest::Error, api: &str) {
 }
 
 fn check_json_errors(error: reqwest::Error, api: &str) {
-    println!("An error ❌ as ocurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
+    println!("An error ❌ has occurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
 pub fn read_from_file(file: &str, with_ip: &str, with_output: &str, file_format: &str) {
@@ -561,7 +598,7 @@ fn get_ip(domain: &str) -> String {
         Ok(ip_address) => ip_address
             .iter()
             .next()
-            .expect("An error as ocurred getting the IP address.")
+            .expect("An error has occurred getting the IP address.")
             .to_string(),
         Err(_) => String::from("No IP address found"),
     }
