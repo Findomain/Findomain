@@ -1,6 +1,5 @@
 # Findomain releaser
 WIN_TARGET="x86_64-pc-windows-gnu"
-ARM_TARGET="arm-unknown-linux-gnueabihf"
 AARCH_TARGET="aarch64-unknown-linux-gnu"
 OSX_TARGET="x86_64-apple-darwin"
 
