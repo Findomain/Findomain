@@ -238,16 +238,16 @@ fn manage_subdomains_data(
             if with_ip == "y" && with_output == "y" {
                 let ipadress = get_ip(&subdomain);
                 write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                println!(" >> {} => {}", &subdomain, &ipadress);
+                println!("{},{}", &subdomain, &ipadress);
             } else if with_ip == "y" {
                 let ipadress = get_ip(&subdomain);
-                println!(" >> {} => {}", &subdomain, &ipadress);
+                println!("{},{}", &subdomain, &ipadress);
             } else if with_output == "y" {
                 let ipadress = "";
                 write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
-                println!(" >> {}", &subdomain);
+                println!("{}", &subdomain);
             } else {
-                println!(" >> {}", &subdomain);
+                println!("{}", &subdomain);
             }
         }
         println!("\nGood luck Hax0r 💀!\n");
