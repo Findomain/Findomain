@@ -231,6 +231,7 @@ fn manage_subdomains_data(
             &vec_subdomains.len(),
             &target
         );
+        check_output_file_exists(&file_name);
         for subdomain in vec_subdomains {
             if with_ip == "y" && with_output == "y" {
                 let ipadress = get_ip(&subdomain);
@@ -524,7 +525,6 @@ pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
             for domain in f.lines() {
                 let domain = domain.unwrap().to_string();
                 let file_name = &domain;
-                check_output_file_exists(&file_name);
                 get_subdomains(&domain, &with_ip, &with_output, &file_name)
             }
         }

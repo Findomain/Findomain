@@ -2,7 +2,7 @@
 extern crate clap;
 use clap::App;
 
-use findomain::{check_output_file_exists, get_subdomains, read_from_file};
+use findomain::{get_subdomains, read_from_file};
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
@@ -11,7 +11,6 @@ fn main() {
         let target = matches.value_of("target").unwrap().to_string();
         let with_output = "y";
         let file_name = &target;
-        check_output_file_exists(&file_name);
         if matches.is_present("ip") {
             let with_ip = "y";
             get_subdomains(&target, &with_ip, &with_output, &file_name)
