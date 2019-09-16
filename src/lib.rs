@@ -80,14 +80,13 @@ struct SubdomainsVirustotalApikey {
 }
 
 lazy_static! {
-    static ref RNUM: String = rand::thread_rng().gen_range(0, 10000).to_string();
     static ref CLIENT: reqwest::Client = reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
         .build()
         .unwrap();
 }
 
-pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_format: &str) {
+pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name: &str) {
     let target = target
         .replace("www.", "")
         .replace("https://", "")
@@ -195,19 +194,17 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_forma
         &target,
         &with_ip,
         &with_output,
-        &file_format,
+        &file_name,
     );
     if with_ip == "y" && with_output == "y" {
-        let filename = [&target, "_", &RNUM.to_string(), "-ip", ".", file_format].concat();
         println!(
             ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-            &target, &filename
+            &target, &file_name
         )
     } else if with_output == "y" {
-        let filename = [&target, "_", &RNUM.to_string(), ".", file_format].concat();
         println!(
             ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-            &target, &filename
+            &target, &file_name
         )
     }
 }
@@ -217,7 +214,7 @@ fn manage_subdomains_data(
     target: &str,
     with_ip: &str,
     with_output: &str,
-    file_format: &str,
+    file_name: &str,
 ) {
     let base_target = [".", &target].concat();
     if vec_subdomains.is_empty() {
@@ -237,14 +234,14 @@ fn manage_subdomains_data(
         for subdomain in vec_subdomains {
             if with_ip == "y" && with_output == "y" {
                 let ipadress = get_ip(&subdomain);
-                write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
                 println!("{},{}", &subdomain, &ipadress);
             } else if with_ip == "y" {
                 let ipadress = get_ip(&subdomain);
                 println!("{},{}", &subdomain, &ipadress);
             } else if with_output == "y" {
                 let ipadress = "";
-                write_to_file(&subdomain, &target, &ipadress, &file_format, &with_ip);
+                write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
                 println!("{}", &subdomain);
             } else {
                 println!("{}", &subdomain);
@@ -520,71 +517,60 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("An error ❌ has occurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
 }
 
-pub fn read_from_file(file: &str, with_ip: &str, with_output: &str, file_format: &str) {
-    if let Ok(f) = File::open(&file) {
-        let f = BufReader::new(f);
-        for line in f.lines() {
-            get_subdomains(
-                &line.unwrap().to_string(),
-                &with_ip,
-                &with_output,
-                &file_format,
-            )
+pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
+    match File::open(&file) {
+        Ok(f) => {
+            let f = BufReader::new(f);
+            for domain in f.lines() {
+                let domain = domain.unwrap().to_string();
+                let file_name = &domain;
+                check_output_file_exists(&file_name);
+                get_subdomains(&domain, &with_ip, &with_output, &file_name)
+            }
         }
-    } else {
-        println!(
-            "Error: can't open file 📁 {}, please check the filename and try again.",
-            &file
-        );
+        Err(e) => {
+            println!("Can't open file 📁 {}. Error: {}", &file, e.description());
+        }
     }
 }
 
-fn write_to_file(data: &str, target: &str, subdomain_ip: &str, file_format: &str, with_ip: &str) {
+fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str) {
     if with_ip == "y" {
         let data = &[data, ",", subdomain_ip, "\n"].concat();
-        let with_ip = "-ip";
-        let filename = &[target, "_", &RNUM, with_ip, ".", file_format].concat();
-        if Path::new(&filename).exists() {
+        if Path::new(&file_name).exists() {
             let mut output_file = OpenOptions::new()
                 .append(true)
-                .open(&filename)
+                .open(&file_name)
                 .expect("Can't open file.");
             output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
         } else {
-            File::create(&filename).expect("Failed to create file.");
+            File::create(&file_name).expect("Failed to create file.");
             let mut output_file = OpenOptions::new()
                 .append(true)
-                .open(&filename)
+                .open(&file_name)
                 .expect("Can't open file.");
-            output_file
-                .write_all("subdomain,ip\n".as_bytes())
-                .expect("Failed writing to file.");
             output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
         }
     } else {
         let data = &[data, "\n"].concat();
-        let filename = &[target, "_", &RNUM, ".", file_format].concat();
-        if Path::new(&filename).exists() {
+        if Path::new(&file_name).exists() {
             let mut output_file = OpenOptions::new()
                 .append(true)
-                .open(&filename)
+                .open(&file_name)
                 .expect("Can't open file.");
             output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
         } else {
-            File::create(&filename).expect("Failed to create file.");
+            File::create(&file_name).expect("Failed to create file.");
             let mut output_file = OpenOptions::new()
                 .append(true)
-                .open(&filename)
+                .open(&file_name)
                 .expect("Can't open file.");
-            output_file
-                .write_all("subdomain\n".as_bytes())
-                .expect("Failed writing to file.");
             output_file
                 .write_all(&data.as_bytes())
                 .expect("Failed writing to file.");
@@ -618,5 +604,22 @@ fn get_resolver() -> Resolver {
                 }
             },
         },
+    }
+}
+
+pub fn check_output_file_exists(file_name: &str) {
+    if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
+        println!("\nFile {} already exists, deleting it.", &file_name);
+        match std::fs::remove_file(&file_name) {
+            Ok(_) => println!("Filename {} deleted.", &file_name),
+            Err(e) => {
+                println!(
+                    "A error as occurred while deleting the file {}. Error: {}.",
+                    &file_name,
+                    e.description(),
+                );
+                std::process::exit(1)
+            }
+        }
     }
 }
