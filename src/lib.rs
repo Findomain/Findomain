@@ -223,6 +223,7 @@ fn manage_subdomains_data(
             &target
         );
     } else {
+        check_output_file_exists(&file_name);
         vec_subdomains.sort();
         vec_subdomains.dedup();
         vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
@@ -231,7 +232,6 @@ fn manage_subdomains_data(
             &vec_subdomains.len(),
             &target
         );
-        check_output_file_exists(&file_name);
         for subdomain in vec_subdomains {
             if with_ip == "y" && with_output == "y" {
                 let ipadress = get_ip(&subdomain);
@@ -485,29 +485,29 @@ fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<Vec<S
 fn check_request_errors(error: reqwest::Error, api: &str) {
     if error.is_timeout() {
         println!(
-            "A timeout ⏳ error has occurred while processing the request in the {} API. Error description: {}\n",
+            "A timeout ⏳ error has occurred while processing the request in the {} API. Error description: {}",
             &api, &error.description())
     } else if error.is_redirect() {
         println!(
-            "A redirect ↪️  was found while processing the {} API. Error description: {}\n",
+            "A redirect ↪️  was found while processing the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_client_error() {
         println!(
-            "A client error 🧑❌ has occurred sending the request to the {} API. Error description: {}\n",
+            "A client error 🧑❌ has occurred sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_server_error() {
         println!(
-            "A server error 🖥️❌ has occurred sending the request to the {} API. Error description: {}\n",
+            "A server error ❌ has occurred sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else {
         println!(
-            "An error ❌ has occurred while procesing the request in the {} API. Error description: {}\n",
+            "An error ❌ has occurred while procesing the request in the {} API. Error description: {}",
             &api,
             &error.description()
         )
@@ -515,7 +515,7 @@ fn check_request_errors(error: reqwest::Error, api: &str) {
 }
 
 fn check_json_errors(error: reqwest::Error, api: &str) {
-    println!("An error ❌ has occurred while parsing the JSON obtained from the {} API. Error description: {}.\n", &api, error.description())
+    println!("An error ❌ has occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
 pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
@@ -609,9 +609,9 @@ fn get_resolver() -> Resolver {
 
 pub fn check_output_file_exists(file_name: &str) {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        println!("\nFile {} already exists, deleting it.", &file_name);
+        println!("File {} already exists, overwriting the file.", &file_name);
         match std::fs::remove_file(&file_name) {
-            Ok(_) => println!("Filename {} deleted.", &file_name),
+            Ok(_) => (),
             Err(e) => {
                 println!(
                     "A error as occurred while deleting the file {}. Error: {}.",
