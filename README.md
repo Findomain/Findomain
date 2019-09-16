@@ -55,7 +55,7 @@ APIs that we are using at the moment:
 - [Certspotter](https://api.certspotter.com/)
 - [Crt.sh](https://crt.sh)
 - [Virustotal](https://www.virustotal.com/ui/domains/)
-- [Sublit3r](https://api.sublist3r.com/)
+- [Sublist3r](https://api.sublist3r.com/)
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
 - [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
 - [Bufferover](http://dns.bufferover.run/)
