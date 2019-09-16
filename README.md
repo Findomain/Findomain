@@ -41,9 +41,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Discover subdomains with or without IP address according to user arguments.
 * Read target from user argument (-t) or file (-f).
 * Discover subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
-* Write output to TXT file.
-* Write output to CSV file.
-* Write output to JSON file.
+* Write results to an output file.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 
@@ -322,17 +320,17 @@ OPTIONS:
 
 `findomain -t example.com`
 
-3. Make a search of subdomains and export the data to a CSV file:
+3. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com):
 
-`findomain -t example.com -o csv`
+`findomain -t example.com -o
 
 4. Make a search of subdomains and resolve the IP address of subdomains (if possible):
 
 `findomain -t example.com -i`
 
-5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a CSV file:
+5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a output file (the output file name in it case is example.com):
 
-`findomain -t example.com -i -o csv`
+`findomain -t example.com -i -o
 
 6. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
 
@@ -340,7 +338,6 @@ OPTIONS:
 
 # TODO
 
-- [ ] Improve JSON output.
 - [ ] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
 
 # Issues and requests
