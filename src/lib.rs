@@ -609,7 +609,6 @@ fn get_resolver() -> Resolver {
 
 pub fn check_output_file_exists(file_name: &str) {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        println!("File {} already exists, overwriting the file.", &file_name);
         match std::fs::remove_file(&file_name) {
             Ok(_) => (),
             Err(e) => {
