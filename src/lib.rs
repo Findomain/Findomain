@@ -7,6 +7,7 @@ extern crate lazy_static;
 use postgres::{Connection, TlsMode};
 use rand::Rng;
 use std::{
+    collections::HashSet,
     error::Error,
     fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
@@ -18,12 +19,12 @@ use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver}
 
 mod auth;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsCertSpotter {
     dns_names: Vec<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsCrtsh {
     name_value: String,
 }
@@ -180,17 +181,32 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name:
         },
     ];
 
-    let all_subdomains_vec = all_subdomains
+    let subdomains = all_subdomains
         .into_iter()
         .map(|j| j.join().unwrap())
         .collect::<Vec<_>>();
 
+    //    let current_subdomains: HashSet<String> = subdomains
+    //       .iter()
+    //       .flatten()
+    //       .flat_map(|sub| sub)
+    //       .cloned()
+    //       .collect();
+
+    //   let existing_subdomains: HashSet<String> = [
+    //   database query here
+    //   ]
+    //   .into_iter()
+    //   .cloned()
+    //   .map(str::to_owned)
+    //   .collect();
+
+    //    let new_subdomains: HashSet<&String> = current_subdomains.difference(&existing_subdomains).into_iter().collect();
+    //
+    //    At it point we can push the new subdomains to slack hook.
+
     manage_subdomains_data(
-        all_subdomains_vec
-            .iter()
-            .flatten()
-            .flat_map(|sub| sub)
-            .collect(),
+        subdomains.iter().flatten().flat_map(|sub| sub).collect(),
         &target,
         &with_ip,
         &with_output,
@@ -210,29 +226,27 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name:
 }
 
 fn manage_subdomains_data(
-    mut vec_subdomains: Vec<&String>,
+    mut subdomains: HashSet<&String>,
     target: &str,
     with_ip: &str,
     with_output: &str,
     file_name: &str,
 ) {
     let base_target = [".", &target].concat();
-    if vec_subdomains.is_empty() {
+    if subdomains.is_empty() {
         println!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
             &target
         );
     } else {
         check_output_file_exists(&file_name);
-        vec_subdomains.sort();
-        vec_subdomains.dedup();
-        vec_subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
+        subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
         println!(
             "\nA total of {} subdomains were found for ==>  {} 👽\n",
-            &vec_subdomains.len(),
+            &subdomains.len(),
             &target
         );
-        for subdomain in vec_subdomains {
+        for subdomain in subdomains {
             if with_ip == "y" && with_output == "y" {
                 let ipadress = get_ip(&subdomain);
                 write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
@@ -252,10 +266,11 @@ fn manage_subdomains_data(
     }
 }
 
-fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<Vec<String>> {
+fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<HashSet<String>> {
     println!("Searching in the CertSpotter API... 🔍");
     match CLIENT.get(url_api_certspotter).send() {
-        Ok(mut data_certspotter) => match data_certspotter.json::<Vec<SubdomainsCertSpotter>>() {
+        Ok(mut data_certspotter) => match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>()
+        {
             Ok(domains_certspotter) => Some(
                 domains_certspotter
                     .into_iter()
@@ -274,10 +289,10 @@ fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<Vec<String>> 
     }
 }
 
-fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<Vec<String>> {
+fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<HashSet<String>> {
     println!("Searching in the Crtsh API... 🔍");
     match CLIENT.get(url_api_crtsh).send() {
-        Ok(mut data_crtsh) => match data_crtsh.json::<Vec<SubdomainsCrtsh>>() {
+        Ok(mut data_crtsh) => match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
             Ok(domains_crtsh) => Some(
                 domains_crtsh
                     .into_iter()
@@ -296,7 +311,7 @@ fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<Vec<String>> {
+fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<HashSet<String>> {
     println!("Searching in the Crtsh database... 🔍");
     match Connection::connect("postgres://guest@crt.sh:5432/certwatch", TlsMode::None) {
         Ok(crtsh_db_client) => match crtsh_db_client.query(&crtsh_db_query, &[]) {
@@ -329,7 +344,7 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
     }
 }
 
-fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<Vec<String>> {
+fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<HashSet<String>> {
     println!("Searching in the Virustotal API... 🔍");
     match CLIENT.get(url_api_virustotal).send() {
         Ok(mut data_virustotal) => match data_virustotal.json::<ResponseDataVirusTotal>() {
@@ -349,10 +364,10 @@ fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<Vec<String>> {
+fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<HashSet<String>> {
     println!("Searching in the Sublist3r API... 🔍");
     match CLIENT.get(url_api_sublist3r).send() {
-        Ok(mut data_sublist3r) => match data_sublist3r.json::<Vec<String>>() {
+        Ok(mut data_sublist3r) => match data_sublist3r.json::<HashSet<String>>() {
             Ok(domains_sublist3r) => Some(domains_sublist3r),
             Err(e) => {
                 check_json_errors(e, "Sublist3r");
@@ -366,7 +381,7 @@ fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_facebook_subdomains(url_api_fb: &str) -> Option<Vec<String>> {
+fn get_facebook_subdomains(url_api_fb: &str) -> Option<HashSet<String>> {
     println!("Searching in the Facebook API... 🔍");
     match CLIENT.get(url_api_fb).send() {
         Ok(mut data_fb) => match data_fb.json::<ResponseDataFacebook>() {
@@ -389,7 +404,7 @@ fn get_facebook_subdomains(url_api_fb: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_spyse_subdomains(url_api_spyse: &str) -> Option<Vec<String>> {
+fn get_spyse_subdomains(url_api_spyse: &str) -> Option<HashSet<String>> {
     println!("Searching in the Spyse API... 🔍");
     match CLIENT.get(url_api_spyse).send() {
         Ok(mut data_spyse) => match data_spyse.json::<ResponseDataSpyse>() {
@@ -409,7 +424,7 @@ fn get_spyse_subdomains(url_api_spyse: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<Vec<String>> {
+fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<HashSet<String>> {
     println!("Searching in the Bufferover API... 🔍");
     match CLIENT.get(url_api_bufferover).send() {
         Ok(mut data_bufferover) => match data_bufferover.json::<SubdomainsBufferover>() {
@@ -434,7 +449,7 @@ fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<Vec<String>> {
     }
 }
 
-fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<Vec<String>> {
+fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<HashSet<String>> {
     println!("Searching in the Threadcrowd API... 🔍");
     match CLIENT.get(url_api_threatcrowd).send() {
         Ok(mut data_threatcrowd) => match data_threatcrowd.json::<SubdomainsThreadcrowd>() {
@@ -457,7 +472,7 @@ fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<Vec<String>> 
     }
 }
 
-fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<Vec<String>> {
+fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<HashSet<String>> {
     println!("Searching in the Virustotal API using apikey... 🔍");
     match CLIENT.get(url_virustotal_apikey).send() {
         Ok(mut data_virustotal_apikey) => {
