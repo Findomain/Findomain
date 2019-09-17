@@ -34,50 +34,50 @@ struct SubdomainsDBCrtsh {
     NAME_VALUE: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsVirustotal {
     id: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq)]
 struct ResponseDataVirusTotal {
-    data: Vec<SubdomainsVirustotal>,
+    data: HashSet<SubdomainsVirustotal>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsFacebook {
     domains: Vec<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq)]
 struct ResponseDataFacebook {
-    data: Vec<SubdomainsFacebook>,
+    data: HashSet<SubdomainsFacebook>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsSpyse {
     domain: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Eq, PartialEq)]
 struct ResponseDataSpyse {
-    records: Vec<SubdomainsSpyse>,
+    records: HashSet<SubdomainsSpyse>,
 }
 
 #[derive(Deserialize)]
 #[allow(non_snake_case)]
 struct SubdomainsBufferover {
-    FDNS_A: Vec<String>,
+    FDNS_A: HashSet<String>,
 }
 
 #[derive(Deserialize)]
 struct SubdomainsThreadcrowd {
-    subdomains: Vec<String>,
+    subdomains: HashSet<String>,
 }
 
 #[derive(Deserialize)]
 struct SubdomainsVirustotalApikey {
-    subdomains: Vec<String>,
+    subdomains: HashSet<String>,
 }
 
 lazy_static! {
@@ -240,7 +240,7 @@ fn manage_subdomains_data(
         );
     } else {
         check_output_file_exists(&file_name);
-        subdomains.retain(|sub| !sub.contains("*.") && sub.contains(&base_target));
+        subdomains.retain(|sub| !sub.contains("*") && sub.contains(&base_target));
         println!(
             "\nA total of {} subdomains were found for ==>  {} 👽\n",
             &subdomains.len(),
