@@ -28,5 +28,5 @@ args:
     - output:
         short: o
         long: output
-        help: Set the flag to write to an output file. The name of the out file is the name of the target, for example if your target is example.com the output file name is example.com. It also applies when findomain read targets from a file.
+        help: Set the flag to write to an output file. The name of the output file will be the name of the target, for example if you execute `findomain -t example.com` the output file name is example.com. It also applies when findomain read targets from a file.
         takes_value: false
