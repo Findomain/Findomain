@@ -240,7 +240,9 @@ fn manage_subdomains_data(
         );
     } else {
         check_output_file_exists(&file_name);
-        subdomains.retain(|sub| !sub.contains("*") && sub.contains(&base_target));
+        subdomains.retain(|sub| {
+            !sub.contains("*") && !sub.starts_with(".") && sub.contains(&base_target)
+        });
         println!(
             "\nA total of {} subdomains were found for ==>  {} 👽\n",
             &subdomains.len(),
