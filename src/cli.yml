@@ -1,6 +1,6 @@
 name: findomain
-version: "0.2.7"
-author: Eduard Tolosa <tolosaeduard@gmail.com>
+version: "0.2.8"
+author: Eduard Tolosa <edu4rdshl@protonmail.com>
 settings:
     - ArgRequiredElseHelp
     - StrictUtf8

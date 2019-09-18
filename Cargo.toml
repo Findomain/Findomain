@@ -1,12 +1,12 @@
 [package]
 name = "findomain"
-version = "0.2.7"
-authors = ["Eduard Toloza <tolosaeduard@gmail.com>"]
+version = "0.2.8"
+authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
 repository = "https://github.com/edu4rdshl/findomain"
 license = "GPL-3.0-or-later"
-keywords = ["findomain", "subdomain-discover", "find-subdomains"]
+keywords = ["discover-subdomains" "certificate-transparency-logs" "search-subdomains" "subdomain-enumeration" "subdomain-scanner"]
 readme = "README.md"
 
 [dependencies]
@@ -18,7 +18,6 @@ clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.2"
 postgres = "0.15.2"
-# json = "0.11.14"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.24", features = ["vendored"] }
