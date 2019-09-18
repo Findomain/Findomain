@@ -74,14 +74,14 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 # Installation
 
-# Supported platforms in our binary releases
-
-All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform).
+We offer binarys ready to use for the following platforms (all are for 64 bits only):
 
 * [Linux](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-in-linux-using-compiled-artifacts)
 * [Windows](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-windows)
 * [MacOS](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-macos)
 * [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-aarch64-raspberry-pi)
+
+If you need to run Findomain in another platform, continue reading the documentation.
 
 # Build for 32 bits or another platform
 
