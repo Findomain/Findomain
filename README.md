@@ -72,6 +72,8 @@ APIs marked with `*` can *optionally* be used with an access token, create one i
 
 If you know other APIs that should be added, comment [here](https://github.com/Edu4rdSHL/findomain/issues/7).
 
+# Installation
+
 # Supported platforms in our binary releases
 
 All supported platforms in the binarys that we give are 64 bits only and we don't have plans to add support for 32 bits binary releases, if you want to have support for 32 bits follow the [documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform).
