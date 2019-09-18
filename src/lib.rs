@@ -630,7 +630,10 @@ fn get_resolver() -> Resolver {
 
 pub fn check_output_file_exists(file_name: &str) {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        match fs::rename(&file_name, [&file_name, ".old"].concat()) {
+        match fs::rename(
+            &file_name,
+            [&file_name.replace(".txt", ""), ".old.txt"].concat(),
+        ) {
             Ok(_) => (),
             Err(e) => {
                 println!(
