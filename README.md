@@ -41,7 +41,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Discover subdomains with or without IP address according to user arguments.
 * Read target from user argument (-t) or file (-f).
 * Discover subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
-* Write results to an TXT output file.
+* Write results to TXT output file(s).
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 
@@ -289,11 +289,11 @@ Put in the CMD command prompt:
 
 # Usage
 
-You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
+See `findomain -h/--help` to see all the options.
 
 ```
-findomain 0.2.5
-Eduard Tolosa <tolosaeduard@gmail.com>
+findomain 0.2.8
+Eduard Tolosa <edu4rdshl@protonmail.com>
 The fastest and cross-platform subdomain enumerator, don't waste your time.
 
 USAGE:
@@ -302,13 +302,16 @@ USAGE:
 FLAGS:
     -h, --help       Prints help information
     -i, --get-ip     Return the subdomain list with IP address if resolved.
+    -o, --output     Write to an output file. The name of the output file will be the target string with TXT format. For
+                     example if you execute `findomain -t example.com` the output file name is example.com.txt. It also
+                     applies when Findomain read targets from a file.
     -V, --version    Prints version information
 
 OPTIONS:
     -f, --file <file>        Sets the input file to use.
-    -o, --output <output>    Write data to output file in the specified format. [possible values: txt, csv, json]
     -t, --target <target>    Target host
 ```
+You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 # Examples
 
@@ -322,7 +325,7 @@ OPTIONS:
 
 3. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com.txt):
 
-`findomain -t example.com -o
+`findomain -t example.com -o`
 
 4. Make a search of subdomains and resolve the IP address of subdomains (if possible):
 
