@@ -30,7 +30,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
-|Findomain|real	0m6.299s|70582|Very Low|Very Low|
+|Findomain|real 0m6.299s|70582|Very Low|Very Low|
 
 **Summary:** 70582 subdomains in 6.3 seconds.
 
@@ -41,7 +41,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Discover subdomains with or without IP address according to user arguments.
 * Read target from user argument (-t) or file (-f).
 * Discover subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
-* Write results to an output file.
+* Write results to an TXT output file.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 
@@ -66,7 +66,7 @@ APIs that we are using at the moment:
 
 APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
 
-APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it. 
+APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
 
 **More APIs?**
 
@@ -320,7 +320,7 @@ OPTIONS:
 
 `findomain -t example.com`
 
-3. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com):
+3. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com.txt):
 
 `findomain -t example.com -o
 
@@ -328,7 +328,7 @@ OPTIONS:
 
 `findomain -t example.com -i`
 
-5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a output file (the output file name in it case is example.com):
+5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a output file (the output file name in it case is example.com.txt):
 
 `findomain -t example.com -i -o
 
