@@ -9,7 +9,7 @@ use rand::Rng;
 use std::{
     collections::HashSet,
     error::Error,
-    fs::{File, OpenOptions},
+    fs::{self, File, OpenOptions},
     io::{BufRead, BufReader, Write},
     path::Path,
     thread,
@@ -538,7 +538,7 @@ fn check_request_errors(error: reqwest::Error, api: &str) {
 }
 
 fn check_json_errors(error: reqwest::Error, api: &str) {
-    println!("An error ❌ has occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
+    println!("An error ❌ occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
 pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
@@ -621,9 +621,7 @@ fn get_resolver() -> Resolver {
             Err(_) => match Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()) {
                 Ok(cloudflare_resolver) => cloudflare_resolver,
                 Err(_) => {
-                    let defaul_resolver =
-                        Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-                    defaul_resolver
+                    Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
                 }
             },
         },
@@ -632,11 +630,11 @@ fn get_resolver() -> Resolver {
 
 pub fn check_output_file_exists(file_name: &str) {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        match std::fs::remove_file(&file_name) {
+        match fs::rename(&file_name, [&file_name, ".old"].concat()) {
             Ok(_) => (),
             Err(e) => {
                 println!(
-                    "A error as occurred while deleting the file {}. Error: {}.",
+                    "An error occurred while backing up the file {}. Error: {}.",
                     &file_name,
                     e.description(),
                 );
