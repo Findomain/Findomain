@@ -6,7 +6,7 @@ edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
 repository = "https://github.com/edu4rdshl/findomain"
 license = "GPL-3.0-or-later"
-keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "subdomain-enumeration", "subdomain-scanner"]
+keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
 
 [dependencies]
