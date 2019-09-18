@@ -10,7 +10,7 @@ fn main() {
     if matches.is_present("target") && matches.is_present("output") {
         let target = matches.value_of("target").unwrap().to_string();
         let with_output = "y";
-        let file_name = &target;
+        let file_name = [&target, ".txt"].concat();
         if matches.is_present("ip") {
             let with_ip = "y";
             get_subdomains(&target, &with_ip, &with_output, &file_name)

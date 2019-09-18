@@ -259,7 +259,7 @@ fn manage_subdomains_data(
                 let ipadress = get_ip(&subdomain);
                 println!("{},{}", &subdomain, &ipadress);
             }
-        } else if with_ip != "y" with_output == "y" {
+        } else if with_ip != "y" && with_output == "y" {
             let ipadress = "";
             for subdomain in subdomains {
                 write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
@@ -547,7 +547,7 @@ pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
             let f = BufReader::new(f);
             for domain in f.lines() {
                 let domain = domain.unwrap().to_string();
-                let file_name = &domain;
+                let file_name = [&domain, ".txt"].concat();
                 get_subdomains(&domain, &with_ip, &with_output, &file_name)
             }
         }
