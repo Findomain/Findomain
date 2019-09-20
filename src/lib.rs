@@ -243,11 +243,6 @@ fn manage_subdomains_data(
         subdomains.retain(|sub| {
             !sub.contains("*") && !sub.starts_with(".") && sub.contains(&base_target)
         });
-        println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽\n",
-            &subdomains.len(),
-            &target
-        );
         if with_ip == "y" && with_output == "y" {
             for subdomain in subdomains {
                 let ipadress = get_ip(&subdomain);
@@ -270,6 +265,11 @@ fn manage_subdomains_data(
                 println!("{}", &subdomain);
             }
         }
+        println!(
+            "\nA total of {} subdomains were found for ==>  {} 👽\n",
+            &subdomains.len(),
+            &target
+        );
         println!("\nGood luck Hax0r 💀!\n");
     }
 }
