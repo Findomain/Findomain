@@ -3,8 +3,9 @@ extern crate clap;
 use clap::App;
 
 use findomain::{get_subdomains, read_from_file};
+use findomain::errors::*;
 
-fn main() {
+fn run() -> Result<()> {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
     if matches.is_present("target") && matches.is_present("output") {
@@ -49,5 +50,17 @@ fn main() {
             let with_ip = "";
             read_from_file(&file, &with_ip, &with_output)
         }
+    } else {
+        Ok(())
+    }
+}
+
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("Error: {}", err);
+        for cause in err.iter_chain().skip(1) {
+            eprintln!("Because: {}", cause);
+        }
+        std::process::exit(1);
     }
 }

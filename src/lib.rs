@@ -18,6 +18,8 @@ use std::{
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
 mod auth;
+pub mod errors;
+use crate::errors::*;
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsCertSpotter {
@@ -87,7 +89,7 @@ lazy_static! {
         .unwrap();
 }
 
-pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name: &str) {
+pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name: &str) -> Result<()> {
     let target = target
         .replace("www.", "")
         .replace("https://", "")
@@ -211,7 +213,7 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name:
         &with_ip,
         &with_output,
         &file_name,
-    );
+    )?;
     if with_ip == "y" && with_output == "y" {
         println!(
             ">> 📁 Filename for the target {} was saved in: ./{} 😀",
@@ -223,6 +225,7 @@ pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name:
             &target, &file_name
         )
     }
+    Ok(())
 }
 
 fn manage_subdomains_data(
@@ -231,7 +234,7 @@ fn manage_subdomains_data(
     with_ip: &str,
     with_output: &str,
     file_name: &str,
-) {
+) -> Result<()> {
     let base_target = [".", &target].concat();
     if subdomains.is_empty() {
         println!(
@@ -239,14 +242,14 @@ fn manage_subdomains_data(
             &target
         );
     } else {
-        check_output_file_exists(&file_name);
+        check_output_file_exists(&file_name)?;
         subdomains.retain(|sub| {
             !sub.contains("*") && !sub.starts_with(".") && sub.contains(&base_target)
         });
         if with_ip == "y" && with_output == "y" {
             for subdomain in &subdomains {
                 let ipadress = get_ip(&subdomain);
-                write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
+                write_to_file(&subdomain, &ipadress, &file_name, &with_ip)?;
                 println!("{},{}", &subdomain, &ipadress);
             }
         } else if with_ip == "y" && with_output != "y" {
@@ -257,7 +260,7 @@ fn manage_subdomains_data(
         } else if with_ip != "y" && with_output == "y" {
             let ipadress = "";
             for subdomain in &subdomains {
-                write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
+                write_to_file(&subdomain, &ipadress, &file_name, &with_ip)?;
                 println!("{}", &subdomain);
             }
         } else {
@@ -272,6 +275,8 @@ fn manage_subdomains_data(
         );
         println!("\nGood luck Hax0r 💀!\n");
     }
+
+    Ok(())
 }
 
 fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<HashSet<String>> {
@@ -541,64 +546,37 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("An error ❌ occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
-pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) {
+pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) -> Result<()> {
     match File::open(&file) {
         Ok(f) => {
             let f = BufReader::new(f);
             for domain in f.lines() {
                 let domain = domain.unwrap().to_string();
                 let file_name = [&domain, ".txt"].concat();
-                get_subdomains(&domain, &with_ip, &with_output, &file_name)
+                get_subdomains(&domain, &with_ip, &with_output, &file_name)?;
             }
         }
         Err(e) => {
             println!("Can't open file 📁 {}. Error: {}", &file, e.description());
         }
     }
+    Ok(())
 }
 
-fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str) {
-    if with_ip == "y" {
-        let data = &[data, ",", subdomain_ip, "\n"].concat();
-        if Path::new(&file_name).exists() {
-            let mut output_file = OpenOptions::new()
-                .append(true)
-                .open(&file_name)
-                .expect("Can't open file.");
-            output_file
-                .write_all(&data.as_bytes())
-                .expect("Failed writing to file.");
-        } else {
-            File::create(&file_name).expect("Failed to create file.");
-            let mut output_file = OpenOptions::new()
-                .append(true)
-                .open(&file_name)
-                .expect("Can't open file.");
-            output_file
-                .write_all(&data.as_bytes())
-                .expect("Failed writing to file.");
-        }
+fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str) -> Result<()> {
+    let data = if with_ip == "y" {
+        [data, ",", subdomain_ip, "\n"].concat()
     } else {
-        let data = &[data, "\n"].concat();
-        if Path::new(&file_name).exists() {
-            let mut output_file = OpenOptions::new()
-                .append(true)
-                .open(&file_name)
-                .expect("Can't open file.");
-            output_file
-                .write_all(&data.as_bytes())
-                .expect("Failed writing to file.");
-        } else {
-            File::create(&file_name).expect("Failed to create file.");
-            let mut output_file = OpenOptions::new()
-                .append(true)
-                .open(&file_name)
-                .expect("Can't open file.");
-            output_file
-                .write_all(&data.as_bytes())
-                .expect("Failed writing to file.");
-        }
-    }
+        [data, "\n"].concat()
+    };
+    let mut output_file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(&file_name)
+        .context("Can't open file")?;
+    output_file
+        .write_all(&data.as_bytes())?;
+    Ok(())
 }
 
 fn get_ip(domain: &str) -> String {
@@ -628,21 +606,12 @@ fn get_resolver() -> Resolver {
     }
 }
 
-pub fn check_output_file_exists(file_name: &str) {
+pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        match fs::rename(
+        fs::rename(
             &file_name,
             &file_name.replace(&file_name.split(".").last().unwrap(), "old.txt"),
-        ) {
-            Ok(_) => (),
-            Err(e) => {
-                println!(
-                    "An error occurred while backing up the file {}. Error: {}.",
-                    &file_name,
-                    e.description(),
-                );
-                std::process::exit(1)
-            }
-        }
+        ).with_context(|_| format!("An error occurred while backing up the file {:?}", &file_name))?;
     }
+    Ok(())
 }
