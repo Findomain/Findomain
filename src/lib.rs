@@ -244,24 +244,24 @@ fn manage_subdomains_data(
             !sub.contains("*") && !sub.starts_with(".") && sub.contains(&base_target)
         });
         if with_ip == "y" && with_output == "y" {
-            for subdomain in subdomains {
+            for subdomain in &subdomains {
                 let ipadress = get_ip(&subdomain);
                 write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
                 println!("{},{}", &subdomain, &ipadress);
             }
         } else if with_ip == "y" && with_output != "y" {
-            for subdomain in subdomains {
+            for subdomain in &subdomains {
                 let ipadress = get_ip(&subdomain);
                 println!("{},{}", &subdomain, &ipadress);
             }
         } else if with_ip != "y" && with_output == "y" {
             let ipadress = "";
-            for subdomain in subdomains {
+            for subdomain in &subdomains {
                 write_to_file(&subdomain, &ipadress, &file_name, &with_ip);
                 println!("{}", &subdomain);
             }
         } else {
-            for subdomain in subdomains {
+            for subdomain in &subdomains {
                 println!("{}", &subdomain);
             }
         }
