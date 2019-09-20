@@ -2,8 +2,8 @@
 extern crate clap;
 use clap::App;
 
-use findomain::{get_subdomains, read_from_file};
 use findomain::errors::*;
+use findomain::{get_subdomains, read_from_file};
 
 fn run() -> Result<()> {
     let yaml = load_yaml!("cli.yml");
@@ -57,9 +57,9 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(err) = run() {
-        eprintln!("Error: {}", err);
+        eprintln!("\nError: {}", err);
         for cause in err.iter_chain().skip(1) {
-            eprintln!("Because: {}", cause);
+            eprintln!("Error description: {}", cause);
         }
         std::process::exit(1);
     }

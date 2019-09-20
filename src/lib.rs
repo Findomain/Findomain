@@ -89,7 +89,12 @@ lazy_static! {
         .unwrap();
 }
 
-pub fn get_subdomains(target: &str, with_ip: &str, with_output: &str, file_name: &str) -> Result<()> {
+pub fn get_subdomains(
+    target: &str,
+    with_ip: &str,
+    with_output: &str,
+    file_name: &str,
+) -> Result<()> {
     let target = target
         .replace("www.", "")
         .replace("https://", "")
@@ -269,7 +274,7 @@ fn manage_subdomains_data(
             }
         }
         println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽\n",
+            "\nA total of {} subdomains were found for ==>  {} 👽",
             &subdomains.len(),
             &target
         );
@@ -341,7 +346,7 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
             ),
             Err(e) => {
                 println!(
-                    "A error ❌ has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
+                    "❌ A error has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
                     e.description()
                 );
                 get_crtsh_subdomains(&url_api_crtsh)
@@ -349,7 +354,7 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
         },
         Err(e) => {
             println!(
-                "A error ❌ has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
+                "❌ A error has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
                 e.description()
             );
             get_crtsh_subdomains(&url_api_crtsh)
@@ -513,29 +518,29 @@ fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<HashS
 fn check_request_errors(error: reqwest::Error, api: &str) {
     if error.is_timeout() {
         println!(
-            "A timeout ⏳ error has occurred while processing the request in the {} API. Error description: {}",
+            "⏳ A timeout error has occurred while processing the request in the {} API. Error description: {}",
             &api, &error.description())
     } else if error.is_redirect() {
         println!(
-            "A redirect ↪️  was found while processing the {} API. Error description: {}",
+            "❌ A redirect was found while processing the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_client_error() {
         println!(
-            "A client error 🧑❌ has occurred sending the request to the {} API. Error description: {}",
+            "❌ A client error has occurred sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else if error.is_server_error() {
         println!(
-            "A server error ❌ has occurred sending the request to the {} API. Error description: {}",
+            "❌ A server error has occurred sending the request to the {} API. Error description: {}",
             &api,
             &error.description()
         )
     } else {
         println!(
-            "An error ❌ has occurred while procesing the request in the {} API. Error description: {}",
+            "❌ An error has occurred while procesing the request in the {} API. Error description: {}",
             &api,
             &error.description()
         )
@@ -543,7 +548,7 @@ fn check_request_errors(error: reqwest::Error, api: &str) {
 }
 
 fn check_json_errors(error: reqwest::Error, api: &str) {
-    println!("An error ❌ occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
+    println!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
 pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) -> Result<()> {
@@ -573,9 +578,8 @@ fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str)
         .append(true)
         .create(true)
         .open(&file_name)
-        .context("Can't open file")?;
-    output_file
-        .write_all(&data.as_bytes())?;
+        .with_context(|_| format!("Can't open file: {}", &file_name))?;
+    output_file.write_all(&data.as_bytes())?;
     Ok(())
 }
 
@@ -608,10 +612,13 @@ fn get_resolver() -> Resolver {
 
 pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        fs::rename(
-            &file_name,
-            &file_name.replace(&file_name.split(".").last().unwrap(), "old.txt"),
-        ).with_context(|_| format!("An error occurred while backing up the file {:?}", &file_name))?;
+        let backup_file_name = file_name.replace(&file_name.split(".").last().unwrap(), "old.txt");
+        fs::rename(&file_name, &backup_file_name).with_context(|_| {
+            format!(
+                "The file {} already exists but Findomain can't backup the file to {}. Please run the tool with a more privileged user or try in a different directory.",
+                &file_name, &backup_file_name,
+            )
+        })?;
     }
     Ok(())
 }
