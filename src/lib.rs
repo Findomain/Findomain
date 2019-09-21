@@ -249,7 +249,7 @@ fn manage_subdomains_data(
     } else {
         check_output_file_exists(&file_name)?;
         subdomains.retain(|sub| {
-            !sub.contains("*") && !sub.starts_with(".") && sub.contains(&base_target)
+            !sub.contains("*") && !sub.starts_with(".") && sub.ends_with(&base_target)
         });
         if with_ip == "y" && with_output == "y" {
             for subdomain in &subdomains {
@@ -622,3 +622,5 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     }
     Ok(())
 }
+
+//fn wildcard_detection(domains: Vec<String>)
