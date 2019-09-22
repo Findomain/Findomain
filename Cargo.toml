@@ -18,7 +18,7 @@ clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.2"
 postgres = "0.15.2"
-failure = "0.1"
+failure = "0.1.5"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.24", features = ["vendored"] }
