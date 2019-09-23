@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate serde_derive;
+use serde::de::DeserializeOwned;
 
 #[macro_use]
 extern crate lazy_static;
@@ -20,6 +21,17 @@ use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver}
 mod auth;
 pub mod errors;
 use crate::errors::*;
+
+trait IntoSubdomains {
+    fn into_subdomains(self) -> HashSet<String>;
+}
+
+impl IntoSubdomains for HashSet<String> {
+    #[inline]
+    fn into_subdomains(self) -> HashSet<String> {
+        self
+    }
+}
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsCertSpotter {
@@ -46,6 +58,15 @@ struct ResponseDataVirusTotal {
     data: HashSet<SubdomainsVirustotal>,
 }
 
+impl IntoSubdomains for ResponseDataVirusTotal {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.data
+            .into_iter()
+            .map(|sub| sub.id)
+            .collect()
+    }
+}
+
 #[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsFacebook {
     domains: Vec<String>,
@@ -54,6 +75,15 @@ struct SubdomainsFacebook {
 #[derive(Deserialize, Eq, PartialEq)]
 struct ResponseDataFacebook {
     data: HashSet<SubdomainsFacebook>,
+}
+
+impl IntoSubdomains for ResponseDataFacebook {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.data
+            .into_iter()
+            .flat_map(|sub| sub.domains.into_iter())
+            .collect()
+    }
 }
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
@@ -66,10 +96,30 @@ struct ResponseDataSpyse {
     records: HashSet<SubdomainsSpyse>,
 }
 
+impl IntoSubdomains for ResponseDataSpyse {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.records
+            .into_iter()
+            .map(|sub| sub.domain)
+            .collect()
+    }
+}
+
 #[derive(Deserialize)]
 #[allow(non_snake_case)]
 struct SubdomainsBufferover {
     FDNS_A: HashSet<String>,
+}
+
+impl IntoSubdomains for SubdomainsBufferover {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.FDNS_A
+            .iter()
+            .map(|sub| sub.split(','))
+            .flatten()
+            .map(str::to_owned)
+            .collect()
+    }
 }
 
 #[derive(Deserialize)]
@@ -77,9 +127,25 @@ struct SubdomainsThreadcrowd {
     subdomains: HashSet<String>,
 }
 
+impl IntoSubdomains for SubdomainsThreadcrowd {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.subdomains
+            .into_iter()
+            .collect()
+    }
+}
+
 #[derive(Deserialize)]
 struct SubdomainsVirustotalApikey {
     subdomains: HashSet<String>,
+}
+
+impl IntoSubdomains for SubdomainsVirustotalApikey {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.subdomains
+            .into_iter()
+            .collect()
+    }
 }
 
 lazy_static! {
@@ -219,12 +285,7 @@ pub fn get_subdomains(
         &with_output,
         &file_name,
     )?;
-    if with_ip == "y" && with_output == "y" {
-        println!(
-            ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-            &target, &file_name
-        )
-    } else if with_output == "y" {
+    if with_output == "y" {
         println!(
             ">> 📁 Filename for the target {} was saved in: ./{} 😀",
             &target, &file_name
@@ -249,7 +310,7 @@ fn manage_subdomains_data(
     } else {
         check_output_file_exists(&file_name)?;
         subdomains.retain(|sub| {
-            !sub.contains("*") && !sub.starts_with(".") && sub.ends_with(&base_target)
+            !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target)
         });
         if with_ip == "y" && with_output == "y" {
             for subdomain in &subdomains {
@@ -362,157 +423,55 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
     }
 }
 
-fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Virustotal API... 🔍");
-    match CLIENT.get(url_api_virustotal).send() {
-        Ok(mut data_virustotal) => match data_virustotal.json::<ResponseDataVirusTotal>() {
-            Ok(virustotal_json) => {
-                let domains_virustotal = virustotal_json.data;
-                Some(domains_virustotal.into_iter().map(|sub| sub.id).collect())
-            }
+fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(url: &str, name: &str) -> Option<HashSet<String>> {
+    match CLIENT.get(url).send() {
+        Ok(mut data) => match data.json::<T>() {
+            Ok(json) => Some(json.into_subdomains()),
             Err(e) => {
-                check_json_errors(e, "Virustotal");
+                check_json_errors(e, name);
                 None
             }
         },
         Err(e) => {
-            check_request_errors(e, "Virustotal");
+            check_request_errors(e, name);
             None
         }
     }
+}
+
+fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<HashSet<String>> {
+    println!("Searching in the Virustotal API... 🔍");
+    get_from_http_api::<ResponseDataVirusTotal>(url_api_virustotal, "Virustotal")
 }
 
 fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<HashSet<String>> {
     println!("Searching in the Sublist3r API... 🔍");
-    match CLIENT.get(url_api_sublist3r).send() {
-        Ok(mut data_sublist3r) => match data_sublist3r.json::<HashSet<String>>() {
-            Ok(domains_sublist3r) => Some(domains_sublist3r),
-            Err(e) => {
-                check_json_errors(e, "Sublist3r");
-                None
-            }
-        },
-        Err(e) => {
-            check_request_errors(e, "Sublist3r");
-            None
-        }
-    }
+    get_from_http_api::<HashSet<String>>(url_api_sublist3r, "Sublist3r")
 }
 
 fn get_facebook_subdomains(url_api_fb: &str) -> Option<HashSet<String>> {
     println!("Searching in the Facebook API... 🔍");
-    match CLIENT.get(url_api_fb).send() {
-        Ok(mut data_fb) => match data_fb.json::<ResponseDataFacebook>() {
-            Ok(fb_json) => Some(
-                fb_json
-                    .data
-                    .into_iter()
-                    .flat_map(|sub| sub.domains.into_iter())
-                    .collect(),
-            ),
-            Err(e) => {
-                check_json_errors(e, "Facebook");
-                None
-            }
-        },
-        Err(e) => {
-            check_request_errors(e, "Facebook");
-            None
-        }
-    }
+    get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook")
 }
 
 fn get_spyse_subdomains(url_api_spyse: &str) -> Option<HashSet<String>> {
     println!("Searching in the Spyse API... 🔍");
-    match CLIENT.get(url_api_spyse).send() {
-        Ok(mut data_spyse) => match data_spyse.json::<ResponseDataSpyse>() {
-            Ok(spyse_json) => {
-                let domains_spyse = spyse_json.records;
-                Some(domains_spyse.into_iter().map(|sub| sub.domain).collect())
-            }
-            Err(e) => {
-                check_json_errors(e, "Spyse");
-                None
-            }
-        },
-        Err(e) => {
-            check_request_errors(e, "Spyse");
-            None
-        }
-    }
+    get_from_http_api::<ResponseDataSpyse>(url_api_spyse, "Spyse")
 }
 
 fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<HashSet<String>> {
     println!("Searching in the Bufferover API... 🔍");
-    match CLIENT.get(url_api_bufferover).send() {
-        Ok(mut data_bufferover) => match data_bufferover.json::<SubdomainsBufferover>() {
-            Ok(bufferover_json) => Some(
-                bufferover_json
-                    .FDNS_A
-                    .iter()
-                    .map(|sub| sub.split(","))
-                    .flatten()
-                    .map(str::to_owned)
-                    .collect(),
-            ),
-            Err(e) => {
-                check_json_errors(e, "Bufferover");
-                None
-            }
-        },
-        Err(e) => {
-            check_request_errors(e, "Bufferover");
-            None
-        }
-    }
+    get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover")
 }
 
 fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<HashSet<String>> {
     println!("Searching in the Threadcrowd API... 🔍");
-    match CLIENT.get(url_api_threatcrowd).send() {
-        Ok(mut data_threatcrowd) => match data_threatcrowd.json::<SubdomainsThreadcrowd>() {
-            Ok(threatcrowd_json) => Some(
-                threatcrowd_json
-                    .subdomains
-                    .into_iter()
-                    .map(|sub| sub)
-                    .collect(),
-            ),
-            Err(e) => {
-                check_json_errors(e, "Threadcrowd");
-                None
-            }
-        },
-        Err(e) => {
-            check_request_errors(e, "Threadcrowd");
-            None
-        }
-    }
+    get_from_http_api::<SubdomainsThreadcrowd>(url_api_threatcrowd, "Threadcrowd")
 }
 
 fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<HashSet<String>> {
     println!("Searching in the Virustotal API using apikey... 🔍");
-    match CLIENT.get(url_virustotal_apikey).send() {
-        Ok(mut data_virustotal_apikey) => {
-            match data_virustotal_apikey.json::<SubdomainsVirustotalApikey>() {
-                Ok(virustotal_apikey_json) => Some(
-                    virustotal_apikey_json
-                        .subdomains
-                        .into_iter()
-                        .map(|sub| sub)
-                        .collect(),
-                ),
-                Err(e) => {
-                    check_json_errors(e, "Virustotal API using apikey");
-                    None
-                }
-            }
-        }
-        Err(e) => {
-            check_request_errors(e, "Virustotal API using apikey");
-            None
-        }
-    }
+    get_from_http_api::<SubdomainsVirustotalApikey>(url_virustotal_apikey, "Virustotal API using apikey")
 }
 
 fn check_request_errors(error: reqwest::Error, api: &str) {
@@ -552,19 +511,16 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
 }
 
 pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) -> Result<()> {
-    match File::open(&file) {
-        Ok(f) => {
-            let f = BufReader::new(f);
-            for domain in f.lines() {
-                let domain = domain.unwrap().to_string();
-                let file_name = [&domain, ".txt"].concat();
-                get_subdomains(&domain, &with_ip, &with_output, &file_name)?;
-            }
-        }
-        Err(e) => {
-            println!("Can't open file 📁 {}. Error: {}", &file, e.description());
-        }
+    let f = File::open(&file)
+        .with_context(|_| format!("Can't open file 📁 {}", &file))?;
+
+    let f = BufReader::new(f);
+    for domain in f.lines() {
+        let domain = domain?.to_string();
+        let file_name = [&domain, ".txt"].concat();
+        get_subdomains(&domain, &with_ip, &with_output, &file_name)?;
     }
+
     Ok(())
 }
 
@@ -578,7 +534,7 @@ fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str)
         .append(true)
         .create(true)
         .open(&file_name)
-        .with_context(|_| format!("Can't open file: {}", &file_name))?;
+        .with_context(|_| format!("Can't create file 📁 {}", &file_name))?;
     output_file.write_all(&data.as_bytes())?;
     Ok(())
 }
@@ -596,23 +552,20 @@ fn get_ip(domain: &str) -> String {
 }
 
 fn get_resolver() -> Resolver {
-    match Resolver::from_system_conf() {
-        Ok(system_resolver) => system_resolver,
-        Err(_) => match Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()) {
-            Ok(quad9_resolver) => quad9_resolver,
-            Err(_) => match Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()) {
-                Ok(cloudflare_resolver) => cloudflare_resolver,
-                Err(_) => {
-                    Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
-                }
-            },
-        },
+    if let Ok(system_resolver) = Resolver::from_system_conf() {
+        system_resolver
+    } else if let Ok(quad9_resolver) = Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()) {
+        quad9_resolver
+    } else if let Ok(cloudflare_resolver) = Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()) {
+        cloudflare_resolver
+    } else {
+        Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
     }
 }
 
 pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        let backup_file_name = file_name.replace(&file_name.split(".").last().unwrap(), "old.txt");
+        let backup_file_name = file_name.replace(&file_name.split('.').last().unwrap(), "old.txt");
         fs::rename(&file_name, &backup_file_name).with_context(|_| {
             format!(
                 "The file {} already exists but Findomain can't backup the file to {}. Please run the tool with a more privileged user or try in a different directory.",
@@ -622,5 +575,3 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     }
     Ok(())
 }
-
-//fn wildcard_detection(domains: Vec<String>)
