@@ -562,7 +562,7 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
         .create(true)
         .open(&file_name)
         .with_context(|_| format!("Can't create file 📁 {}", &file_name))?;
-    output_file.write_all(&data.as_bytes())?;
+    output_file.write_all(&[data, "\n"].concat().as_bytes())?;
     Ok(())
 }
 
