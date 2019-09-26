@@ -60,10 +60,7 @@ struct ResponseDataVirusTotal {
 
 impl IntoSubdomains for ResponseDataVirusTotal {
     fn into_subdomains(self) -> HashSet<String> {
-        self.data
-            .into_iter()
-            .map(|sub| sub.id)
-            .collect()
+        self.data.into_iter().map(|sub| sub.id).collect()
     }
 }
 
@@ -98,10 +95,7 @@ struct ResponseDataSpyse {
 
 impl IntoSubdomains for ResponseDataSpyse {
     fn into_subdomains(self) -> HashSet<String> {
-        self.records
-            .into_iter()
-            .map(|sub| sub.domain)
-            .collect()
+        self.records.into_iter().map(|sub| sub.domain).collect()
     }
 }
 
@@ -129,9 +123,7 @@ struct SubdomainsThreadcrowd {
 
 impl IntoSubdomains for SubdomainsThreadcrowd {
     fn into_subdomains(self) -> HashSet<String> {
-        self.subdomains
-            .into_iter()
-            .collect()
+        self.subdomains.into_iter().collect()
     }
 }
 
@@ -142,9 +134,7 @@ struct SubdomainsVirustotalApikey {
 
 impl IntoSubdomains for SubdomainsVirustotalApikey {
     fn into_subdomains(self) -> HashSet<String> {
-        self.subdomains
-            .into_iter()
-            .collect()
+        self.subdomains.into_iter().collect()
     }
 }
 
@@ -160,6 +150,7 @@ pub fn get_subdomains(
     with_ip: &str,
     with_output: &str,
     file_name: &str,
+    unique_output_flag: &str,
 ) -> Result<()> {
     let target = target
         .replace("www.", "")
@@ -277,14 +268,24 @@ pub fn get_subdomains(
     //    let new_subdomains: HashSet<&String> = current_subdomains.difference(&existing_subdomains).into_iter().collect();
     //
     //    At it point we can push the new subdomains to slack hook.
-
-    manage_subdomains_data(
-        subdomains.iter().flatten().flat_map(|sub| sub).collect(),
-        &target,
-        &with_ip,
-        &with_output,
-        &file_name,
-    )?;
+    if unique_output_flag == "y" {
+        manage_subdomains_data(
+            subdomains.iter().flatten().flat_map(|sub| sub).collect(),
+            &target,
+            &with_ip,
+            &with_output,
+            &file_name,
+        )?;
+    } else {
+        check_output_file_exists(&file_name)?;
+        manage_subdomains_data(
+            subdomains.iter().flatten().flat_map(|sub| sub).collect(),
+            &target,
+            &with_ip,
+            &with_output,
+            &file_name,
+        )?;
+    }
     if with_output == "y" {
         println!(
             ">> 📁 Filename for the target {} was saved in: ./{} 😀",
@@ -308,7 +309,6 @@ fn manage_subdomains_data(
             &target
         );
     } else {
-        check_output_file_exists(&file_name)?;
         subdomains.retain(|sub| {
             !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target)
         });
@@ -423,7 +423,10 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
     }
 }
 
-fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(url: &str, name: &str) -> Option<HashSet<String>> {
+fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
+    url: &str,
+    name: &str,
+) -> Option<HashSet<String>> {
     match CLIENT.get(url).send() {
         Ok(mut data) => match data.json::<T>() {
             Ok(json) => Some(json.into_subdomains()),
@@ -471,7 +474,10 @@ fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<HashSet<Strin
 
 fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<HashSet<String>> {
     println!("Searching in the Virustotal API using apikey... 🔍");
-    get_from_http_api::<SubdomainsVirustotalApikey>(url_virustotal_apikey, "Virustotal API using apikey")
+    get_from_http_api::<SubdomainsVirustotalApikey>(
+        url_virustotal_apikey,
+        "Virustotal API using apikey",
+    )
 }
 
 fn check_request_errors(error: reqwest::Error, api: &str) {
@@ -510,15 +516,30 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
-pub fn read_from_file(file: &str, with_ip: &str, with_output: &str) -> Result<()> {
-    let f = File::open(&file)
-        .with_context(|_| format!("Can't open file 📁 {}", &file))?;
+pub fn read_from_file(
+    file: &str,
+    with_ip: &str,
+    with_output: &str,
+    file_name: &str,
+    unique_output_flag: &str,
+) -> Result<()> {
+    let f = File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
 
     let f = BufReader::new(f);
     for domain in f.lines() {
         let domain = domain?.to_string();
-        let file_name = [&domain, ".txt"].concat();
-        get_subdomains(&domain, &with_ip, &with_output, &file_name)?;
+        let file_name = if file_name.is_empty() {
+            [&domain, ".txt"].concat()
+        } else {
+            String::from(file_name)
+        };
+        get_subdomains(
+            &domain,
+            &with_ip,
+            &with_output,
+            &file_name,
+            &unique_output_flag,
+        )?;
     }
 
     Ok(())
@@ -554,9 +575,13 @@ fn get_ip(domain: &str) -> String {
 fn get_resolver() -> Resolver {
     if let Ok(system_resolver) = Resolver::from_system_conf() {
         system_resolver
-    } else if let Ok(quad9_resolver) = Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()) {
+    } else if let Ok(quad9_resolver) =
+        Resolver::new(ResolverConfig::quad9(), ResolverOpts::default())
+    {
         quad9_resolver
-    } else if let Ok(cloudflare_resolver) = Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()) {
+    } else if let Ok(cloudflare_resolver) =
+        Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default())
+    {
         cloudflare_resolver
     } else {
         Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()

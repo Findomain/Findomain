@@ -9,24 +9,38 @@ args:
     - target:
         short: t
         long: target
-        help: Target host
+        help: Target host.
         takes_value: true
+        multiple: false
         conflicts_with:
           - file
+
     - ip:
         short: i
         long: get-ip
         help: Return the subdomain list with IP address if resolved.
         takes_value: false
+
     - file:
         short: f
         long: file
         help: Sets the input file to use.
         takes_value: true
+        multiple: false
         conflicts_with:
           - target
+
     - output:
         short: o
         long: output
-        help: Write to an output file. The name of the output file will be the target string with TXT format. For example if you execute 'findomain -t example.com' the output file name is example.com.txt. It also applies when Findomain read targets from a file.
+        help: Write to an output file. The name of the output file will be the target string with TXT format.
         takes_value: false
+
+    - unique-output:
+        short: u
+        long: unique-output
+        help: Write all the results for a target or a list of targets to a specified filename.
+        takes_value: true
+        multiple: false
+        conflicts_with:
+          - output
