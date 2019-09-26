@@ -568,10 +568,7 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
 
 fn get_ip(domain: &str) -> bool {
     let resolver = get_resolver();
-    match resolver.lookup_ip(&domain) {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    resolver.lookup_ip(&domain).is_ok()
 }
 
 fn get_resolver() -> Resolver {
