@@ -38,10 +38,10 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 * Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
-* Discover subdomains with or without IP address according to user arguments.
+* Discover only resolved subdomains.
 * Read target from user argument (-t) or file (-f).
-* Discover subdomains with or without IP and also write to output files per-domain if specified by the user, recursively.
-* Write results to TXT output file(s).
+* Write to one unique output file specified by the user all or only resolved subdomains.
+* Write results to automatically named TXT output file(s).
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 
@@ -294,7 +294,7 @@ Put in the CMD command prompt:
 See `findomain -h/--help` to see all the options.
 
 ```
-findomain 0.2.8
+findomain 0.3.0
 Eduard Tolosa <edu4rdshl@protonmail.com>
 The fastest and cross-platform subdomain enumerator, don't waste your time.
 
@@ -302,16 +302,16 @@ USAGE:
     findomain [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help       Prints help information
-    -i, --get-ip     Return the subdomain list with IP address if resolved.
-    -o, --output     Write to an output file. The name of the output file will be the target string with TXT format. For
-                     example if you execute `findomain -t example.com` the output file name is example.com.txt. It also
-                     applies when Findomain read targets from a file.
-    -V, --version    Prints version information
+    -h, --help        Prints help information
+    -o, --output      Write to an output file. The name of the output file will be the target string with TXT format.
+    -r, --resolved    Show/write only resolved subdomains.
+    -V, --version     Prints version information
 
 OPTIONS:
-    -f, --file <file>        Sets the input file to use.
-    -t, --target <target>    Target host
+    -f, --file <file>                      Sets the input file to use.
+    -t, --target <target>                  Target host.
+    -u, --unique-output <unique-output>    Write all the results for a target or a list of targets to a specified
+                                           filename.
 ```
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
@@ -329,17 +329,25 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 
 `findomain -t example.com -o`
 
-4. Make a search of subdomains and resolve the IP address of subdomains (if possible):
+4. Make a search of subdomains and export the data to a custom output file name:
 
-`findomain -t example.com -i`
+`findomain -t example.com -u example.txt`
 
-5. Make a search of subdomains and resolve the IP address of subdomains (if possible), exporting the data to a output file (the output file name in it case is example.com.txt):
+5. Make a search of only resolvable subdomains:
 
-`findomain -t example.com -i -o
+`findomain -t example.com -r`
 
-6. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
+6. Make a search of only resolvable subdomains, exporting the data to a custom output file.
+
+`findomain -t example.com -r -u example.txt`
+
+7. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
 
 `findomain -f file_with_domains.txt`
+
+8. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file) and save all the resolved domains into a custom file name:
+
+`findomain -f file_with_domains.txt -r -u multiple_domains.txt`
 
 # TODO
 
