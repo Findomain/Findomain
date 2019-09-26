@@ -147,7 +147,7 @@ lazy_static! {
 
 pub fn get_subdomains(
     target: &str,
-    with_ip: &str,
+    only_resolved: &str,
     with_output: &str,
     file_name: &str,
     unique_output_flag: &str,
@@ -272,7 +272,7 @@ pub fn get_subdomains(
         manage_subdomains_data(
             subdomains.iter().flatten().flat_map(|sub| sub).collect(),
             &target,
-            &with_ip,
+            &only_resolved,
             &with_output,
             &file_name,
         )?;
@@ -281,7 +281,7 @@ pub fn get_subdomains(
         manage_subdomains_data(
             subdomains.iter().flatten().flat_map(|sub| sub).collect(),
             &target,
-            &with_ip,
+            &only_resolved,
             &with_output,
             &file_name,
         )?;
@@ -298,7 +298,7 @@ pub fn get_subdomains(
 fn manage_subdomains_data(
     mut subdomains: HashSet<&String>,
     target: &str,
-    with_ip: &str,
+    only_resolved: &str,
     with_output: &str,
     file_name: &str,
 ) -> Result<()> {
@@ -309,40 +309,51 @@ fn manage_subdomains_data(
             &target
         );
     } else {
+        println!();
         subdomains.retain(|sub| {
             !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target)
         });
-        if with_ip == "y" && with_output == "y" {
+        let mut subdomains_resolved = 0;
+        if only_resolved == "y" && with_output == "y" {
             for subdomain in &subdomains {
-                let ipadress = get_ip(&subdomain);
-                write_to_file(&subdomain, &ipadress, &file_name, &with_ip)?;
-                println!("{},{}", &subdomain, &ipadress);
+                if get_ip(subdomain) {
+                    write_to_file(subdomain, file_name)?;
+                    println!("{}", subdomain);
+                    subdomains_resolved += 1
+                }
             }
-        } else if with_ip == "y" && with_output != "y" {
+            show_subdomains_found(subdomains_resolved, target)
+        } else if only_resolved == "y" && with_output != "y" {
             for subdomain in &subdomains {
-                let ipadress = get_ip(&subdomain);
-                println!("{},{}", &subdomain, &ipadress);
+                if get_ip(subdomain) {
+                    println!("{}", subdomain);
+                    subdomains_resolved += 1
+                }
             }
-        } else if with_ip != "y" && with_output == "y" {
-            let ipadress = "";
+            show_subdomains_found(subdomains_resolved, target)
+        } else if only_resolved != "y" && with_output == "y" {
             for subdomain in &subdomains {
-                write_to_file(&subdomain, &ipadress, &file_name, &with_ip)?;
-                println!("{}", &subdomain);
+                write_to_file(subdomain, file_name)?;
+                println!("{}", subdomain);
             }
+            show_subdomains_found(subdomains.len(), target)
         } else {
             for subdomain in &subdomains {
-                println!("{}", &subdomain);
+                println!("{}", subdomain);
             }
+            show_subdomains_found(subdomains.len(), target)
         }
-        println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽",
-            &subdomains.len(),
-            &target
-        );
         println!("\nGood luck Hax0r 💀!\n");
     }
 
     Ok(())
+}
+
+fn show_subdomains_found(subdomains_found: usize, target: &str) {
+    println!(
+        "\nA total of {} subdomains were found for ==>  {} 👽",
+        subdomains_found, target
+    )
 }
 
 fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<HashSet<String>> {
@@ -518,7 +529,7 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
 
 pub fn read_from_file(
     file: &str,
-    with_ip: &str,
+    only_resolved: &str,
     with_output: &str,
     file_name: &str,
     unique_output_flag: &str,
@@ -535,7 +546,7 @@ pub fn read_from_file(
         };
         get_subdomains(
             &domain,
-            &with_ip,
+            &only_resolved,
             &with_output,
             &file_name,
             &unique_output_flag,
@@ -545,12 +556,7 @@ pub fn read_from_file(
     Ok(())
 }
 
-fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str) -> Result<()> {
-    let data = if with_ip == "y" {
-        [data, ",", subdomain_ip, "\n"].concat()
-    } else {
-        [data, "\n"].concat()
-    };
+fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     let mut output_file = OpenOptions::new()
         .append(true)
         .create(true)
@@ -560,15 +566,11 @@ fn write_to_file(data: &str, subdomain_ip: &str, file_name: &str, with_ip: &str)
     Ok(())
 }
 
-fn get_ip(domain: &str) -> String {
+fn get_ip(domain: &str) -> bool {
     let resolver = get_resolver();
     match resolver.lookup_ip(&domain) {
-        Ok(ip_address) => ip_address
-            .iter()
-            .next()
-            .expect("An error has occurred getting the IP address.")
-            .to_string(),
-        Err(_) => String::from("No IP address found"),
+        Ok(_) => true,
+        Err(_) => false,
     }
 }
 

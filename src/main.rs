@@ -15,7 +15,11 @@ fn run() -> Result<()> {
     } else {
         empty_value.clone()
     };
-    let with_ip = if matches.is_present("ip") { "y" } else { "" };
+    let only_resolved = if matches.is_present("resolved") {
+        "y"
+    } else {
+        ""
+    };
     let with_output = if matches.is_present("output") || matches.is_present("unique-output") {
         "y"
     } else {
@@ -37,7 +41,7 @@ fn run() -> Result<()> {
     if matches.is_present("target") {
         get_subdomains(
             &target,
-            &with_ip,
+            &only_resolved,
             &with_output,
             &file_name,
             &unique_output_flag,
@@ -46,7 +50,7 @@ fn run() -> Result<()> {
         let file = matches.value_of("file").unwrap().to_string();
         read_from_file(
             &file,
-            &with_ip,
+            &only_resolved,
             &with_output,
             &file_name,
             &unique_output_flag,

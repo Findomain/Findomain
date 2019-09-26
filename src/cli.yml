@@ -15,10 +15,10 @@ args:
         conflicts_with:
           - file
 
-    - ip:
-        short: i
-        long: get-ip
-        help: Return the subdomain list with IP address if resolved.
+    - resolved:
+        short: r
+        long: resolved
+        help: Show/write only resolved subdomains.
         takes_value: false
 
     - file:
