@@ -245,10 +245,14 @@ pub fn get_subdomains(
         },
     ];
 
-    let subdomains = all_subdomains
+    let subdomains: HashSet<String> = all_subdomains
         .into_iter()
         .map(|j| j.join().unwrap())
-        .collect::<Vec<_>>();
+        .collect::<Vec<_>>()
+        .into_iter()
+        .flatten()
+        .flat_map(|sub| sub)
+        .collect();
 
     //    let current_subdomains: HashSet<String> = subdomains
     //       .iter()
@@ -268,83 +272,92 @@ pub fn get_subdomains(
     //    let new_subdomains: HashSet<&String> = current_subdomains.difference(&existing_subdomains).into_iter().collect();
     //
     //    At it point we can push the new subdomains to slack hook.
-    if unique_output_flag == "y" {
-        manage_subdomains_data(
-            subdomains.iter().flatten().flat_map(|sub| sub).collect(),
-            &target,
-            &only_resolved,
-            &with_output,
-            &file_name,
-        )?;
-    } else {
-        check_output_file_exists(&file_name)?;
-        manage_subdomains_data(
-            subdomains.iter().flatten().flat_map(|sub| sub).collect(),
-            &target,
-            &only_resolved,
-            &with_output,
-            &file_name,
-        )?;
-    }
-    if with_output == "y" {
-        println!(
-            ">> 📁 Filename for the target {} was saved in: ./{} 😀",
-            &target, &file_name
-        )
-    }
-    Ok(())
-}
 
-fn manage_subdomains_data(
-    mut subdomains: HashSet<&String>,
-    target: &str,
-    only_resolved: &str,
-    with_output: &str,
-    file_name: &str,
-) -> Result<()> {
-    let base_target = [".", &target].concat();
     if subdomains.is_empty() {
         println!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
             &target
         );
     } else {
-        println!();
-        subdomains.retain(|sub| {
-            !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target)
-        });
-        let mut subdomains_resolved = 0;
-        if only_resolved == "y" && with_output == "y" {
-            for subdomain in &subdomains {
-                if get_ip(subdomain) {
-                    write_to_file(subdomain, file_name)?;
-                    println!("{}", subdomain);
-                    subdomains_resolved += 1
-                }
-            }
-            show_subdomains_found(subdomains_resolved, target)
-        } else if only_resolved == "y" && with_output != "y" {
-            for subdomain in &subdomains {
-                if get_ip(subdomain) {
-                    println!("{}", subdomain);
-                    subdomains_resolved += 1
-                }
-            }
-            show_subdomains_found(subdomains_resolved, target)
-        } else if only_resolved != "y" && with_output == "y" {
-            for subdomain in &subdomains {
+        if unique_output_flag == "y" && !target.is_empty() {
+            check_output_file_exists(file_name)?;
+            manage_subdomains_data(
+                subdomains,
+                &target,
+                &only_resolved,
+                &with_output,
+                &file_name,
+            )?;
+        } else if unique_output_flag == "y" && target.is_empty() {
+            manage_subdomains_data(
+                subdomains,
+                &target,
+                &only_resolved,
+                &with_output,
+                &file_name,
+            )?;
+        } else {
+            check_output_file_exists(&file_name)?;
+            manage_subdomains_data(
+                subdomains,
+                &target,
+                &only_resolved,
+                &with_output,
+                &file_name,
+            )?;
+        }
+        if with_output == "y" {
+            println!(
+                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
+                &target, &file_name
+            )
+        }
+    }
+    Ok(())
+}
+
+fn manage_subdomains_data(
+    mut subdomains: HashSet<String>,
+    target: &str,
+    only_resolved: &str,
+    with_output: &str,
+    file_name: &str,
+) -> Result<()> {
+    let base_target = [".", &target].concat();
+    println!();
+    subdomains
+        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
+    let mut subdomains_resolved = 0;
+    if only_resolved == "y" && with_output == "y" {
+        for subdomain in &subdomains {
+            if get_ip(subdomain) {
                 write_to_file(subdomain, file_name)?;
                 println!("{}", subdomain);
+                subdomains_resolved += 1
             }
-            show_subdomains_found(subdomains.len(), target)
-        } else {
-            for subdomain in &subdomains {
-                println!("{}", subdomain);
-            }
-            show_subdomains_found(subdomains.len(), target)
         }
-        println!("\nGood luck Hax0r 💀!\n");
+        show_subdomains_found(subdomains_resolved, target)
+    } else if only_resolved == "y" && with_output != "y" {
+        for subdomain in &subdomains {
+            if get_ip(subdomain) {
+                println!("{}", subdomain);
+                subdomains_resolved += 1
+            }
+        }
+        show_subdomains_found(subdomains_resolved, target)
+    } else if only_resolved != "y" && with_output == "y" {
+        for subdomain in &subdomains {
+            write_to_file(subdomain, file_name)?;
+            println!("{}", subdomain);
+        }
+        show_subdomains_found(subdomains.len(), target)
+    } else {
+        for subdomain in &subdomains {
+            println!("{}", subdomain);
+        }
+        show_subdomains_found(subdomains.len(), target)
     }
+    println!("\nGood luck Hax0r 💀!\n");
 
     Ok(())
 }
@@ -534,13 +547,16 @@ pub fn read_from_file(
     file_name: &str,
     unique_output_flag: &str,
 ) -> Result<()> {
+    if unique_output_flag == "y" {
+        check_output_file_exists(file_name)?;
+    }
     let f = File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
-
     let f = BufReader::new(f);
     for domain in f.lines() {
         let domain = domain?.to_string();
         let file_name = if file_name.is_empty() {
-            [&domain, ".txt"].concat()
+            let file_name = [&domain, ".txt"].concat();
+            file_name
         } else {
             String::from(file_name)
         };
