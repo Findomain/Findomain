@@ -555,8 +555,7 @@ pub fn read_from_file(
     for domain in f.lines() {
         let domain = domain?.to_string();
         let file_name = if file_name.is_empty() {
-            let file_name = [&domain, ".txt"].concat();
-            file_name
+            [&domain, ".txt"].concat()
         } else {
             String::from(file_name)
         };
