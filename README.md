@@ -5,7 +5,7 @@
 
 # Mixed feelings with Findomain? Show your love
 
-If you want to support the tool development and make it better, [support us :)](https://opencollective.com/findomain#backer) You will appear here.
+If you want to support the tool development and make it better, see [Contributing to Findomain](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#contributors)
 
 # Findomain
 
