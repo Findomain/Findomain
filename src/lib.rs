@@ -8,7 +8,7 @@ extern crate lazy_static;
 use postgres::{Connection, TlsMode};
 use rand::Rng;
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     error::Error,
     fs::{self, File, OpenOptions},
     io::{BufRead, BufReader, Write},
@@ -18,8 +18,8 @@ use std::{
 };
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
-mod auth;
 pub mod errors;
+mod get_vars;
 use crate::errors::*;
 
 trait IntoSubdomains {
@@ -138,6 +138,10 @@ impl IntoSubdomains for SubdomainsVirustotalApikey {
     }
 }
 
+struct Subdomain {
+    name: String,
+}
+
 lazy_static! {
     static ref CLIENT: reqwest::Client = reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
@@ -151,7 +155,23 @@ pub fn get_subdomains(
     with_output: &str,
     file_name: &str,
     unique_output_flag: &str,
+    monitoring_flag: &str,
+    postgres_connection: &str,
 ) -> Result<()> {
+    let discord_webhook = get_vars::get_webhook("discord");
+    let slack_webhook = get_vars::get_webhook("slack");
+
+    if monitoring_flag == "y" && discord_webhook.is_empty() && slack_webhook.is_empty() {
+        eprintln!("You need to set at least one webhook variable. For Discord set the findomain_discord_webhook system variable and for Slack set the findomain_slack_webhook variable. Exiting.");
+        std::process::exit(1)
+    }
+
+    let connection: Option<postgres::Connection> = if monitoring_flag == "y" {
+        Some(Connection::connect(postgres_connection, TlsMode::None)?)
+    } else {
+        None
+    };
+
     let target = target
         .replace("www.", "")
         .replace("https://", "")
@@ -160,38 +180,30 @@ pub fn get_subdomains(
 
     println!("\nTarget ==> {}\n", &target);
 
-    let spyse_access_token = auth::get_auth_token("spyse");
-    let facebook_access_token = auth::get_auth_token("facebook");
-    let virustotal_access_token = auth::get_auth_token("virustotal");
+    let spyse_access_token = get_vars::get_auth_token("spyse");
+    let facebook_access_token = get_vars::get_auth_token("facebook");
+    let virustotal_access_token = get_vars::get_auth_token("virustotal");
 
-    let url_api_certspotter = [
-        "https://api.certspotter.com/v1/issuances?domain=",
-        &target,
-        "&include_subdomains=true&expand=dns_names",
-    ]
-    .concat();
-    let url_api_virustotal = [
-        "https://www.virustotal.com/ui/domains/",
-        &target,
-        "/subdomains?limit=40",
-    ]
-    .concat();
-    let url_api_crtsh = ["https://crt.sh/?q=%.", &target, "&output=json"].concat();
-    let crtsh_db_query = ["SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.", &target, "'))"].concat();
-    let url_api_sublist3r = ["https://api.sublist3r.com/search.php?domain=", &target].concat();
-    let url_api_spyse = [
-        "https://api.spyse.com/v1/subdomains?domain=",
-        &target,
-        "&api_token=",
-        &spyse_access_token,
-    ]
-    .concat();
-    let url_api_bufferover = ["http://dns.bufferover.run/dns?q=", &target].concat();
-    let url_api_threatcrowd = [
-        "https://threatcrowd.org/searchApi/v2/domain/report/?domain=",
-        &target,
-    ]
-    .concat();
+    let url_api_certspotter = format!(
+        "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
+        &target
+    );
+    let url_api_virustotal = format!(
+        "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
+        &target
+    );
+    let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &target);
+    let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &target);
+    let url_api_sublist3r = format!("https://api.sublist3r.com/search.php?domain={}", &target);
+    let url_api_spyse = format!(
+        "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
+        &target, &spyse_access_token
+    );
+    let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &target);
+    let url_api_threatcrowd = format!(
+        "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
+        &target
+    );
     let all_subdomains = vec![
         thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter)),
         thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh)),
@@ -210,22 +222,17 @@ pub fn get_subdomains(
                 "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
                 "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
             ];
-            let url_api_fb = [
-                "https://graph.facebook.com/certificates?query=",
+            let url_api_fb = format!(
+                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &target,
-                "&fields=domains&limit=10000&access_token=",
-                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())],
-            ]
-            .concat();
+                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
+            );
             thread::spawn(move || get_facebook_subdomains(&url_api_fb))
         } else {
-            let url_api_fb = [
-                "https://graph.facebook.com/certificates?query=",
+            let url_api_fb = format!(
+                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &target,
-                "&fields=domains&limit=10000&access_token=",
-                &facebook_access_token,
-            ]
-            .concat();
+                &facebook_access_token);
             thread::spawn(move || get_facebook_subdomains(&url_api_fb))
         },
         thread::spawn(move || get_spyse_subdomains(&url_api_spyse)),
@@ -234,13 +241,10 @@ pub fn get_subdomains(
         if virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
-            let url_virustotal_apikey = [
-                "https://www.virustotal.com/vtapi/v2/domain/report?apikey=",
-                &virustotal_access_token,
-                "&domain=",
-                &target,
-            ]
-            .concat();
+            let url_virustotal_apikey = format!(
+                "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
+                &virustotal_access_token, &target
+            );
             thread::spawn(move || get_virustotal_apikey_subdomains(&url_virustotal_apikey))
         },
     ];
@@ -253,33 +257,13 @@ pub fn get_subdomains(
         .flatten()
         .flat_map(|sub| sub)
         .collect();
-
-    //    let current_subdomains: HashSet<String> = subdomains
-    //       .iter()
-    //       .flatten()
-    //       .flat_map(|sub| sub)
-    //       .cloned()
-    //       .collect();
-
-    //   let existing_subdomains: HashSet<String> = [
-    //   database query here
-    //   ]
-    //   .into_iter()
-    //   .cloned()
-    //   .map(str::to_owned)
-    //   .collect();
-
-    //    let new_subdomains: HashSet<&String> = current_subdomains.difference(&existing_subdomains).into_iter().collect();
-    //
-    //    At it point we can push the new subdomains to slack hook.
-
     if subdomains.is_empty() {
         println!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
             &target
         );
     } else {
-        if unique_output_flag == "y" && !target.is_empty() {
+        if unique_output_flag == "y" && !target.is_empty() && monitoring_flag.is_empty() {
             check_output_file_exists(file_name)?;
             manage_subdomains_data(
                 subdomains,
@@ -288,13 +272,21 @@ pub fn get_subdomains(
                 &with_output,
                 &file_name,
             )?;
-        } else if unique_output_flag == "y" && target.is_empty() {
+        } else if unique_output_flag == "y" && target.is_empty() && monitoring_flag.is_empty() {
             manage_subdomains_data(
                 subdomains,
                 &target,
                 &only_resolved,
                 &with_output,
                 &file_name,
+            )?;
+        } else if monitoring_flag == "y" && unique_output_flag.is_empty() {
+            subdomains_alerts(
+                connection.unwrap(),
+                subdomains,
+                &target,
+                &discord_webhook,
+                &slack_webhook,
             )?;
         } else {
             check_output_file_exists(&file_name)?;
@@ -313,6 +305,7 @@ pub fn get_subdomains(
             )
         }
     }
+
     Ok(())
 }
 
@@ -546,6 +539,8 @@ pub fn read_from_file(
     with_output: &str,
     file_name: &str,
     unique_output_flag: &str,
+    monitoring_flag: &str,
+    postgres_connection: &str,
 ) -> Result<()> {
     if unique_output_flag == "y" {
         check_output_file_exists(file_name)?;
@@ -557,7 +552,7 @@ pub fn read_from_file(
         let file_name = if file_name.is_empty() {
             [&domain, ".txt"].concat()
         } else {
-            String::from(file_name)
+            file_name.to_string()
         };
         get_subdomains(
             &domain,
@@ -565,6 +560,8 @@ pub fn read_from_file(
             &with_output,
             &file_name,
             &unique_output_flag,
+            &monitoring_flag,
+            &postgres_connection,
         )?;
     }
 
@@ -613,4 +610,153 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
         })?;
     }
     Ok(())
+}
+
+fn subdomains_alerts(
+    connection: postgres::Connection,
+    mut current_subdomains: HashSet<String>,
+    target: &str,
+    discord_webhook: &str,
+    slack_webhook: &str,
+) -> Result<()> {
+    let mut discord_parameters = HashMap::new();
+    let mut slack_parameters = HashMap::new();
+    let mut webhooks_data = HashMap::new();
+    let base_target = [".", &target].concat();
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS subdomains (
+                   id              SERIAL PRIMARY KEY,
+                   name            VARCHAR NOT NULL UNIQUE
+              )",
+        &[],
+    )?;
+
+    let existing_subdomains = connection.query(
+        &format!("SELECT name FROM subdomains WHERE name LIKE '%{}'", &target),
+        &[],
+    )?;
+
+    let existing_subdomains: HashSet<String> = existing_subdomains
+        .iter()
+        .map(|row| {
+            let subdomain = Subdomain {
+                name: row.get("name"),
+            };
+            subdomain.name
+        })
+        .collect();
+
+    current_subdomains
+        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
+
+    let new_subdomains: HashSet<String> = current_subdomains
+        .difference(&existing_subdomains)
+        .map(|sub| sub.to_string())
+        .collect();
+
+    if new_subdomains.len() > 0 {
+        println!(
+            "\nA total of {} new subdomains found for target {}",
+            new_subdomains.len(),
+            target
+        );
+    }
+
+    if !discord_webhook.is_empty() {
+        discord_parameters.insert(
+            "content",
+            return_webhook_payload(&new_subdomains, "discord", &target),
+        );
+        webhooks_data.insert(discord_webhook, discord_parameters);
+    }
+
+    if !slack_webhook.is_empty() {
+        slack_parameters.insert(
+            "text",
+            return_webhook_payload(&new_subdomains, "slack", &target),
+        );
+        webhooks_data.insert(slack_webhook, slack_parameters);
+    }
+
+    let mut commit_to_db_counter = 0;
+
+    for (webhook, webhooks_payload) in webhooks_data {
+        if !webhook.is_empty() {
+            let response = CLIENT.post(webhook).form(&webhooks_payload).send()?;
+            if response.status().is_success()
+                && !new_subdomains.is_empty()
+                && commit_to_db_counter == 0
+            {
+                if commit_to_db(&connection, &new_subdomains).is_ok() {
+                    commit_to_db_counter += 1
+                }
+            } else if response.status().is_success() && new_subdomains.is_empty() {
+            } else {
+                eprintln!(
+                    "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
+                    webhook, response.status()
+                )
+            }
+        }
+    }
+    Ok(())
+}
+
+fn commit_to_db(conn: &postgres::Connection, new_subdomains: &HashSet<String>) -> Result<()> {
+    let prepared_transaction = conn.transaction()?;
+    for subdomain in new_subdomains {
+        prepared_transaction.execute("INSERT INTO subdomains (name) VALUES ($1)", &[&subdomain])?;
+    }
+    prepared_transaction.commit()?;
+    Ok(())
+}
+
+fn return_webhook_payload(
+    new_subdomains: &HashSet<String>,
+    webhook_name: &str,
+    target: &str,
+) -> String {
+    if new_subdomains.is_empty() {
+        format!(
+            "**Findomain alert:** No new subdomains found for {}",
+            &target
+        )
+    } else {
+        let webhooks_payload = new_subdomains
+            .clone()
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join("\n");
+        if webhook_name == "discord" {
+            if webhooks_payload.len() > 1900 {
+                format!(
+                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    &target,
+                    webhooks_payload.split_at(1900).0.to_string()
+                )
+            } else {
+                format!(
+                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    &target,
+                    webhooks_payload.to_string()
+                )
+            }
+        } else if webhook_name == "slack" {
+            if webhooks_payload.len() > 39000 {
+                format!(
+                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    &target,
+                    webhooks_payload.split_at(39000).0.to_string()
+                )
+            } else {
+                format!(
+                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    &target,
+                    webhooks_payload.to_string()
+                )
+            }
+        } else {
+            String::from("")
+        }
+    }
 }

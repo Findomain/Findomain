@@ -1,5 +1,5 @@
 name: findomain
-version: "0.3.0"
+version: "0.4.0"
 author: Eduard Tolosa <edu4rdshl@protonmail.com>
 settings:
     - ArgRequiredElseHelp
@@ -20,6 +20,8 @@ args:
         long: resolved
         help: Show/write only resolved subdomains.
         takes_value: false
+        conflicts_with:
+          - monitoring-flag
 
     - file:
         short: f
@@ -35,6 +37,8 @@ args:
         long: output
         help: Write to an output file. The name of the output file will be the target string with TXT format.
         takes_value: false
+        conflicts_with:
+          - monitoring-flag
 
     - unique-output:
         short: u
@@ -44,3 +48,35 @@ args:
         multiple: false
         conflicts_with:
           - output
+          - monitoring-flag
+
+    - monitoring-flag:
+        short: m
+        long: monitoring-flag
+        help: Activate Findomain monitoring mode.
+        takes_value: false
+
+    - postgres-user:
+        long: postgres-user
+        help: Postgresql username.
+        takes_value: true
+
+    - postgres-password:
+        long: postgres-password
+        help: Postgresql password.
+        takes_value: true
+
+    - postgres-host:
+        long: postgres-host
+        help: Postgresql host.
+        takes_value: true
+
+    - postgres-port:
+        long: postgres-port
+        help: Postgresql port.
+        takes_value: true
+
+    - postgres-database:
+        long: postgres-database
+        help: Postgresql database.
+        takes_value: true
