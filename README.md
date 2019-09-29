@@ -36,6 +36,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 # Features
 
+* Subdomains monitoring. See [Subdomains Monitoring](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#subdomains-monitoring) for more information.
 * Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
@@ -289,12 +290,60 @@ Put in the CMD command prompt:
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_virustotal_token` in Unix based systems like putting `export findomain_virustotal_token="YourAccessToken"` into your `.bashrc` and set the `findomain_virustotal_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
+# Subdomains Monitoring
+
+Since version 0.4.0 Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/) and [Discord](https://discordapp.com) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
+
+**Options**
+
+You can set the following command line options when using the subdomains monitoring feature:
+
+```
+        --postgres-database <postgres-database>    Postgresql database.
+        --postgres-host <postgres-host>            Postgresql host.
+        --postgres-password <postgres-password>    Postgresql password.
+        --postgres-port <postgres-port>            Postgresql port.
+        --postgres-user <postgres-user>            Postgresql username.
+```
+
+**Default values while connecting to database server**
+
+Findomain have some default values that are used when they are not set. They are listed below:
+
+1) If you only specify the `-m` flag without more arguments or don't specify one of the options Findomain sets:
+
+Database host: localhost
+Database username: postgres
+Database password: postgres
+Database port: 5432
+Database: [Default PostgreSQL database cluster](https://www.postgresql.org/docs/current/app-initdb.html)
+
+**Subdomains monitoring usage examples**
+
+1) **Connect to local computer and local PostgreSQL server with specific username, password and database and push the data to both Discord and Slack webhooks**
+
+```
+$ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX' findomain_slack_webhook='https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX' findomain -m -t example.com --postgres-database findomain --postgres-user findomain --postgres-host localhost --postgres-port 5432
+```
+
+2) **Connect to remote computer/server and remote PostgreSQL server with specific username, password and database and push the data to both Discord and Slack webhooks**
+
+```
+$ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX' findomain_slack_webhook='https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX' findomain -m -t example.com --postgres-user postgres --postgres-password psql  --postgres-host 192.168.122.130 --postgres-port 5432
+```
+
+3) **Connect to local computer using the default values**
+
+```
+$ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX' findomain_slack_webhook='https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX' findomain -m -t example.com
+```
+
 # Usage
 
 See `findomain -h/--help` to see all the options.
 
 ```
-findomain 0.3.0
+findomain 0.4.0
 Eduard Tolosa <edu4rdshl@protonmail.com>
 The fastest and cross-platform subdomain enumerator, don't waste your time.
 
@@ -302,17 +351,27 @@ USAGE:
     findomain [FLAGS] [OPTIONS]
 
 FLAGS:
-    -h, --help        Prints help information
-    -o, --output      Write to an output file. The name of the output file will be the target string with TXT format.
-    -r, --resolved    Show/write only resolved subdomains.
-    -V, --version     Prints version information
+    -h, --help               Prints help information
+    -m, --monitoring-flag    Activate Findomain monitoring mode.
+    -o, --output             Write to an output file. The name of the output file will be the target string with TXT
+                             format.
+    -r, --resolved           Show/write only resolved subdomains.
+    -V, --version            Prints version information
 
 OPTIONS:
-    -f, --file <file>                      Sets the input file to use.
-    -t, --target <target>                  Target host.
-    -u, --unique-output <unique-output>    Write all the results for a target or a list of targets to a specified
-                                           filename.
+    -f, --file <file>                              Sets the input file to use.
+        --postgres-database <postgres-database>    Postgresql database.
+        --postgres-host <postgres-host>            Postgresql host.
+        --postgres-password <postgres-password>    Postgresql password.
+        --postgres-port <postgres-port>            Postgresql port.
+        --postgres-user <postgres-user>            Postgresql username.
+    -t, --target <target>                          Target host.
+    -u, --unique-output <unique-output>
+            Write all the results for a target or a list of targets to a specified filename.
 ```
+
+For subdomains monitoring examples [Subdomains Monitoring](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#subdomains-monitoring) for more information.
+
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
 # Examples
