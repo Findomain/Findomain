@@ -64,7 +64,6 @@ fn run() -> Result<()> {
         empty_value.clone()
     };
 
-    println!("{}", postgres_connection);
     if matches.is_present("target") {
         get_subdomains(
             &target,
