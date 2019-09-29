@@ -312,11 +312,11 @@ Findomain have some default values that are used when they are not set. They are
 
 1) If you only specify the `-m` flag without more arguments or don't specify one of the options Findomain sets:
 
-Database host: localhost
-Database username: postgres
-Database password: postgres
-Database port: 5432
-Database: [Default PostgreSQL database cluster](https://www.postgresql.org/docs/current/app-initdb.html)
+* Database host: localhost
+* Database username: postgres
+* Database password: postgres
+* Database port: 5432
+* Database: [Default PostgreSQL database cluster](https://www.postgresql.org/docs/current/app-initdb.html)
 
 **Subdomains monitoring usage examples**
 
