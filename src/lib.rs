@@ -730,13 +730,15 @@ fn return_webhook_payload(
         if webhook_name == "discord" {
             if webhooks_payload.len() > 1900 {
                 format!(
-                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
+                    &new_subdomains.len(),
                     &target,
                     webhooks_payload.split_at(1900).0.to_string()
                 )
             } else {
                 format!(
-                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
+                    &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
                 )
@@ -744,13 +746,15 @@ fn return_webhook_payload(
         } else if webhook_name == "slack" {
             if webhooks_payload.len() > 39000 {
                 format!(
-                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
+                    &new_subdomains.len(),
                     &target,
                     webhooks_payload.split_at(39000).0.to_string()
                 )
             } else {
                 format!(
-                    "**Findomain alert:** New subdomains found for {}\n```{}```",
+                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
+                    &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
                 )
