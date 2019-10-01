@@ -682,7 +682,7 @@ fn subdomains_alerts(
 
     for (webhook, webhooks_payload) in webhooks_data {
         if !webhook.is_empty() {
-            let response = CLIENT.post(webhook).form(&webhooks_payload).send()?;
+            let response = CLIENT.post(webhook).json(&webhooks_payload).send()?;
             if response.status().is_success()
                 && !new_subdomains.is_empty()
                 && commit_to_db_counter == 0
@@ -716,11 +716,13 @@ fn return_webhook_payload(
     webhook_name: &str,
     target: &str,
 ) -> String {
-    if new_subdomains.is_empty() {
+    if new_subdomains.is_empty() && webhook_name == "discord" {
         format!(
             "**Findomain alert:** No new subdomains found for {}",
             &target
         )
+    } else if new_subdomains.is_empty() && webhook_name == "slack" {
+        format!("*Findomain alert:* No new subdomains found for {}", &target)
     } else {
         let webhooks_payload = new_subdomains
             .clone()
@@ -744,16 +746,16 @@ fn return_webhook_payload(
                 )
             }
         } else if webhook_name == "slack" {
-            if webhooks_payload.len() > 39000 {
+            if webhooks_payload.len() > 15000 {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
+                    "*Findomain alert:* {} new subdomains found for {}\n{}",
                     &new_subdomains.len(),
                     &target,
-                    webhooks_payload.split_at(39000).0.to_string()
+                    webhooks_payload.split_at(15000).0.to_string()
                 )
             } else {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
+                    "*Findomain alert:* {} new subdomains found for {}\n{}",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
