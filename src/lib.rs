@@ -654,7 +654,7 @@ fn subdomains_alerts(
         .map(|sub| sub.to_string())
         .collect();
 
-    if new_subdomains.len() > 0 {
+    if !new_subdomains.is_empty() {
         println!(
             "\nA total of {} new subdomains found for target {}",
             new_subdomains.len(),
