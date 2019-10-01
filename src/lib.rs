@@ -691,7 +691,9 @@ fn subdomains_alerts(
                 if commit_to_db(&connection, &new_subdomains).is_ok() {
                     commit_to_db_counter += 1
                 }
-            } else if response.status().is_success() && new_subdomains.is_empty() {
+            } else if response.status().is_success()
+                || response.status() == 204 && new_subdomains.is_empty()
+            {
             } else {
                 eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
