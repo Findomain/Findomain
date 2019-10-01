@@ -654,14 +654,6 @@ fn subdomains_alerts(
         .map(|sub| sub.to_string())
         .collect();
 
-    if !new_subdomains.is_empty() {
-        println!(
-            "\nA total of {} new subdomains found for target {}",
-            new_subdomains.len(),
-            target
-        );
-    }
-
     if !discord_webhook.is_empty() {
         discord_parameters.insert(
             "content",
