@@ -684,8 +684,9 @@ fn subdomains_alerts(
         if !webhook.is_empty() {
             let response = CLIENT.post(webhook).json(&webhooks_payload).send()?;
             if response.status().is_success()
-                && !new_subdomains.is_empty()
-                && commit_to_db_counter == 0
+                || response.status() == 204
+                    && !new_subdomains.is_empty()
+                    && commit_to_db_counter == 0
             {
                 if commit_to_db(&connection, &new_subdomains).is_ok() {
                     commit_to_db_counter += 1
@@ -748,14 +749,14 @@ fn return_webhook_payload(
         } else if webhook_name == "slack" {
             if webhooks_payload.len() > 15000 {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n{}",
+                    "*Findomain alert:* {} new subdomains found for {}\n``` {} ```",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.split_at(15000).0.to_string()
                 )
             } else {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n{}",
+                    "*Findomain alert:* {} new subdomains found for {}\n``` {} ```",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
