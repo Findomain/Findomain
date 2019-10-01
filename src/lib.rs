@@ -743,14 +743,14 @@ fn return_webhook_payload(
         } else if webhook_name == "slack" {
             if webhooks_payload.len() > 15000 {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n``` {} ```",
+                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.split_at(15000).0.to_string()
                 )
             } else {
                 format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n``` {} ```",
+                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
