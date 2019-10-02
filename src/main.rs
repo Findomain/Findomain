@@ -40,7 +40,7 @@ fn run() -> Result<()> {
     } else {
         ""
     };
-
+    let from_file_flag = if matches.is_present("file") { "y" } else { "" };
     let postgres_user =
         value_t!(matches, "postgres-user", String).unwrap_or_else(|_| "postgres".to_string());
 
@@ -72,6 +72,7 @@ fn run() -> Result<()> {
             &file_name,
             &unique_output_flag,
             &monitoring_flag,
+            &from_file_flag,
             &postgres_connection,
         )
     } else if matches.is_present("file") {
@@ -83,6 +84,7 @@ fn run() -> Result<()> {
             &file_name,
             &unique_output_flag,
             &monitoring_flag,
+            &from_file_flag,
             &postgres_connection,
         )
     } else {

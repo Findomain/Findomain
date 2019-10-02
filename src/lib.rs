@@ -156,6 +156,7 @@ pub fn get_subdomains(
     file_name: &str,
     unique_output_flag: &str,
     monitoring_flag: &str,
+    from_file_flag: &str,
     postgres_connection: &str,
 ) -> Result<()> {
     let discord_webhook = get_vars::get_webhook("discord");
@@ -263,7 +264,7 @@ pub fn get_subdomains(
             &target
         );
     } else {
-        if unique_output_flag == "y" && !target.is_empty() && monitoring_flag.is_empty() {
+        if unique_output_flag == "y" && from_file_flag.is_empty() && monitoring_flag.is_empty() {
             check_output_file_exists(file_name)?;
             manage_subdomains_data(
                 subdomains,
@@ -272,7 +273,10 @@ pub fn get_subdomains(
                 &with_output,
                 &file_name,
             )?;
-        } else if unique_output_flag == "y" && target.is_empty() && monitoring_flag.is_empty() {
+        } else if unique_output_flag == "y"
+            && !from_file_flag.is_empty()
+            && monitoring_flag.is_empty()
+        {
             manage_subdomains_data(
                 subdomains,
                 &target,
@@ -540,6 +544,7 @@ pub fn read_from_file(
     file_name: &str,
     unique_output_flag: &str,
     monitoring_flag: &str,
+    from_file_flag: &str,
     postgres_connection: &str,
 ) -> Result<()> {
     if unique_output_flag == "y" {
@@ -561,6 +566,7 @@ pub fn read_from_file(
             &file_name,
             &unique_output_flag,
             &monitoring_flag,
+            &from_file_flag,
             &postgres_connection,
         )?;
     }
