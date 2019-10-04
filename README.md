@@ -48,6 +48,10 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 **Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
+# Findomain in depth
+
+See [Subdomains Enumeration: what is, how to do it, monitoring automation using webhooks and centralizing your findings](https://medium.com/@edu4rdshl/subdomains-enumeration-what-is-how-to-do-it-monitoring-automation-using-webhooks-and-5e0a0c6d9127) for a detailed guide including real world examples of how you get the most out of the tool.
+
 # How it works?
 It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs and specific well tested APIs to find subdomains. It method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
