@@ -161,10 +161,25 @@ pub fn get_subdomains(
 ) -> Result<()> {
     let discord_webhook = get_vars::get_webhook("discord");
     let slack_webhook = get_vars::get_webhook("slack");
+    let telegram_bot_token = get_vars::get_auth_token("telegram");
+    let mut telegram_webhook = format!(
+        "{}{}{}",
+        "https://api.telegram.org/bot", telegram_bot_token, "/sendMessage"
+    );
+    let telegram_chat_id = get_vars::get_chat_id("telegram");
 
-    if monitoring_flag == "y" && discord_webhook.is_empty() && slack_webhook.is_empty() {
-        eprintln!("You need to set at least one webhook variable. For Discord set the findomain_discord_webhook system variable and for Slack set the findomain_slack_webhook variable. Exiting.");
+    if monitoring_flag == "y"
+        && discord_webhook.is_empty()
+        && slack_webhook.is_empty()
+        && telegram_bot_token.is_empty()
+    {
+        eprintln!("You need to configure at least one webhook variable in your system. For Discord set the findomain_discord_webhook system variable, for Slack set the findomain_slack_webhook variable, for Telegram set the findomain_telegrambot_token and findomain_telegrambot_chat_id valriables. See https://git.io/JeZQW for more information, exiting.");
         std::process::exit(1)
+    } else if !telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
+        eprintln!("You have configured the findomain_telegrambot_token variable but not the findomain_telegrambot_chat_id variable, it's required. See https://git.io/JeZQW for more information, exiting.");
+        std::process::exit(1)
+    } else if telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
+        telegram_webhook = String::from("")
     }
 
     let connection: Option<postgres::Connection> = if monitoring_flag == "y" {
@@ -291,6 +306,8 @@ pub fn get_subdomains(
                 &target,
                 &discord_webhook,
                 &slack_webhook,
+                &telegram_webhook,
+                telegram_chat_id,
             )?;
         } else {
             check_output_file_exists(&file_name)?;
@@ -624,9 +641,12 @@ fn subdomains_alerts(
     target: &str,
     discord_webhook: &str,
     slack_webhook: &str,
+    telegram_webhook: &str,
+    telegram_chat_id: String,
 ) -> Result<()> {
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
+    let mut telegram_parameters = HashMap::new();
     let mut webhooks_data = HashMap::new();
     let base_target = [".", &target].concat();
     connection.execute(
@@ -674,6 +694,16 @@ fn subdomains_alerts(
             return_webhook_payload(&new_subdomains, "slack", &target),
         );
         webhooks_data.insert(slack_webhook, slack_parameters);
+    }
+
+    if !telegram_webhook.is_empty() {
+        telegram_parameters.insert(
+            "text",
+            return_webhook_payload(&new_subdomains, "telegram", &target),
+        );
+        telegram_parameters.insert("chat_id", telegram_chat_id);
+        telegram_parameters.insert("parse_mode", "HTML".to_string());
+        webhooks_data.insert(telegram_webhook, telegram_parameters);
     }
 
     let mut commit_to_db_counter = 0;
@@ -724,6 +754,11 @@ fn return_webhook_payload(
         )
     } else if new_subdomains.is_empty() && webhook_name == "slack" {
         format!("*Findomain alert:* No new subdomains found for {}", &target)
+    } else if new_subdomains.is_empty() && webhook_name == "telegram" {
+        format!(
+            "<b>Findomain alert:</b> No new subdomains found for {}",
+            &target
+        )
     } else {
         let webhooks_payload = new_subdomains
             .clone()
@@ -757,6 +792,22 @@ fn return_webhook_payload(
             } else {
                 format!(
                     "*Findomain alert:* {} new subdomains found for {}\n```{}```",
+                    &new_subdomains.len(),
+                    &target,
+                    webhooks_payload.to_string()
+                )
+            }
+        } else if webhook_name == "telegram" {
+            if webhooks_payload.len() > 4000 {
+                format!(
+                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
+                    &new_subdomains.len(),
+                    &target,
+                    webhooks_payload.split_at(4000).0.to_string()
+                )
+            } else {
+                format!(
+                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
                     &new_subdomains.len(),
                     &target,
                     webhooks_payload.to_string()
