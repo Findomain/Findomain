@@ -163,8 +163,8 @@ pub fn get_subdomains(
     let slack_webhook = get_vars::get_webhook("slack");
     let telegram_bot_token = get_vars::get_auth_token("telegram");
     let mut telegram_webhook = format!(
-        "{}{}{}",
-        "https://api.telegram.org/bot", telegram_bot_token, "/sendMessage"
+        "https://api.telegram.org/bot{}/sendMessage",
+        telegram_bot_token
     );
     let telegram_chat_id = get_vars::get_chat_id("telegram");
 
