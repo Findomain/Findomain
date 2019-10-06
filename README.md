@@ -36,7 +36,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 # Features
 
-* Subdomains monitoring. Put data to Discord, Slack or Telegram webhooks.  See [Subdomains Monitoring](README.md#subdomains-monitoring) for more information.
+* Subdomains monitoring: put data to Discord, Slack or Telegram webhooks.  See [Subdomains Monitoring](README.md#subdomains-monitoring) for more information.
 * Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
