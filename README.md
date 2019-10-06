@@ -1,7 +1,7 @@
 [![Financial Contributors on Open Collective](https://opencollective.com/findomain/all/badge.svg?label=financial+contributors)](https://opencollective.com/findomain) [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
-![alt text](findomain.png "Findomain")
+![Findomain](../images/findomain.png)
 
 # Mixed feelings with Findomain? Show your love
 
@@ -36,17 +36,15 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 # Features
 
-* Subdomains monitoring. See [Subdomains Monitoring](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#subdomains-monitoring) for more information.
+* Subdomains monitoring. Put data to Discord, Slack or Telegram webhooks.  See [Subdomains Monitoring](README.md#subdomains-monitoring) for more information.
 * Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
 * Read target from user argument (-t) or file (-f).
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
-* Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#build-for-32-bits-or-another-platform) for instructions.
+* Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
-
-**Note**: the proxy support is just to proxify APIs requests, the actual implementation to discover IP address of subdomains doesn't support proxyfing and it's made using the host network still if you use the -p option.
 
 # Findomain in depth
 
@@ -69,9 +67,9 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](README.md#access-tokens-configuration) how to configure and use it.
 
-APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](README.md#access-tokens-configuration) how to configure and use it.
 
 **More APIs?**
 
@@ -81,10 +79,10 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 We offer binarys ready to use for the following platforms (all are for 64 bits only):
 
-* [Linux](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-in-linux-using-compiled-artifacts)
-* [Windows](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-windows)
-* [MacOS](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-macos)
-* [Aarch64 (Raspberry Pi)](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#installation-aarch64-raspberry-pi)
+* [Linux](README.md#installation-in-linux-using-compiled-artifacts)
+* [Windows](README.md#installation-windows)
+* [MacOS](README.md#installation-macos)
+* [Aarch64 (Raspberry Pi)](README.md#installation-aarch64-raspberry-pi)
 
 If you need to run Findomain in another platform, continue reading the documentation.
 
@@ -292,11 +290,11 @@ Put in the CMD command prompt:
 
 **Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_virustotal_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
-**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_virustotal_token` in Unix based systems like putting `export findomain_virustotal_token="YourAccessToken"` into your `.bashrc` and set the `findomain_virustotal_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export VariableName="VariableValue"` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
 
 # Subdomains Monitoring
 
-Since version 0.4.0 Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/) and [Discord](https://discordapp.com) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
+Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
 
@@ -312,6 +310,25 @@ You can set the following command line options when using the subdomains monitor
         --postgres-user <postgres-user>            Postgresql username.
 ```
 
+**System variables that can be configured**
+
+Findomain reads system variables to make use of webhooks. Currently Findomain support the following webhooks (click on them to see how to setup the webhooks):
+
+* [Discord](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+* [Slack](https://api.slack.com/incoming-webhooks).
+* [Telegram](docs/create_telegram_webhook.md).
+
+The available system variables that you have are:
+
+```
+findomain_discord_webhook: Discord webhook URL.
+findomain_slack_webhook: Slack webhook URL.
+findomain_telegrambot_token: Telegram bot autentication token.
+findomain_telegrambot_chat_id: Unique identifier for the target chat or username of the target channel.
+```
+
+**Tip:** If you don't want to write the webhook parameters everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export VariableName="VariableValue"` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
+
 **Default values while connecting to database server**
 
 Findomain have some default values that are used when they are not set. They are listed below:
@@ -324,7 +341,7 @@ Findomain have some default values that are used when they are not set. They are
 * Database port: 5432
 * Database: [Default PostgreSQL database cluster](https://www.postgresql.org/docs/current/app-initdb.html)
 
-**Subdomains monitoring usage examples**
+**Subdomains monitoring examples**
 
 1) **Connect to local computer and local PostgreSQL server with specific username, password and database and push the data to both Discord and Slack webhooks**
 
@@ -338,7 +355,13 @@ $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX
 $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX' findomain_slack_webhook='https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX' findomain -m -t example.com --postgres-user postgres --postgres-password psql  --postgres-host 192.168.122.130 --postgres-port 5432
 ```
 
-3) **Connect to local computer using the default values**
+3) **Connect to remote computer/server and remote PostgreSQL server with specific username, password and database and push the data to Telegram webhook**
+
+```
+$ findomain_telegrambot_token="Your_Bot_Token_Here" findomain_telegrambot_chat_id="Your_Chat_ID_Here" findomain -m -t example.com --postgres-user postgres --postgres-password psql  --postgres-host 192.168.122.130 --postgres-port 5432
+```
+
+4) **Connect to local computer using the default values**
 
 ```
 $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX' findomain_slack_webhook='https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX' findomain -m -t example.com
