@@ -1,7 +1,7 @@
 [![Financial Contributors on Open Collective](https://opencollective.com/findomain/all/badge.svg?label=financial+contributors)](https://opencollective.com/findomain) [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
-![Findomain](../images/findomain.png)
+![Findomain](images/findomain.png)
 
 # Mixed feelings with Findomain? Show your love
 
