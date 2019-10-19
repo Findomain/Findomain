@@ -357,7 +357,7 @@ fn manage_subdomains_data(
     subdomains
         .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
     let mut subdomains_resolved = 0;
-    if with_output && only_resolved || with_ip {
+    if with_output && (only_resolved || with_ip) {
         if only_resolved {
             for subdomain in &subdomains {
                 if resolver.lookup_ip(subdomain).is_ok() {
@@ -368,7 +368,7 @@ fn manage_subdomains_data(
             }
         } else if with_ip {
             for subdomain in &subdomains {
-                let ip = get_ip(subdomain);
+                let ip = get_ip(&resolver, subdomain);
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
                     write_to_file(&data, file_name)?;
@@ -378,7 +378,7 @@ fn manage_subdomains_data(
             }
         }
         misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
-    } else if !with_output && only_resolved || with_ip {
+    } else if !with_output && (only_resolved || with_ip) {
         if only_resolved {
             for subdomain in &subdomains {
                 if resolver.lookup_ip(subdomain).is_ok() {
@@ -388,7 +388,7 @@ fn manage_subdomains_data(
             }
         } else if with_ip {
             for subdomain in &subdomains {
-                let ip = get_ip(subdomain);
+                let ip = get_ip(&resolver, subdomain);
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
                     subdomains_resolved += 1
@@ -629,8 +629,7 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     Ok(())
 }
 
-fn get_ip(domain: &str) -> String {
-    let resolver = get_resolver();
+fn get_ip(resolver: &Resolver, domain: &str) -> String {
     match resolver.lookup_ip(&domain) {
         Ok(ip_address) => ip_address
             .iter()
