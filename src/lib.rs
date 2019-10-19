@@ -152,12 +152,7 @@ lazy_static! {
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     let target = &args.target;
-    let only_resolved = &args.only_resolved;
-    let with_output = &args.with_output;
     let file_name = &args.file_name;
-    let unique_output_flag = &args.unique_output_flag;
-    let monitoring_flag = &args.monitoring_flag;
-    let from_file_flag = &args.from_file_flag;
     let postgres_connection = format!(
         "postgresql://{}:{}@{}:{}/{}",
         args.postgres_user,
@@ -176,7 +171,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     );
     let telegram_chat_id = get_vars::get_chat_id("telegram");
 
-    if monitoring_flag == "y"
+    if args.monitoring_flag
         && discord_webhook.is_empty()
         && slack_webhook.is_empty()
         && telegram_bot_token.is_empty()
@@ -190,7 +185,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         telegram_webhook = String::from("")
     }
 
-    let connection: Option<postgres::Connection> = if monitoring_flag == "y" {
+    let connection: Option<postgres::Connection> = if args.monitoring_flag {
         Some(Connection::connect(postgres_connection, TlsMode::None)?)
     } else {
         None
@@ -287,27 +282,24 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
             &target
         );
     } else {
-        if unique_output_flag == "y" && from_file_flag.is_empty() && monitoring_flag.is_empty() {
+        if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag {
             check_output_file_exists(&file_name)?;
             manage_subdomains_data(
                 subdomains,
                 &target,
-                &only_resolved,
-                &with_output,
+                args.only_resolved,
+                args.with_output,
                 &file_name,
             )?;
-        } else if unique_output_flag == "y"
-            && !from_file_flag.is_empty()
-            && monitoring_flag.is_empty()
-        {
+        } else if args.unique_output_flag && args.from_file_flag && !args.monitoring_flag {
             manage_subdomains_data(
                 subdomains,
                 &target,
-                &only_resolved,
-                &with_output,
+                args.only_resolved,
+                args.with_output,
                 &file_name,
             )?;
-        } else if monitoring_flag == "y" && unique_output_flag.is_empty() {
+        } else if args.monitoring_flag && !args.unique_output_flag {
             subdomains_alerts(
                 connection.unwrap(),
                 subdomains,
@@ -322,12 +314,12 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
             manage_subdomains_data(
                 subdomains,
                 &target,
-                &only_resolved,
-                &with_output,
+                args.only_resolved,
+                args.with_output,
                 &file_name,
             )?;
         }
-        if with_output == "y" {
+        if args.with_output {
             println!(
                 ">> 📁 Filename for the target {} was saved in: ./{} 😀",
                 &target, &file_name
@@ -341,8 +333,8 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
 fn manage_subdomains_data(
     mut subdomains: HashSet<String>,
     target: &str,
-    only_resolved: &str,
-    with_output: &str,
+    only_resolved: bool,
+    with_output: bool,
     file_name: &str,
 ) -> Result<()> {
     let base_target = [".", &target].concat();
@@ -350,7 +342,7 @@ fn manage_subdomains_data(
     subdomains
         .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
     let mut subdomains_resolved = 0;
-    if only_resolved == "y" && with_output == "y" {
+    if only_resolved && with_output {
         for subdomain in &subdomains {
             if get_ip(subdomain) {
                 write_to_file(subdomain, file_name)?;
@@ -359,7 +351,7 @@ fn manage_subdomains_data(
             }
         }
         show_subdomains_found(subdomains_resolved, target)
-    } else if only_resolved == "y" && with_output != "y" {
+    } else if only_resolved && !with_output {
         for subdomain in &subdomains {
             if get_ip(subdomain) {
                 println!("{}", subdomain);
@@ -367,7 +359,7 @@ fn manage_subdomains_data(
             }
         }
         show_subdomains_found(subdomains_resolved, target)
-    } else if only_resolved != "y" && with_output == "y" {
+    } else if !only_resolved && with_output {
         for subdomain in &subdomains {
             write_to_file(subdomain, file_name)?;
             println!("{}", subdomain);
@@ -564,7 +556,7 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     let file_name = args.file_name.clone();
-    if args.unique_output_flag == "y" {
+    if args.unique_output_flag {
         check_output_file_exists(&file_name)?;
     }
     let f =
