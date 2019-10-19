@@ -10,6 +10,7 @@ pub struct Args {
     pub postgres_port: usize,
     pub postgres_database: String,
     pub only_resolved: bool,
+    pub with_ip: bool,
     pub with_output: bool,
     pub unique_output_flag: bool,
     pub monitoring_flag: bool,
@@ -50,6 +51,7 @@ pub fn get_args() -> Args {
             .unwrap_or_else(|_| String::from("")),
 
         only_resolved: matches.is_present("resolved"),
+        with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),
         unique_output_flag: matches.is_present("unique-output"),
         monitoring_flag: matches.is_present("monitoring-flag"),

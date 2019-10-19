@@ -16,9 +16,8 @@ use rand::Rng;
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
-    fs::{self, File, OpenOptions},
+    fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
-    path::Path,
     thread,
     time::Duration,
 };
@@ -282,17 +281,18 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         .flat_map(|sub| sub)
         .collect();
     if subdomains.is_empty() {
-        println!(
+        eprintln!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
             &target
         );
     } else {
         if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag {
-            check_output_file_exists(&file_name)?;
+            misc::check_output_file_exists(&file_name)?;
             manage_subdomains_data(
                 subdomains,
                 &target,
                 args.only_resolved,
+                args.with_ip,
                 args.with_output,
                 &file_name,
                 args.quiet_flag,
@@ -302,6 +302,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 subdomains,
                 &target,
                 args.only_resolved,
+                args.with_ip,
                 args.with_output,
                 &file_name,
                 args.quiet_flag,
@@ -317,11 +318,12 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 telegram_chat_id,
             )?;
         } else {
-            check_output_file_exists(&file_name)?;
+            misc::check_output_file_exists(&file_name)?;
             manage_subdomains_data(
                 subdomains,
                 &target,
                 args.only_resolved,
+                args.with_ip,
                 args.with_output,
                 &file_name,
                 args.quiet_flag,
@@ -329,7 +331,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         }
         if args.with_output && !args.quiet_flag {
             println!(
-                ">> 📁 Filename for the target {} was saved in: ./{} 😀",
+                ">> 📁 Subdomains for {} were saved in: ./{} 😀",
                 &target, &file_name
             )
         }
@@ -342,35 +344,59 @@ fn manage_subdomains_data(
     mut subdomains: HashSet<String>,
     target: &str,
     only_resolved: bool,
+    with_ip: bool,
     with_output: bool,
     file_name: &str,
     quiet_flag: bool,
 ) -> Result<()> {
     let base_target = [".", &target].concat();
+    let resolver = get_resolver();
     if !quiet_flag {
         println!()
     };
     subdomains
         .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
     let mut subdomains_resolved = 0;
-    if only_resolved && with_output {
-        for subdomain in &subdomains {
-            if get_ip(subdomain) {
-                write_to_file(subdomain, file_name)?;
-                println!("{}", subdomain);
-                subdomains_resolved += 1
+    if with_output && only_resolved || with_ip {
+        if only_resolved {
+            for subdomain in &subdomains {
+                if resolver.lookup_ip(subdomain).is_ok() {
+                    write_to_file(subdomain, file_name)?;
+                    println!("{}", subdomain);
+                    subdomains_resolved += 1
+                }
+            }
+        } else if with_ip {
+            for subdomain in &subdomains {
+                let ip = get_ip(subdomain);
+                let data = format!("{},{}", subdomain, ip);
+                if !ip.is_empty() {
+                    write_to_file(&data, file_name)?;
+                    println!("{}", data);
+                    subdomains_resolved += 1
+                }
             }
         }
         misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
-    } else if only_resolved && !with_output {
-        for subdomain in &subdomains {
-            if get_ip(subdomain) {
-                println!("{}", subdomain);
-                subdomains_resolved += 1
+    } else if !with_output && only_resolved || with_ip {
+        if only_resolved {
+            for subdomain in &subdomains {
+                if resolver.lookup_ip(subdomain).is_ok() {
+                    println!("{}", subdomain);
+                    subdomains_resolved += 1
+                }
+            }
+        } else if with_ip {
+            for subdomain in &subdomains {
+                let ip = get_ip(subdomain);
+                if !ip.is_empty() {
+                    println!("{}", &format!("{},{}", subdomain, ip));
+                    subdomains_resolved += 1
+                }
             }
         }
         misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
-    } else if !only_resolved && with_output {
+    } else if !only_resolved && !with_ip && with_output {
         for subdomain in &subdomains {
             write_to_file(subdomain, file_name)?;
             println!("{}", subdomain);
@@ -573,15 +599,17 @@ fn get_virustotal_apikey_subdomains(
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     let file_name = args.file_name.clone();
     if args.unique_output_flag {
-        check_output_file_exists(&file_name)?;
+        misc::check_output_file_exists(&args.file_name)?;
     }
     let f =
         File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
     let f = BufReader::new(f);
     for domain in f.lines() {
-        let domain = domain?.to_string();
-        args.file_name = if file_name.is_empty() {
-            [&domain, ".txt"].concat()
+        args.target = domain?.to_string();
+        args.file_name = if file_name.is_empty() && !args.with_ip {
+            [&args.target, ".txt"].concat()
+        } else if file_name.is_empty() && args.with_ip {
+            [&args.target, "-ip", ".txt"].concat()
         } else {
             file_name.to_string()
         };
@@ -601,9 +629,16 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     Ok(())
 }
 
-fn get_ip(domain: &str) -> bool {
+fn get_ip(domain: &str) -> String {
     let resolver = get_resolver();
-    resolver.lookup_ip(&domain).is_ok()
+    match resolver.lookup_ip(&domain) {
+        Ok(ip_address) => ip_address
+            .iter()
+            .next()
+            .expect("An error as ocurred getting the IP address.")
+            .to_string(),
+        Err(_) => String::from(""),
+    }
 }
 
 fn get_resolver() -> Resolver {
@@ -620,19 +655,6 @@ fn get_resolver() -> Resolver {
     } else {
         Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
     }
-}
-
-pub fn check_output_file_exists(file_name: &str) -> Result<()> {
-    if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        let backup_file_name = file_name.replace(&file_name.split('.').last().unwrap(), "old.txt");
-        fs::rename(&file_name, &backup_file_name).with_context(|_| {
-            format!(
-                "The file {} already exists but Findomain can't backup the file to {}. Please run the tool with a more privileged user or try in a different directory.",
-                &file_name, &backup_file_name,
-            )
-        })?;
-    }
-    Ok(())
 }
 
 fn subdomains_alerts(
@@ -683,7 +705,7 @@ fn subdomains_alerts(
     if !discord_webhook.is_empty() {
         discord_parameters.insert(
             "content",
-            return_webhook_payload(&new_subdomains, "discord", &target),
+            misc::return_webhook_payload(&new_subdomains, "discord", &target),
         );
         webhooks_data.insert(discord_webhook, discord_parameters);
     }
@@ -691,7 +713,7 @@ fn subdomains_alerts(
     if !slack_webhook.is_empty() {
         slack_parameters.insert(
             "text",
-            return_webhook_payload(&new_subdomains, "slack", &target),
+            misc::return_webhook_payload(&new_subdomains, "slack", &target),
         );
         webhooks_data.insert(slack_webhook, slack_parameters);
     }
@@ -699,7 +721,7 @@ fn subdomains_alerts(
     if !telegram_webhook.is_empty() {
         telegram_parameters.insert(
             "text",
-            return_webhook_payload(&new_subdomains, "telegram", &target),
+            misc::return_webhook_payload(&new_subdomains, "telegram", &target),
         );
         telegram_parameters.insert("chat_id", telegram_chat_id);
         telegram_parameters.insert("parse_mode", "HTML".to_string());
@@ -740,81 +762,4 @@ fn commit_to_db(conn: &postgres::Connection, new_subdomains: &HashSet<String>) -
     }
     prepared_transaction.commit()?;
     Ok(())
-}
-
-fn return_webhook_payload(
-    new_subdomains: &HashSet<String>,
-    webhook_name: &str,
-    target: &str,
-) -> String {
-    if new_subdomains.is_empty() && webhook_name == "discord" {
-        format!(
-            "**Findomain alert:** No new subdomains found for {}",
-            &target
-        )
-    } else if new_subdomains.is_empty() && webhook_name == "slack" {
-        format!("*Findomain alert:* No new subdomains found for {}", &target)
-    } else if new_subdomains.is_empty() && webhook_name == "telegram" {
-        format!(
-            "<b>Findomain alert:</b> No new subdomains found for {}",
-            &target
-        )
-    } else {
-        let webhooks_payload = new_subdomains
-            .clone()
-            .into_iter()
-            .collect::<Vec<_>>()
-            .join("\n");
-        if webhook_name == "discord" {
-            if webhooks_payload.len() > 1900 {
-                format!(
-                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(1900).0.to_string()
-                )
-            } else {
-                format!(
-                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.to_string()
-                )
-            }
-        } else if webhook_name == "slack" {
-            if webhooks_payload.len() > 15000 {
-                format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(15000).0.to_string()
-                )
-            } else {
-                format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.to_string()
-                )
-            }
-        } else if webhook_name == "telegram" {
-            if webhooks_payload.len() > 4000 {
-                format!(
-                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(4000).0.to_string()
-                )
-            } else {
-                format!(
-                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.to_string()
-                )
-            }
-        } else {
-            String::from("")
-        }
-    }
 }

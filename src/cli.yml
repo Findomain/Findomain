@@ -22,6 +22,16 @@ args:
         takes_value: false
         conflicts_with:
           - monitoring-flag
+          - ip
+
+    - ip:
+        short: i
+        long: ip
+        help: Show/write the ip address of resolved subdomains.
+        takes_value: false
+        conflicts_with:
+          - monitoring-flag
+          - resolved
 
     - file:
         short: f
