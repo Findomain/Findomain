@@ -18,6 +18,7 @@ use std::{
 };
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
+pub mod args;
 pub mod errors;
 mod get_vars;
 use crate::errors::*;
@@ -149,16 +150,23 @@ lazy_static! {
         .unwrap();
 }
 
-pub fn get_subdomains(
-    target: &str,
-    only_resolved: &str,
-    with_output: &str,
-    file_name: &str,
-    unique_output_flag: &str,
-    monitoring_flag: &str,
-    from_file_flag: &str,
-    postgres_connection: &str,
-) -> Result<()> {
+pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
+    let target = &args.target;
+    let only_resolved = &args.only_resolved;
+    let with_output = &args.with_output;
+    let file_name = &args.file_name;
+    let unique_output_flag = &args.unique_output_flag;
+    let monitoring_flag = &args.monitoring_flag;
+    let from_file_flag = &args.from_file_flag;
+    let postgres_connection = format!(
+        "postgresql://{}:{}@{}:{}/{}",
+        args.postgres_user,
+        args.postgres_password,
+        args.postgres_host,
+        args.postgres_port,
+        args.postgres_database
+    );
+
     let discord_webhook = get_vars::get_webhook("discord");
     let slack_webhook = get_vars::get_webhook("slack");
     let telegram_bot_token = get_vars::get_auth_token("telegram");
@@ -280,7 +288,7 @@ pub fn get_subdomains(
         );
     } else {
         if unique_output_flag == "y" && from_file_flag.is_empty() && monitoring_flag.is_empty() {
-            check_output_file_exists(file_name)?;
+            check_output_file_exists(&file_name)?;
             manage_subdomains_data(
                 subdomains,
                 &target,
@@ -554,38 +562,22 @@ fn check_json_errors(error: reqwest::Error, api: &str) {
     println!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
-pub fn read_from_file(
-    file: &str,
-    only_resolved: &str,
-    with_output: &str,
-    file_name: &str,
-    unique_output_flag: &str,
-    monitoring_flag: &str,
-    from_file_flag: &str,
-    postgres_connection: &str,
-) -> Result<()> {
-    if unique_output_flag == "y" {
-        check_output_file_exists(file_name)?;
+pub fn read_from_file(args: &mut args::Args) -> Result<()> {
+    let file_name = args.file_name.clone();
+    if args.unique_output_flag == "y" {
+        check_output_file_exists(&file_name)?;
     }
-    let f = File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
+    let f =
+        File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
     let f = BufReader::new(f);
     for domain in f.lines() {
         let domain = domain?.to_string();
-        let file_name = if file_name.is_empty() {
+        args.file_name = if file_name.is_empty() {
             [&domain, ".txt"].concat()
         } else {
             file_name.to_string()
         };
-        get_subdomains(
-            &domain,
-            &only_resolved,
-            &with_output,
-            &file_name,
-            &unique_output_flag,
-            &monitoring_flag,
-            &from_file_flag,
-            &postgres_connection,
-        )?;
+        get_subdomains(args)?;
     }
 
     Ok(())
