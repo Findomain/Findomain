@@ -80,3 +80,8 @@ args:
         long: postgres-database
         help: Postgresql database.
         takes_value: true
+    - quiet:
+        short: q
+        long: quiet
+        help: Remove informative messages but show fatal errors or subdomains not found message.
+        takes_value: false

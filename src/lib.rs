@@ -5,6 +5,12 @@ use serde::de::DeserializeOwned;
 #[macro_use]
 extern crate lazy_static;
 
+pub mod args;
+pub mod errors;
+mod get_vars;
+mod misc;
+
+use crate::errors::*;
 use postgres::{Connection, TlsMode};
 use rand::Rng;
 use std::{
@@ -17,11 +23,6 @@ use std::{
     time::Duration,
 };
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
-
-pub mod args;
-pub mod errors;
-mod get_vars;
-use crate::errors::*;
 
 trait IntoSubdomains {
     fn into_subdomains(self) -> HashSet<String>;
@@ -161,7 +162,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         args.postgres_port,
         args.postgres_database
     );
-
+    let quiet_flag = args.quiet_flag;
     let discord_webhook = get_vars::get_webhook("discord");
     let slack_webhook = get_vars::get_webhook("slack");
     let telegram_bot_token = get_vars::get_auth_token("telegram");
@@ -176,10 +177,10 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         && slack_webhook.is_empty()
         && telegram_bot_token.is_empty()
     {
-        eprintln!("You need to configure at least one webhook variable in your system. For Discord set the findomain_discord_webhook system variable, for Slack set the findomain_slack_webhook variable, for Telegram set the findomain_telegrambot_token and findomain_telegrambot_chat_id valriables. See https://git.io/JeZQW for more information, exiting.");
+        telegram_err1();
         std::process::exit(1)
     } else if !telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
-        eprintln!("You have configured the findomain_telegrambot_token variable but not the findomain_telegrambot_chat_id variable, it's required. See https://git.io/JeZQW for more information, exiting.");
+        telegram_err2();
         std::process::exit(1)
     } else if telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
         telegram_webhook = String::from("")
@@ -197,7 +198,9 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         .replace("http://", "")
         .replace("/", "");
 
-    println!("\nTarget ==> {}\n", &target);
+    if !quiet_flag {
+        println!("\nTarget ==> {}\n", &target)
+    }
 
     let spyse_access_token = get_vars::get_auth_token("spyse");
     let facebook_access_token = get_vars::get_auth_token("facebook");
@@ -224,10 +227,10 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         &target
     );
     let all_subdomains = vec![
-        thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter)),
-        thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh)),
-        thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal)),
-        thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r)),
+        thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
+        thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
+        thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
+        thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
         if facebook_access_token.is_empty() {
             let findomain_fb_tokens = [
                 "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
@@ -246,17 +249,17 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 &target,
                 &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
             );
-            thread::spawn(move || get_facebook_subdomains(&url_api_fb))
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
         } else {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &target,
                 &facebook_access_token);
-            thread::spawn(move || get_facebook_subdomains(&url_api_fb))
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
-        thread::spawn(move || get_spyse_subdomains(&url_api_spyse)),
-        thread::spawn(move || get_bufferover_subdomains(&url_api_bufferover)),
-        thread::spawn(move || get_threatcrowd_subdomains(&url_api_threatcrowd)),
+        thread::spawn(move || get_spyse_subdomains(&url_api_spyse, quiet_flag)),
+        thread::spawn(move || get_bufferover_subdomains(&url_api_bufferover, quiet_flag)),
+        thread::spawn(move || get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)),
         if virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
@@ -264,7 +267,9 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
                 &virustotal_access_token, &target
             );
-            thread::spawn(move || get_virustotal_apikey_subdomains(&url_virustotal_apikey))
+            thread::spawn(move || {
+                get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
+            })
         },
     ];
 
@@ -290,6 +295,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 args.only_resolved,
                 args.with_output,
                 &file_name,
+                args.quiet_flag,
             )?;
         } else if args.unique_output_flag && args.from_file_flag && !args.monitoring_flag {
             manage_subdomains_data(
@@ -298,6 +304,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 args.only_resolved,
                 args.with_output,
                 &file_name,
+                args.quiet_flag,
             )?;
         } else if args.monitoring_flag && !args.unique_output_flag {
             subdomains_alerts(
@@ -317,9 +324,10 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 args.only_resolved,
                 args.with_output,
                 &file_name,
+                args.quiet_flag,
             )?;
         }
-        if args.with_output {
+        if args.with_output && !args.quiet_flag {
             println!(
                 ">> 📁 Filename for the target {} was saved in: ./{} 😀",
                 &target, &file_name
@@ -336,9 +344,12 @@ fn manage_subdomains_data(
     only_resolved: bool,
     with_output: bool,
     file_name: &str,
+    quiet_flag: bool,
 ) -> Result<()> {
     let base_target = [".", &target].concat();
-    println!();
+    if !quiet_flag {
+        println!()
+    };
     subdomains
         .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
     let mut subdomains_resolved = 0;
@@ -350,7 +361,7 @@ fn manage_subdomains_data(
                 subdomains_resolved += 1
             }
         }
-        show_subdomains_found(subdomains_resolved, target)
+        misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
     } else if only_resolved && !with_output {
         for subdomain in &subdomains {
             if get_ip(subdomain) {
@@ -358,33 +369,34 @@ fn manage_subdomains_data(
                 subdomains_resolved += 1
             }
         }
-        show_subdomains_found(subdomains_resolved, target)
+        misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
     } else if !only_resolved && with_output {
         for subdomain in &subdomains {
             write_to_file(subdomain, file_name)?;
             println!("{}", subdomain);
         }
-        show_subdomains_found(subdomains.len(), target)
+        misc::show_subdomains_found(subdomains.len(), target, quiet_flag)
     } else {
         for subdomain in &subdomains {
             println!("{}", subdomain);
         }
-        show_subdomains_found(subdomains.len(), target)
+        misc::show_subdomains_found(subdomains.len(), target, quiet_flag)
     }
-    println!("\nGood luck Hax0r 💀!\n");
+
+    if !quiet_flag {
+        println!("\nGood luck Hax0r 💀!\n");
+    }
 
     Ok(())
 }
 
-fn show_subdomains_found(subdomains_found: usize, target: &str) {
-    println!(
-        "\nA total of {} subdomains were found for ==>  {} 👽",
-        subdomains_found, target
-    )
-}
-
-fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<HashSet<String>> {
-    println!("Searching in the CertSpotter API... 🔍");
+fn get_certspotter_subdomains(
+    url_api_certspotter: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("CertSpotter")
+    }
     match CLIENT.get(url_api_certspotter).send() {
         Ok(mut data_certspotter) => match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>()
         {
@@ -395,19 +407,21 @@ fn get_certspotter_subdomains(url_api_certspotter: &str) -> Option<HashSet<Strin
                     .collect(),
             ),
             Err(e) => {
-                check_json_errors(e, "CertSpotter");
+                check_json_errors(e, "CertSpotter", quiet_flag);
                 None
             }
         },
         Err(e) => {
-            check_request_errors(e, "CertSpotter");
+            check_request_errors(e, "CertSpotter", quiet_flag);
             None
         }
     }
 }
 
-fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Crtsh API... 🔍");
+fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Crtsh")
+    }
     match CLIENT.get(url_api_crtsh).send() {
         Ok(mut data_crtsh) => match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
             Ok(domains_crtsh) => Some(
@@ -417,19 +431,25 @@ fn get_crtsh_subdomains(url_api_crtsh: &str) -> Option<HashSet<String>> {
                     .collect(),
             ),
             Err(e) => {
-                check_json_errors(e, "Crtsh");
+                check_json_errors(e, "Crtsh", quiet_flag);
                 None
             }
         },
         Err(e) => {
-            check_request_errors(e, "Crtsh");
+            check_request_errors(e, "Crtsh", quiet_flag);
             None
         }
     }
 }
 
-fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Crtsh database... 🔍");
+fn get_crtsh_db_subdomains(
+    crtsh_db_query: &str,
+    url_api_crtsh: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Crtsh database")
+    }
     match Connection::connect("postgres://guest@crt.sh:5432/certwatch", TlsMode::None) {
         Ok(crtsh_db_client) => match crtsh_db_client.query(&crtsh_db_query, &[]) {
             Ok(crtsh_db_subdomains) => Some(
@@ -444,19 +464,23 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
                     .collect(),
             ),
             Err(e) => {
-                println!(
+                if !quiet_flag {
+                    println!(
                     "❌ A error has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
                     e.description()
                 );
-                get_crtsh_subdomains(&url_api_crtsh)
+                }
+                get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
             }
         },
         Err(e) => {
-            println!(
+            if !quiet_flag {
+                println!(
                 "❌ A error has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
                 e.description()
             );
-            get_crtsh_subdomains(&url_api_crtsh)
+            }
+            get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
         }
     }
 }
@@ -464,94 +488,86 @@ fn get_crtsh_db_subdomains(crtsh_db_query: &str, url_api_crtsh: &str) -> Option<
 fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
     url: &str,
     name: &str,
+    quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     match CLIENT.get(url).send() {
         Ok(mut data) => match data.json::<T>() {
             Ok(json) => Some(json.into_subdomains()),
             Err(e) => {
-                check_json_errors(e, name);
+                check_json_errors(e, name, quiet_flag);
                 None
             }
         },
         Err(e) => {
-            check_request_errors(e, name);
+            check_request_errors(e, name, quiet_flag);
             None
         }
     }
 }
 
-fn get_virustotal_subdomains(url_api_virustotal: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Virustotal API... 🔍");
-    get_from_http_api::<ResponseDataVirusTotal>(url_api_virustotal, "Virustotal")
+fn get_virustotal_subdomains(
+    url_api_virustotal: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Virustotal")
+    }
+    get_from_http_api::<ResponseDataVirusTotal>(url_api_virustotal, "Virustotal", quiet_flag)
 }
 
-fn get_sublist3r_subdomains(url_api_sublist3r: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Sublist3r API... 🔍");
-    get_from_http_api::<HashSet<String>>(url_api_sublist3r, "Sublist3r")
+fn get_sublist3r_subdomains(url_api_sublist3r: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Sublist3r")
+    }
+    get_from_http_api::<HashSet<String>>(url_api_sublist3r, "Sublist3r", quiet_flag)
 }
 
-fn get_facebook_subdomains(url_api_fb: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Facebook API... 🔍");
-    get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook")
+fn get_facebook_subdomains(url_api_fb: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Facebook")
+    }
+    get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook", quiet_flag)
 }
 
-fn get_spyse_subdomains(url_api_spyse: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Spyse API... 🔍");
-    get_from_http_api::<ResponseDataSpyse>(url_api_spyse, "Spyse")
+fn get_spyse_subdomains(url_api_spyse: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Spyse")
+    }
+    get_from_http_api::<ResponseDataSpyse>(url_api_spyse, "Spyse", quiet_flag)
 }
 
-fn get_bufferover_subdomains(url_api_bufferover: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Bufferover API... 🔍");
-    get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover")
+fn get_bufferover_subdomains(
+    url_api_bufferover: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Bufferover")
+    }
+    get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover", quiet_flag)
 }
 
-fn get_threatcrowd_subdomains(url_api_threatcrowd: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Threadcrowd API... 🔍");
-    get_from_http_api::<SubdomainsThreadcrowd>(url_api_threatcrowd, "Threadcrowd")
+fn get_threatcrowd_subdomains(
+    url_api_threatcrowd: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Threadcrowd")
+    }
+    get_from_http_api::<SubdomainsThreadcrowd>(url_api_threatcrowd, "Threadcrowd", quiet_flag)
 }
 
-fn get_virustotal_apikey_subdomains(url_virustotal_apikey: &str) -> Option<HashSet<String>> {
-    println!("Searching in the Virustotal API using apikey... 🔍");
+fn get_virustotal_apikey_subdomains(
+    url_virustotal_apikey: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        println!("Searching in the Virustotal API using apikey... 🔍");
+    }
     get_from_http_api::<SubdomainsVirustotalApikey>(
         url_virustotal_apikey,
         "Virustotal API using apikey",
+        quiet_flag,
     )
-}
-
-fn check_request_errors(error: reqwest::Error, api: &str) {
-    if error.is_timeout() {
-        println!(
-            "⏳ A timeout error has occurred while processing the request in the {} API. Error description: {}",
-            &api, &error.description())
-    } else if error.is_redirect() {
-        println!(
-            "❌ A redirect was found while processing the {} API. Error description: {}",
-            &api,
-            &error.description()
-        )
-    } else if error.is_client_error() {
-        println!(
-            "❌ A client error has occurred sending the request to the {} API. Error description: {}",
-            &api,
-            &error.description()
-        )
-    } else if error.is_server_error() {
-        println!(
-            "❌ A server error has occurred sending the request to the {} API. Error description: {}",
-            &api,
-            &error.description()
-        )
-    } else {
-        println!(
-            "❌ An error has occurred while procesing the request in the {} API. Error description: {}",
-            &api,
-            &error.description()
-        )
-    }
-}
-
-fn check_json_errors(error: reqwest::Error, api: &str) {
-    println!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
 }
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
