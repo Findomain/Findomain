@@ -2,5 +2,6 @@
 **/*.rs.bk
 test.*
 *.txt
+domains
 *.csv
 *.json
