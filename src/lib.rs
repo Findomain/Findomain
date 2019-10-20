@@ -151,7 +151,6 @@ lazy_static! {
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
-    let target = &args.target;
     let file_name = &args.file_name;
     let postgres_connection = format!(
         "postgresql://{}:{}@{}:{}/{}",
@@ -191,7 +190,8 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         None
     };
 
-    let target = target
+    let target = args
+        .target
         .replace("www.", "")
         .replace("https://", "")
         .replace("http://", "")
@@ -316,9 +316,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
                 &slack_webhook,
                 &telegram_webhook,
                 telegram_chat_id,
-                args.with_output,
-                &args.file_name,
-                args.quiet_flag,
+                &args,
             )?;
         } else {
             misc::check_output_file_exists(&file_name)?;
@@ -664,9 +662,7 @@ fn subdomains_alerts(
     slack_webhook: &str,
     telegram_webhook: &str,
     telegram_chat_id: String,
-    with_output: bool,
-    file_name: &str,
-    quiet_flag: bool,
+    args: &&mut args::Args,
 ) -> Result<()> {
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
@@ -704,17 +700,17 @@ fn subdomains_alerts(
         .map(|sub| sub.to_string())
         .collect();
 
-    if with_output {
-        if !new_subdomains.is_empty() {
-            let file_name =
-                file_name.replace(&file_name.split('.').last().unwrap(), "new_subdomains.txt");
-            misc::check_output_file_exists(&file_name)?;
-            for subdomain in &new_subdomains {
-                write_to_file(subdomain, &file_name)?;
-            }
-            if !quiet_flag {
-                misc::show_file_location(&target, &file_name)
-            }
+    if args.with_output && !new_subdomains.is_empty() {
+        let file_name = args.file_name.replace(
+            &args.file_name.split('.').last().unwrap(),
+            "new_subdomains.txt",
+        );
+        misc::check_output_file_exists(&file_name)?;
+        for subdomain in &new_subdomains {
+            write_to_file(subdomain, &file_name)?;
+        }
+        if !args.quiet_flag {
+            misc::show_file_location(&target, &file_name)
         }
     }
 
@@ -760,13 +756,11 @@ fn subdomains_alerts(
             } else if response.status().is_success()
                 || response.status() == 204 && new_subdomains.is_empty()
             {
-            } else {
-                if !quiet_flag {
-                    eprintln!(
+            } else if !args.quiet_flag {
+                eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
                     webhook, response.status()
                 )
-                }
             }
         }
     }
