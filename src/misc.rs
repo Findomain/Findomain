@@ -31,6 +31,13 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn show_file_location(target: &str, file_name: &str) {
+    println!(
+        ">> 📁 Subdomains for {} were saved in: ./{} 😀",
+        &target, &file_name
+    )
+}
+
 pub fn return_webhook_payload(
     new_subdomains: &HashSet<String>,
     webhook_name: &str,

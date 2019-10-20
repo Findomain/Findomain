@@ -47,8 +47,6 @@ args:
         long: output
         help: Write to an output file. The name of the output file will be the target string with TXT format.
         takes_value: false
-        conflicts_with:
-          - monitoring-flag
 
     - unique-output:
         short: u
