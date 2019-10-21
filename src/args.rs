@@ -1,4 +1,5 @@
 use clap::{load_yaml, value_t, App};
+use std::collections::HashSet;
 
 pub struct Args {
     pub target: String,
@@ -16,6 +17,7 @@ pub struct Args {
     pub monitoring_flag: bool,
     pub from_file_flag: bool,
     pub quiet_flag: bool,
+    pub subdomains: HashSet<String>,
 }
 
 pub fn get_args() -> Args {
@@ -57,5 +59,6 @@ pub fn get_args() -> Args {
         monitoring_flag: matches.is_present("monitoring-flag"),
         from_file_flag: matches.is_present("file"),
         quiet_flag: matches.is_present("quiet"),
+        subdomains: HashSet::new(),
     }
 }

@@ -148,18 +148,10 @@ lazy_static! {
         .timeout(Duration::from_secs(20))
         .build()
         .unwrap();
+    static ref RESOLVER: Resolver = get_resolver();
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
-    let file_name = &args.file_name;
-    let postgres_connection = format!(
-        "postgresql://{}:{}@{}:{}/{}",
-        args.postgres_user,
-        args.postgres_password,
-        args.postgres_host,
-        args.postgres_port,
-        args.postgres_database
-    );
     let quiet_flag = args.quiet_flag;
     let discord_webhook = get_vars::get_webhook("discord");
     let slack_webhook = get_vars::get_webhook("slack");
@@ -184,13 +176,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         telegram_webhook = String::from("")
     }
 
-    let connection: Option<postgres::Connection> = if args.monitoring_flag {
-        Some(Connection::connect(postgres_connection, TlsMode::None)?)
-    } else {
-        None
-    };
-
-    let target = args
+    args.target = args
         .target
         .replace("www.", "")
         .replace("https://", "")
@@ -198,7 +184,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         .replace("/", "");
 
     if !quiet_flag {
-        println!("\nTarget ==> {}\n", &target)
+        println!("\nTarget ==> {}\n", &args.target)
     }
 
     let spyse_access_token = get_vars::get_auth_token("spyse");
@@ -207,23 +193,26 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
 
     let url_api_certspotter = format!(
         "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
-        &target
+        &args.target
     );
     let url_api_virustotal = format!(
         "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
-        &target
+        &args.target
     );
-    let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &target);
-    let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &target);
-    let url_api_sublist3r = format!("https://api.sublist3r.com/search.php?domain={}", &target);
+    let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &args.target);
+    let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &args.target);
+    let url_api_sublist3r = format!(
+        "https://api.sublist3r.com/search.php?domain={}",
+        &args.target
+    );
     let url_api_spyse = format!(
         "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-        &target, &spyse_access_token
+        &args.target, &spyse_access_token
     );
-    let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &target);
+    let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
-        &target
+        &args.target
     );
     let all_subdomains = vec![
         thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
@@ -245,14 +234,14 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
             ];
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
-                &target,
+                &args.target,
                 &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
             );
             thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
         } else {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
-                &target,
+                &args.target,
                 &facebook_access_token);
             thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
@@ -264,7 +253,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         } else {
             let url_virustotal_apikey = format!(
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
-                &virustotal_access_token, &target
+                &virustotal_access_token, &args.target
             );
             thread::spawn(move || {
                 get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
@@ -272,7 +261,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         },
     ];
 
-    let subdomains: HashSet<String> = all_subdomains
+    args.subdomains = all_subdomains
         .into_iter()
         .map(|j| j.join().unwrap())
         .collect::<Vec<_>>()
@@ -280,134 +269,98 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         .flatten()
         .flat_map(|sub| sub)
         .collect();
-    if subdomains.is_empty() {
+    let base_target = &format!(".{}", args.target);
+    args.subdomains
+        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(base_target));
+
+    if args.subdomains.is_empty() {
         eprintln!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
-            &target
+            &args.target
         );
     } else {
         if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag {
-            misc::check_output_file_exists(&file_name)?;
-            manage_subdomains_data(
-                subdomains,
-                &target,
-                args.only_resolved,
-                args.with_ip,
-                args.with_output,
-                &file_name,
-                args.quiet_flag,
-            )?;
+            misc::check_output_file_exists(&args.file_name)?;
+            manage_subdomains_data(args)?;
         } else if args.unique_output_flag && args.from_file_flag && !args.monitoring_flag {
-            manage_subdomains_data(
-                subdomains,
-                &target,
-                args.only_resolved,
-                args.with_ip,
-                args.with_output,
-                &file_name,
-                args.quiet_flag,
-            )?;
+            manage_subdomains_data(args)?;
         } else if args.monitoring_flag && !args.unique_output_flag {
             subdomains_alerts(
-                connection.unwrap(),
-                subdomains,
-                &target,
+                args,
                 &discord_webhook,
                 &slack_webhook,
                 &telegram_webhook,
                 telegram_chat_id,
-                &args,
             )?;
         } else {
-            misc::check_output_file_exists(&file_name)?;
-            manage_subdomains_data(
-                subdomains,
-                &target,
-                args.only_resolved,
-                args.with_ip,
-                args.with_output,
-                &file_name,
-                args.quiet_flag,
-            )?;
+            misc::check_output_file_exists(&args.file_name)?;
+            manage_subdomains_data(args)?;
         }
         if args.with_output && !args.quiet_flag && !args.monitoring_flag {
-            misc::show_file_location(&target, &file_name)
+            misc::show_file_location(&args.target, &args.file_name)
         }
     }
-
     Ok(())
 }
 
-fn manage_subdomains_data(
-    mut subdomains: HashSet<String>,
-    target: &str,
-    only_resolved: bool,
-    with_ip: bool,
-    with_output: bool,
-    file_name: &str,
-    quiet_flag: bool,
-) -> Result<()> {
-    let base_target = [".", &target].concat();
-    let resolver = get_resolver();
-    if !quiet_flag {
+fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
+    if !args.quiet_flag {
         println!()
     };
-    subdomains
-        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
     let mut subdomains_resolved = 0;
-    if with_output && (only_resolved || with_ip) {
-        if only_resolved {
-            for subdomain in &subdomains {
-                if resolver.lookup_ip(subdomain).is_ok() {
-                    write_to_file(subdomain, file_name)?;
+    if args.with_output && (args.only_resolved || args.with_ip) {
+        if args.only_resolved {
+            for subdomain in &args.subdomains {
+                if RESOLVER.lookup_ip(subdomain).is_ok() {
+                    write_to_file(subdomain, &args.file_name)?;
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
-        } else if with_ip {
-            for subdomain in &subdomains {
-                let ip = get_ip(&resolver, subdomain);
+        } else if args.with_ip {
+            for subdomain in &args.subdomains {
+                let ip = get_ip(&RESOLVER, subdomain);
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
-                    write_to_file(&data, file_name)?;
+                    write_to_file(&data, &args.file_name)?;
                     println!("{}", data);
                     subdomains_resolved += 1
                 }
             }
         }
-        misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
-    } else if !with_output && (only_resolved || with_ip) {
-        if only_resolved {
-            for subdomain in &subdomains {
-                if resolver.lookup_ip(subdomain).is_ok() {
+        misc::show_subdomains_found(subdomains_resolved, &args.target, args.quiet_flag)
+    } else if !args.with_output && (args.only_resolved || args.with_ip) {
+        if args.only_resolved {
+            for subdomain in &args.subdomains {
+                if RESOLVER.lookup_ip(subdomain).is_ok() {
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
-        } else if with_ip {
-            for subdomain in &subdomains {
-                let ip = get_ip(&resolver, subdomain);
+        } else if args.with_ip {
+            for subdomain in &args.subdomains {
+                let ip = get_ip(&RESOLVER, subdomain);
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
                     subdomains_resolved += 1
                 }
             }
         }
-        misc::show_subdomains_found(subdomains_resolved, target, quiet_flag)
-    } else if !only_resolved && !with_ip && with_output {
-        for subdomain in &subdomains {
-            write_to_file(subdomain, file_name)?;
+        misc::show_subdomains_found(subdomains_resolved, &args.target, args.quiet_flag)
+    } else if !args.only_resolved && !args.with_ip && args.with_output {
+        for subdomain in &args.subdomains {
+            write_to_file(subdomain, &args.file_name)?;
             println!("{}", subdomain);
         }
-        misc::show_subdomains_found(subdomains.len(), target, quiet_flag)
+        misc::show_subdomains_found(args.subdomains.len(), &args.target, args.quiet_flag)
     } else {
-        for subdomain in &subdomains {
+        for subdomain in &args.subdomains {
             println!("{}", subdomain);
         }
-        misc::show_subdomains_found(subdomains.len(), target, quiet_flag)
+        misc::show_subdomains_found(args.subdomains.len(), &args.target, args.quiet_flag)
     }
 
-    if !quiet_flag {
+    if !args.quiet_flag {
         println!("\nGood luck Hax0r 💀!\n");
     }
 
@@ -605,9 +558,9 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     for domain in f.lines() {
         args.target = domain?.to_string();
         args.file_name = if file_name.is_empty() && !args.with_ip {
-            [&args.target, ".txt"].concat()
+            format!("{}.txt", &args.target)
         } else if file_name.is_empty() && args.with_ip {
-            [&args.target, "-ip", ".txt"].concat()
+            format!("{}-ip.txt", &args.target)
         } else {
             file_name.to_string()
         };
@@ -623,7 +576,7 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
         .create(true)
         .open(&file_name)
         .with_context(|_| format!("Can't create file 📁 {}", &file_name))?;
-    output_file.write_all(&[data, "\n"].concat().as_bytes())?;
+    output_file.write_all(&format!("{}\n", &data).as_bytes())?;
     Ok(())
 }
 
@@ -655,20 +608,27 @@ fn get_resolver() -> Resolver {
 }
 
 fn subdomains_alerts(
-    connection: postgres::Connection,
-    mut current_subdomains: HashSet<String>,
-    target: &str,
+    args: &mut args::Args,
     discord_webhook: &str,
     slack_webhook: &str,
     telegram_webhook: &str,
     telegram_chat_id: String,
-    args: &&mut args::Args,
 ) -> Result<()> {
+    let connection: postgres::Connection = Connection::connect(
+        format!(
+            "postgresql://{}:{}@{}:{}/{}",
+            args.postgres_user,
+            args.postgres_password,
+            args.postgres_host,
+            args.postgres_port,
+            args.postgres_database
+        ),
+        TlsMode::None,
+    )?;
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
     let mut telegram_parameters = HashMap::new();
     let mut webhooks_data = HashMap::new();
-    let base_target = [".", &target].concat();
     connection.execute(
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
@@ -678,7 +638,10 @@ fn subdomains_alerts(
     )?;
 
     let existing_subdomains = connection.query(
-        &format!("SELECT name FROM subdomains WHERE name LIKE '%{}'", &target),
+        &format!(
+            "SELECT name FROM subdomains WHERE name LIKE '%{}'",
+            &args.target
+        ),
         &[],
     )?;
 
@@ -692,10 +655,8 @@ fn subdomains_alerts(
         })
         .collect();
 
-    current_subdomains
-        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(&base_target));
-
-    let new_subdomains: HashSet<String> = current_subdomains
+    let new_subdomains: HashSet<String> = args
+        .subdomains
         .difference(&existing_subdomains)
         .map(|sub| sub.to_string())
         .collect();
@@ -710,14 +671,14 @@ fn subdomains_alerts(
             write_to_file(subdomain, &file_name)?;
         }
         if !args.quiet_flag {
-            misc::show_file_location(&target, &file_name)
+            misc::show_file_location(&args.target, &file_name)
         }
     }
 
     if !discord_webhook.is_empty() {
         discord_parameters.insert(
             "content",
-            misc::return_webhook_payload(&new_subdomains, "discord", &target),
+            misc::return_webhook_payload(&new_subdomains, "discord", &args.target),
         );
         webhooks_data.insert(discord_webhook, discord_parameters);
     }
@@ -725,7 +686,7 @@ fn subdomains_alerts(
     if !slack_webhook.is_empty() {
         slack_parameters.insert(
             "text",
-            misc::return_webhook_payload(&new_subdomains, "slack", &target),
+            misc::return_webhook_payload(&new_subdomains, "slack", &args.target),
         );
         webhooks_data.insert(slack_webhook, slack_parameters);
     }
@@ -733,7 +694,7 @@ fn subdomains_alerts(
     if !telegram_webhook.is_empty() {
         telegram_parameters.insert(
             "text",
-            misc::return_webhook_payload(&new_subdomains, "telegram", &target),
+            misc::return_webhook_payload(&new_subdomains, "telegram", &args.target),
         );
         telegram_parameters.insert("chat_id", telegram_chat_id);
         telegram_parameters.insert("parse_mode", "HTML".to_string());
