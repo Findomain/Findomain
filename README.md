@@ -30,9 +30,9 @@ The tool used to calculate the time, is the `time` command in Linux.
 
 |Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
-|Findomain|real 0m6.299s|70582|Very Low|Very Low|
+|Findomain|real 0m5.515s|84110|Very Low|Very Low|
 
-**Summary:** 70582 subdomains in 6.3 seconds.
+**Summary:** 84110 subdomains in 5.5 seconds.
 
 # Features
 
@@ -40,9 +40,11 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
+* Discover subdomains IP for data analisis.
 * Read target from user argument (-t) or file (-f).
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
+* Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 
@@ -372,7 +374,7 @@ $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX
 See `findomain -h/--help` to see all the options.
 
 ```
-findomain 0.4.0
+findomain 0.6.0
 Eduard Tolosa <edu4rdshl@protonmail.com>
 The fastest and cross-platform subdomain enumerator, don't waste your time.
 
@@ -381,9 +383,11 @@ USAGE:
 
 FLAGS:
     -h, --help               Prints help information
+    -i, --ip                 Show/write the ip address of resolved subdomains.
     -m, --monitoring-flag    Activate Findomain monitoring mode.
     -o, --output             Write to an output file. The name of the output file will be the target string with TXT
                              format.
+    -q, --quiet              Remove informative messages but show fatal errors or subdomains not found message.
     -r, --resolved           Show/write only resolved subdomains.
     -V, --version            Prints version information
 
