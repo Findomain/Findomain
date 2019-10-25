@@ -2,6 +2,7 @@
 WIN_TARGET="x86_64-pc-windows-gnu"
 AARCH_TARGET="aarch64-unknown-linux-gnu"
 OSX_TARGET="x86_64-apple-darwin"
+MANPAGE_DIR="docs/findomain.1"
 
 # Linux build
 echo "Building Linux artifact."
@@ -38,3 +39,15 @@ if CC=o64-clang CXX=o64-clang++ LIBZ_SYS_STATIC=1 cargo build -q --release --tar
 else
   echo "OSX artifact build: FAILED"
 fi
+
+echo "Creating manpage..."
+if command -v help2man > /dev/null; then
+  if help2man -o "$MANPAGE_DIR" "target/release/findomain"; then
+    echo "Manpage created sucessfully and saved in $MANPAGE_DIR"
+  else
+    echo "Error creating manpage."
+  fi
+else
+  echo "Please install the help2man package."
+fi
+
