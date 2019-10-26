@@ -2,7 +2,7 @@
 WIN_TARGET="x86_64-pc-windows-gnu"
 AARCH_TARGET="aarch64-unknown-linux-gnu"
 OSX_TARGET="x86_64-apple-darwin"
-MANPAGE_DIR="docs/findomain.1"
+MANPAGE_DIR="./findomain.1"
 
 # Linux build
 echo "Building Linux artifact."
