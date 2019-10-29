@@ -36,7 +36,7 @@ args:
     - file:
         short: f
         long: file
-        help: Sets the input file to use.
+        help: Use a list of subdomains writen in a file as input.
         takes_value: true
         multiple: false
         conflicts_with:
@@ -88,8 +88,16 @@ args:
         long: postgres-database
         help: Postgresql database.
         takes_value: true
+
     - quiet:
         short: q
         long: quiet
         help: Remove informative messages but show fatal errors or subdomains not found message.
         takes_value: false
+
+    - query-database:
+        long: query-database
+        help: Query the findomain database to search subdomains that have already been discovered.
+        takes_value: false
+        conflicts_with:
+          - monitoring-flag

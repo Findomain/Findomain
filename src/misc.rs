@@ -1,4 +1,4 @@
-use crate::errors::*;
+use crate::{args, errors::*};
 use std::{
     collections::HashSet,
     fs::{self},
@@ -110,7 +110,45 @@ pub fn return_webhook_payload(
                 )
             }
         } else {
-            String::from("")
+            String::new()
         }
     }
+}
+
+pub fn sanitize_target_string(target: String) -> String {
+    target
+        .replace("www.", "")
+        .replace("https://", "")
+        .replace("http://", "")
+        .replace("/", "")
+}
+
+pub fn works_with_data(
+    args: &mut args::Args,
+    discord_webhook: String,
+    slack_webhook: String,
+    telegram_webhook: String,
+    telegram_chat_id: String,
+) -> Result<()> {
+    if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag {
+        check_output_file_exists(&args.file_name)?;
+        crate::manage_subdomains_data(args)?;
+    } else if args.unique_output_flag && args.from_file_flag && !args.monitoring_flag {
+        crate::manage_subdomains_data(args)?;
+    } else if args.monitoring_flag && !args.unique_output_flag {
+        crate::subdomains_alerts(
+            args,
+            &discord_webhook,
+            &slack_webhook,
+            &telegram_webhook,
+            telegram_chat_id,
+        )?;
+    } else {
+        check_output_file_exists(&args.file_name)?;
+        crate::manage_subdomains_data(args)?;
+    }
+    if args.with_output && !args.quiet_flag && !args.monitoring_flag {
+        show_file_location(&args.target, &args.file_name)
+    }
+    Ok(())
 }

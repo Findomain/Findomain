@@ -8,7 +8,8 @@ fn run() -> Result<()> {
     } else if !arguments.file.is_empty() {
         read_from_file(&mut arguments)
     } else {
-        Ok(())
+        eprintln!("Error: Target is empty and not input file was supplied!");
+        std::process::exit(1)
     }
 }
 
