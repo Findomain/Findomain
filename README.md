@@ -44,6 +44,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Read target from user argument (-t) or file (-f).
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
+* Hability to query directly the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) for previous discovered subdomains.
 * Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
@@ -373,36 +374,6 @@ $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX
 
 See `findomain -h/--help` to see all the options.
 
-```
-findomain 0.6.0
-Eduard Tolosa <edu4rdshl@protonmail.com>
-The fastest and cross-platform subdomain enumerator, don't waste your time.
-
-USAGE:
-    findomain [FLAGS] [OPTIONS]
-
-FLAGS:
-    -h, --help               Prints help information
-    -i, --ip                 Show/write the ip address of resolved subdomains.
-    -m, --monitoring-flag    Activate Findomain monitoring mode.
-    -o, --output             Write to an output file. The name of the output file will be the target string with TXT
-                             format.
-    -q, --quiet              Remove informative messages but show fatal errors or subdomains not found message.
-    -r, --resolved           Show/write only resolved subdomains.
-    -V, --version            Prints version information
-
-OPTIONS:
-    -f, --file <file>                              Sets the input file to use.
-        --postgres-database <postgres-database>    Postgresql database.
-        --postgres-host <postgres-host>            Postgresql host.
-        --postgres-password <postgres-password>    Postgresql password.
-        --postgres-port <postgres-port>            Postgresql port.
-        --postgres-user <postgres-user>            Postgresql username.
-    -t, --target <target>                          Target host.
-    -u, --unique-output <unique-output>
-            Write all the results for a target or a list of targets to a specified filename.
-```
-
 For subdomains monitoring examples [Subdomains Monitoring](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#subdomains-monitoring) for more information.
 
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
@@ -440,6 +411,14 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 8. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file) and save all the resolved domains into a custom file name:
 
 `findomain -f file_with_domains.txt -r -u multiple_domains.txt`
+
+9. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring).
+
+`findomain -t example.com --query-database`
+
+10. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) and save results to a custom filename.
+
+`findomain -t example.com --query-database -u subdomains.txt`
 
 # TODO
 
