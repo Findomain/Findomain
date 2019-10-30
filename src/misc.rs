@@ -123,26 +123,14 @@ pub fn sanitize_target_string(target: String) -> String {
         .replace("/", "")
 }
 
-pub fn works_with_data(
-    args: &mut args::Args,
-    discord_webhook: String,
-    slack_webhook: String,
-    telegram_webhook: String,
-    telegram_chat_id: String,
-) -> Result<()> {
+pub fn works_with_data(args: &mut args::Args) -> Result<()> {
     if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag {
         check_output_file_exists(&args.file_name)?;
         crate::manage_subdomains_data(args)?;
     } else if args.unique_output_flag && args.from_file_flag && !args.monitoring_flag {
         crate::manage_subdomains_data(args)?;
     } else if args.monitoring_flag && !args.unique_output_flag {
-        crate::subdomains_alerts(
-            args,
-            &discord_webhook,
-            &slack_webhook,
-            &telegram_webhook,
-            telegram_chat_id,
-        )?;
+        crate::subdomains_alerts(args)?;
     } else {
         check_output_file_exists(&args.file_name)?;
         crate::manage_subdomains_data(args)?;

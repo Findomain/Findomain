@@ -1,4 +1,4 @@
-use crate::misc::sanitize_target_string;
+use crate::{get_vars, misc::sanitize_target_string};
 use clap::{load_yaml, value_t, App};
 use std::collections::HashSet;
 
@@ -6,11 +6,12 @@ pub struct Args {
     pub target: String,
     pub file_name: String,
     pub file: String,
-    pub postgres_user: String,
-    pub postgres_password: String,
-    pub postgres_host: String,
-    pub postgres_port: usize,
-    pub postgres_database: String,
+    pub postgres_connection: String,
+    pub discord_webhook: String,
+    pub slack_webhook: String,
+    pub telegram_bot_token: String,
+    pub telegram_webhook: String,
+    pub telegram_chat_id: String,
     pub only_resolved: bool,
     pub with_ip: bool,
     pub with_output: bool,
@@ -44,19 +45,23 @@ pub fn get_args() -> Args {
         } else {
             String::new()
         },
-        postgres_user: value_t!(matches, "postgres-user", String)
-            .unwrap_or_else(|_| "postgres".to_string()),
-
-        postgres_password: value_t!(matches, "postgres-password", String)
-            .unwrap_or_else(|_| "postgres".to_string()),
-
-        postgres_host: value_t!(matches, "postgres-host", String)
-            .unwrap_or_else(|_| "localhost".to_string()),
-
-        postgres_port: value_t!(matches, "postgres-port", usize).unwrap_or_else(|_| 5432),
-
-        postgres_database: value_t!(matches, "postgres-database", String)
-            .unwrap_or_else(|_| String::new()),
+        postgres_connection: format!(
+            "postgresql://{}:{}@{}:{}/{}",
+            value_t!(matches, "postgres-user", String).unwrap_or_else(|_| "postgres".to_string()),
+            value_t!(matches, "postgres-password", String)
+                .unwrap_or_else(|_| "postgres".to_string()),
+            value_t!(matches, "postgres-host", String).unwrap_or_else(|_| "localhost".to_string()),
+            value_t!(matches, "postgres-port", usize).unwrap_or_else(|_| 5432),
+            value_t!(matches, "postgres-database", String).unwrap_or_else(|_| String::new()),
+        ),
+        discord_webhook: get_vars::get_webhook("discord"),
+        slack_webhook: get_vars::get_webhook("slack"),
+        telegram_bot_token: get_vars::get_auth_token("telegram"),
+        telegram_webhook: format!(
+            "https://api.telegram.org/bot{}/sendMessage",
+            get_vars::get_auth_token("telegram")
+        ),
+        telegram_chat_id: get_vars::get_chat_id("telegram"),
 
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),

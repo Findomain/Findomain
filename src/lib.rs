@@ -155,139 +155,103 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
     }
-
     if args.query_database {
         query_findomain_database(args)?
     } else {
-        let quiet_flag = args.quiet_flag;
-        let discord_webhook = get_vars::get_webhook("discord");
-        let slack_webhook = get_vars::get_webhook("slack");
-        let telegram_bot_token = get_vars::get_auth_token("telegram");
-        let mut telegram_webhook = format!(
-            "https://api.telegram.org/bot{}/sendMessage",
-            telegram_bot_token
-        );
-        let telegram_chat_id = get_vars::get_chat_id("telegram");
-
-        if args.monitoring_flag
-            && discord_webhook.is_empty()
-            && slack_webhook.is_empty()
-            && telegram_bot_token.is_empty()
-        {
-            telegram_err1();
-            std::process::exit(1)
-        } else if !telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
-            telegram_err2();
-            std::process::exit(1)
-        } else if telegram_bot_token.is_empty() && telegram_chat_id.is_empty() {
-            telegram_webhook = String::new()
-        }
-
-        let spyse_access_token = get_vars::get_auth_token("spyse");
-        let facebook_access_token = get_vars::get_auth_token("facebook");
-        let virustotal_access_token = get_vars::get_auth_token("virustotal");
-
-        let url_api_certspotter = format!(
-        "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
-        &args.target
-    );
-        let url_api_virustotal = format!(
-            "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
-            &args.target
-        );
-        let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &args.target);
-        let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &args.target);
-        let url_api_sublist3r = format!(
-            "https://api.sublist3r.com/search.php?domain={}",
-            &args.target
-        );
-        let url_api_spyse = format!(
-            "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-            &args.target, &spyse_access_token
-        );
-        let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
-        let url_api_threatcrowd = format!(
-            "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
-            &args.target
-        );
-        let all_subdomains = vec![
-            thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
-            thread::spawn(move || {
-                get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)
-            }),
-            thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
-            thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
-            if facebook_access_token.is_empty() {
-                let findomain_fb_tokens = [
-                    "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
-                    "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
-                    "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
-                    "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
-                    "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
-                    "434231614102088|pLJSVc9iOqxrG6NO7DDPrlkQ1qE",
-                    "431009107520610|AX8VNunXMng-ainHO8Ke0sdeMJI",
-                    "893300687707948|KW_O07biKRaW5fpNqeAeSrMU1W8",
-                    "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
-                    "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
-                ];
-                let url_api_fb = format!(
-                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
-                &args.target,
-                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
-            );
-                thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
-            } else {
-                let url_api_fb = format!(
-                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
-                &args.target,
-                &facebook_access_token);
-                thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
-            },
-            thread::spawn(move || get_spyse_subdomains(&url_api_spyse, quiet_flag)),
-            thread::spawn(move || get_bufferover_subdomains(&url_api_bufferover, quiet_flag)),
-            thread::spawn(move || get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)),
-            if virustotal_access_token.is_empty() {
-                thread::spawn(|| None)
-            } else {
-                let url_virustotal_apikey = format!(
-                    "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
-                    &virustotal_access_token, &args.target
-                );
-                thread::spawn(move || {
-                    get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
-                })
-            },
-        ];
-
-        args.subdomains = all_subdomains
-            .into_iter()
-            .map(|j| j.join().unwrap())
-            .collect::<Vec<_>>()
-            .into_iter()
-            .flatten()
-            .flat_map(|sub| sub)
-            .collect();
-        let base_target = &format!(".{}", args.target);
-        args.subdomains.retain(|sub| {
-            !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(base_target)
-        });
-
+        check_monitoring_parameters(args)?;
+        args.subdomains = search_subdomains(args);
         if args.subdomains.is_empty() {
             eprintln!(
                 "\nNo subdomains were found for the target: {} ¡😭!\n",
                 &args.target
             );
         } else {
-            misc::works_with_data(
-                args,
-                discord_webhook,
-                slack_webhook,
-                telegram_webhook,
-                telegram_chat_id,
-            )?
+            misc::works_with_data(args)?
         }
     }
     Ok(())
+}
+
+fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
+    let quiet_flag = args.quiet_flag;
+    let base_target = &format!(".{}", args.target);
+    let spyse_access_token = get_vars::get_auth_token("spyse");
+    let facebook_access_token = get_vars::get_auth_token("facebook");
+    let virustotal_access_token = get_vars::get_auth_token("virustotal");
+
+    let url_api_certspotter = format!(
+        "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
+        &args.target
+    );
+    let url_api_virustotal = format!(
+        "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
+        &args.target
+    );
+    let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &args.target);
+    let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &args.target);
+    let url_api_sublist3r = format!(
+        "https://api.sublist3r.com/search.php?domain={}",
+        &args.target
+    );
+    let url_api_spyse = format!(
+        "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
+        &args.target, &spyse_access_token
+    );
+    let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
+    let url_api_threatcrowd = format!(
+        "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
+        &args.target
+    );
+    let mut all_subdomains: HashSet<String> = vec![
+        thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
+        thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
+        thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
+        thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
+        if facebook_access_token.is_empty() {
+            let findomain_fb_tokens = [
+                "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
+                "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
+                "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
+                "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
+                "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
+                "434231614102088|pLJSVc9iOqxrG6NO7DDPrlkQ1qE",
+                "431009107520610|AX8VNunXMng-ainHO8Ke0sdeMJI",
+                "893300687707948|KW_O07biKRaW5fpNqeAeSrMU1W8",
+                "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
+                "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
+            ];
+            let url_api_fb = format!(
+                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
+                &args.target,
+                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
+            );
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
+        } else {
+            let url_api_fb = format!(
+                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
+                &args.target,
+                &facebook_access_token);
+            thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
+        },
+        thread::spawn(move || get_spyse_subdomains(&url_api_spyse, quiet_flag)),
+        thread::spawn(move || get_bufferover_subdomains(&url_api_bufferover, quiet_flag)),
+        thread::spawn(move || get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)),
+        if virustotal_access_token.is_empty() {
+            thread::spawn(|| None)
+        } else {
+            let url_virustotal_apikey = format!(
+                "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
+                &virustotal_access_token, &args.target
+            );
+            thread::spawn(move || {
+                get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
+            })
+        },
+    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flat_map(|sub| sub).collect();
+
+    all_subdomains
+        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(base_target));
+    all_subdomains
 }
 
 fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
@@ -594,24 +558,9 @@ fn get_resolver() -> Resolver {
     }
 }
 
-fn subdomains_alerts(
-    args: &mut args::Args,
-    discord_webhook: &str,
-    slack_webhook: &str,
-    telegram_webhook: &str,
-    telegram_chat_id: String,
-) -> Result<()> {
-    let connection: postgres::Connection = Connection::connect(
-        format!(
-            "postgresql://{}:{}@{}:{}/{}",
-            args.postgres_user,
-            args.postgres_password,
-            args.postgres_host,
-            args.postgres_port,
-            args.postgres_database
-        ),
-        TlsMode::None,
-    )?;
+fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
+    let connection: postgres::Connection =
+        Connection::connect(args.postgres_connection.clone(), TlsMode::None)?;
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
     let mut telegram_parameters = HashMap::new();
@@ -662,30 +611,30 @@ fn subdomains_alerts(
         }
     }
 
-    if !discord_webhook.is_empty() {
+    if !args.discord_webhook.is_empty() {
         discord_parameters.insert(
             "content",
             misc::return_webhook_payload(&new_subdomains, "discord", &args.target),
         );
-        webhooks_data.insert(discord_webhook, discord_parameters);
+        webhooks_data.insert(&args.discord_webhook, discord_parameters);
     }
 
-    if !slack_webhook.is_empty() {
+    if !args.slack_webhook.is_empty() {
         slack_parameters.insert(
             "text",
             misc::return_webhook_payload(&new_subdomains, "slack", &args.target),
         );
-        webhooks_data.insert(slack_webhook, slack_parameters);
+        webhooks_data.insert(&args.slack_webhook, slack_parameters);
     }
 
-    if !telegram_webhook.is_empty() {
+    if !args.telegram_webhook.is_empty() {
         telegram_parameters.insert(
             "text",
             misc::return_webhook_payload(&new_subdomains, "telegram", &args.target),
         );
-        telegram_parameters.insert("chat_id", telegram_chat_id);
+        telegram_parameters.insert("chat_id", args.telegram_chat_id.clone());
         telegram_parameters.insert("parse_mode", "HTML".to_string());
-        webhooks_data.insert(telegram_webhook, telegram_parameters);
+        webhooks_data.insert(&args.telegram_webhook, telegram_parameters);
     }
 
     let mut commit_to_db_counter = 0;
@@ -725,17 +674,14 @@ fn commit_to_db(conn: &postgres::Connection, new_subdomains: &HashSet<String>) -
 }
 
 fn query_findomain_database(args: &mut args::Args) -> Result<()> {
-    let connection: postgres::Connection = Connection::connect(
-        format!(
-            "postgresql://{}:{}@{}:{}/{}",
-            args.postgres_user,
-            args.postgres_password,
-            args.postgres_host,
-            args.postgres_port,
-            args.postgres_database
-        ),
-        TlsMode::None,
-    )?;
+    if !args.quiet_flag {
+        println!(
+            "Searching subdomains in the Findomain database for the target {} 🔍",
+            args.target
+        )
+    }
+    let connection: postgres::Connection =
+        Connection::connect(args.postgres_connection.clone(), TlsMode::None)?;
     connection.execute(
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
@@ -759,12 +705,6 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
             subdomain.name
         })
         .collect();
-    misc::works_with_data(
-        args,
-        String::new(),
-        String::new(),
-        String::new(),
-        String::new(),
-    )?;
+    misc::works_with_data(args)?;
     Ok(())
 }
