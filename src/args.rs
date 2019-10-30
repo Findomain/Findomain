@@ -57,10 +57,7 @@ pub fn get_args() -> Args {
         discord_webhook: get_vars::get_webhook("discord"),
         slack_webhook: get_vars::get_webhook("slack"),
         telegram_bot_token: get_vars::get_auth_token("telegram"),
-        telegram_webhook: format!(
-            "https://api.telegram.org/bot{}/sendMessage",
-            get_vars::get_auth_token("telegram")
-        ),
+        telegram_webhook: String::new(),
         telegram_chat_id: get_vars::get_chat_id("telegram"),
 
         only_resolved: matches.is_present("resolved"),
