@@ -1,4 +1,4 @@
-use crate::args;
+use crate::{args, get_vars};
 pub use failure::{Error, ResultExt};
 use std::error::Error as stdError;
 pub type Result<T> = ::std::result::Result<T, Error>;
