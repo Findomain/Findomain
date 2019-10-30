@@ -54,8 +54,11 @@ pub fn check_monitoring_parameters(args: &mut args::Args) -> Result<()> {
     } else if !args.telegram_bot_token.is_empty() && args.telegram_chat_id.is_empty() {
         eprintln!("You have configured the findomain_telegrambot_token variable but not the findomain_telegrambot_chat_id variable, it's required. See https://git.io/JeZQW for more information, exiting.");
         std::process::exit(1)
-    } else if args.telegram_bot_token.is_empty() && args.telegram_chat_id.is_empty() {
-        args.telegram_webhook = String::new()
+    } else if !args.telegram_bot_token.is_empty() && !args.telegram_chat_id.is_empty() {
+        args.telegram_webhook = format!(
+            "https://api.telegram.org/bot{}/sendMessage",
+            get_vars::get_auth_token("telegram")
+        )
     }
     Ok(())
 }
