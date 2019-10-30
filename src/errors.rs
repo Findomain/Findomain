@@ -57,7 +57,7 @@ pub fn check_monitoring_parameters(args: &mut args::Args) -> Result<()> {
     } else if !args.telegram_bot_token.is_empty() && !args.telegram_chat_id.is_empty() {
         args.telegram_webhook = format!(
             "https://api.telegram.org/bot{}/sendMessage",
-            get_vars::get_auth_token("telegram")
+            args.telegram_bot_token
         )
     }
     Ok(())
