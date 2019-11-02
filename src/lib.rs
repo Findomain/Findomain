@@ -159,6 +159,10 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         query_findomain_database(args)?
     } else {
         if args.monitoring_flag {
+            args.discord_webhook = get_vars::get_webhook("discord");
+            args.slack_webhook = get_vars::get_webhook("slack");
+            args.telegram_bot_token = get_vars::get_auth_token("telegram");
+            args.telegram_chat_id = get_vars::get_chat_id("telegram");
             check_monitoring_parameters(args)?;
         }
         args.subdomains = search_subdomains(args);

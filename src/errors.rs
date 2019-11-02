@@ -1,4 +1,4 @@
-use crate::{args, get_vars};
+use crate::args;
 pub use failure::{Error, ResultExt};
 use std::error::Error as stdError;
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -44,10 +44,6 @@ pub fn check_json_errors(error: reqwest::Error, api: &str, quiet_flag: bool) {
 }
 
 pub fn check_monitoring_parameters(args: &mut args::Args) -> Result<()> {
-    args.discord_webhook = get_vars::get_webhook("discord");
-    args.slack_webhook = get_vars::get_webhook("slack");
-    args.telegram_bot_token = get_vars::get_auth_token("telegram");
-    args.telegram_chat_id = get_vars::get_chat_id("telegram");
     if args.monitoring_flag
         && args.discord_webhook.is_empty()
         && args.slack_webhook.is_empty()
