@@ -44,8 +44,7 @@ pub fn check_json_errors(error: reqwest::Error, api: &str, quiet_flag: bool) {
 }
 
 pub fn check_monitoring_parameters(args: &mut args::Args) -> Result<()> {
-    if args.monitoring_flag
-        && args.discord_webhook.is_empty()
+    if args.discord_webhook.is_empty()
         && args.slack_webhook.is_empty()
         && args.telegram_bot_token.is_empty()
         && args.telegram_chat_id.is_empty()
