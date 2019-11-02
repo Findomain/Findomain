@@ -503,11 +503,11 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     if args.unique_output_flag {
         misc::check_output_file_exists(&args.file_name)?
     }
-    let f =
+    let file =
         File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
-    let f = BufReader::new(f);
-    for domain in f.lines() {
-        args.target = domain?.to_string();
+    let file_lines: HashSet<String> = BufReader::new(file).lines().flat_map(|line| line).collect();
+    for domain in file_lines {
+        args.target = domain;
         args.file_name = if file_name.is_empty() && !args.with_ip {
             format!("{}.txt", &args.target)
         } else if file_name.is_empty() && args.with_ip {
