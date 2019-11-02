@@ -158,7 +158,9 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if args.query_database {
         query_findomain_database(args)?
     } else {
-        check_monitoring_parameters(args)?;
+        if args.monitoring_flag {
+            check_monitoring_parameters(args)?;
+        }
         args.subdomains = search_subdomains(args);
         if args.subdomains.is_empty() {
             eprintln!(
