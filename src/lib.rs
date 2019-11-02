@@ -507,17 +507,18 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
         File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
     let file_lines: HashSet<String> = BufReader::new(file).lines().flat_map(|line| line).collect();
     for domain in file_lines {
-        args.target = domain;
-        args.file_name = if file_name.is_empty() && !args.with_ip {
-            format!("{}.txt", &args.target)
-        } else if file_name.is_empty() && args.with_ip {
-            format!("{}-ip.txt", &args.target)
-        } else {
-            file_name.to_string()
-        };
-        get_subdomains(args)?
+        if !domain.is_empty() {
+            args.target = misc::sanitize_target_string(domain);
+            args.file_name = if file_name.is_empty() && !args.with_ip {
+                format!("{}.txt", &args.target)
+            } else if file_name.is_empty() && args.with_ip {
+                format!("{}-ip.txt", &args.target)
+            } else {
+                file_name.to_string()
+            };
+            get_subdomains(args)?
+        }
     }
-
     Ok(())
 }
 
