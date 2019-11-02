@@ -253,7 +253,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
             })
         },
-    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flat_map(|sub| sub).collect();
+    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains
         .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(base_target));
