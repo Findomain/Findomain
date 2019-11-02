@@ -511,7 +511,7 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     }
     let file =
         File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
-    let file_lines: HashSet<String> = BufReader::new(file).lines().flat_map(|line| line).collect();
+    let file_lines: HashSet<String> = BufReader::new(file).lines().flatten().collect();
     for domain in file_lines {
         if !domain.is_empty() {
             args.target = misc::sanitize_target_string(domain);
