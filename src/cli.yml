@@ -101,3 +101,11 @@ args:
         takes_value: false
         conflicts_with:
           - monitoring-flag
+
+    - import-subdomains:
+        help: Import subdomains from a file.
+        long: import-subdomains
+        takes_value: true
+        multiple: true
+        requires:
+          - monitoring-flag

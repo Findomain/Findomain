@@ -20,7 +20,9 @@ pub struct Args {
     pub from_file_flag: bool,
     pub quiet_flag: bool,
     pub query_database: bool,
+    pub with_imported_subdomains: bool,
     pub subdomains: HashSet<String>,
+    pub import_subdomains_from: Vec<String>,
 }
 
 pub fn get_args() -> Args {
@@ -67,7 +69,13 @@ pub fn get_args() -> Args {
         monitoring_flag: matches.is_present("monitoring-flag"),
         from_file_flag: matches.is_present("file"),
         quiet_flag: matches.is_present("quiet"),
+        with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
         subdomains: HashSet::new(),
+        import_subdomains_from: matches
+            .values_of("import-subdomains")
+            .unwrap()
+            .map(str::to_owned)
+            .collect(),
     }
 }

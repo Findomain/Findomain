@@ -566,6 +566,12 @@ fn get_resolver() -> Resolver {
 }
 
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
+    if args.with_imported_subdomains {
+        let imported_subdomains = import_subdomains_from_file(args)?;
+        for subdomain in imported_subdomains {
+            args.subdomains.insert(subdomain);
+        }
+    }
     let connection: postgres::Connection =
         Connection::connect(args.postgres_connection.clone(), TlsMode::None)?;
     let mut discord_parameters = HashMap::new();
@@ -714,4 +720,20 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
         .collect();
     misc::works_with_data(args)?;
     Ok(())
+}
+
+fn import_subdomains_from_file(args: &mut args::Args) -> Result<HashSet<String>> {
+    let mut subdomains_from_file: HashSet<String> = HashSet::new();
+    if !args.import_subdomains_from.is_empty() {
+        for file in &args.import_subdomains_from {
+            let file =
+                File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
+            for subdomain in BufReader::new(&file).lines().flatten() {
+                if !subdomain.is_empty() && subdomain.ends_with(&args.target) {
+                    subdomains_from_file.insert(subdomain);
+                }
+            }
+        }
+    }
+    Ok(subdomains_from_file)
 }
