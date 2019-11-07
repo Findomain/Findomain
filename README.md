@@ -28,7 +28,7 @@ Memory: 139MiB / 3943MiB
 ```
 The tool used to calculate the time, is the `time` command in Linux.
 
-|Enumeration Tool|Serch Time|Total Subdomains Found|CPU Usage|RAM Usage|
+|Enumeration Tool|Search Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
 |Findomain|real 0m5.515s|84110|Very Low|Very Low|
 
