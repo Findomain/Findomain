@@ -511,8 +511,7 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     }
     let file =
         File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
-    let file_lines: HashSet<String> = BufReader::new(file).lines().flatten().collect();
-    for domain in file_lines {
+    for domain in BufReader::new(file).lines().flatten() {
         if !domain.is_empty() {
             args.target = misc::sanitize_target_string(domain);
             args.file_name = if file_name.is_empty() && !args.with_ip {
@@ -728,7 +727,7 @@ fn import_subdomains_from_file(args: &mut args::Args) -> Result<HashSet<String>>
         for file in &args.import_subdomains_from {
             let file =
                 File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
-            for subdomain in BufReader::new(&file).lines().flatten() {
+            for subdomain in BufReader::new(file).lines().flatten() {
                 if !subdomain.is_empty() && subdomain.ends_with(&args.target) {
                     subdomains_from_file.insert(subdomain);
                 }
