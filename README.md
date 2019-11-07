@@ -45,6 +45,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
 * Hability to query directly the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) for previous discovered subdomains.
+* Hability to import and work data discovered by other tools.
 * Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
@@ -419,6 +420,10 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 10. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) and save results to a custom filename.
 
 `findomain -t example.com --query-database -u subdomains.txt`
+
+11. Import subdomains from several files and work with they in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
+
+`findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
 
 # TODO
 
