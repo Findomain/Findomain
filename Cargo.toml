@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "0.8.0-beta2"
+version = "0.8.0-beta3"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
@@ -10,8 +10,8 @@ keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-su
 readme = "README.md"
 
 [dependencies]
-serde = { version = "1.0.101", features = ["derive"] }
-serde_derive = "1.0.101"
+serde = { version = "1.0.102", features = ["derive"] }
+serde_derive = "1.0.102"
 reqwest = "0.9.22"
 trust-dns-resolver = "0.12.0"
 clap = { version = "2.33.0", features = ["yaml"] }
