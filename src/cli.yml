@@ -103,7 +103,7 @@ args:
           - monitoring-flag
 
     - import-subdomains:
-        help: Import subdomains from a file.
+        help: Import subdomains from one or multiple files. Subdomains need to be one per line in the file to import.
         long: import-subdomains
         takes_value: true
         multiple: true
