@@ -72,10 +72,14 @@ pub fn get_args() -> Args {
         with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
         subdomains: HashSet::new(),
-        import_subdomains_from: matches
-            .values_of("import-subdomains")
-            .unwrap()
-            .map(str::to_owned)
-            .collect(),
+        import_subdomains_from: if matches.is_present("import-subdomains") {
+            matches
+                .values_of("import-subdomains")
+                .unwrap()
+                .map(str::to_owned)
+                .collect()
+        } else {
+            Vec::new()
+        },
     }
 }
