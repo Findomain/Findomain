@@ -208,6 +208,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
     );
+    let url_api_anubisdb = format!("https://jonlu.ca/anubis/subdomains/{}", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
         thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
         thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
@@ -253,6 +254,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
             })
         },
+        thread::spawn(move || get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains
@@ -468,6 +470,13 @@ fn get_spyse_subdomains(url_api_spyse: &str, quiet_flag: bool) -> Option<HashSet
         misc::show_searching_msg("Spyse")
     }
     get_from_http_api::<ResponseDataSpyse>(url_api_spyse, "Spyse", quiet_flag)
+}
+
+fn get_anubisdb_subdomains(url_api_anubisdb: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("AnubisDB")
+    }
+    get_from_http_api::<HashSet<String>>(url_api_anubisdb, "AnubisDB", quiet_flag)
 }
 
 fn get_bufferover_subdomains(
