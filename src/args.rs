@@ -81,20 +81,8 @@ pub fn get_args() -> Args {
                 || matches.is_present("ipv6-only"),
             matches.is_present("resolved"),
         ),
-        ipv4_only: eval_resolved_or_ip_present(
-            matches.is_present("ipv4-only"),
-            matches.is_present("ip")
-                || matches.is_present("ipv4-only")
-                || matches.is_present("ipv6-only"),
-            matches.is_present("resolved"),
-        ),
-        ipv6_only: eval_resolved_or_ip_present(
-            matches.is_present("ipv6-only"),
-            matches.is_present("ip")
-                || matches.is_present("ipv4-only")
-                || matches.is_present("ipv6-only"),
-            matches.is_present("resolved"),
-        ),
+        ipv4_only: matches.is_present("ipv4-only"),
+        ipv6_only: matches.is_present("ipv6-only"),
         subdomains: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches
