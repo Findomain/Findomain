@@ -126,8 +126,19 @@ If you want to install it, you can do that manually compiling the source or usin
 **Manually:**
 You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
-```
+```bash
 $ git clone https://github.com/Edu4rdSHL/findomain.git
+$ cd findomain
+$ cargo build --release
+$ sudo cp target/release/findomain /usr/bin/
+$ findomain
+```
+
+**Build the development version Manually:**
+You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
+For the developer version, only the developer branch must be loaded...
+```bash
+$ git clone https://github.com/Edu4rdSHL/findomain.git -b develop
 $ cd findomain
 $ cargo build --release
 $ sudo cp target/release/findomain /usr/bin/
