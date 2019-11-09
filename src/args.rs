@@ -1,4 +1,4 @@
-use crate::misc::sanitize_target_string;
+use crate::misc::{eval_resolved_or_ip_present, sanitize_target_string};
 use clap::{load_yaml, value_t, App};
 use std::collections::HashSet;
 
@@ -22,6 +22,8 @@ pub struct Args {
     pub query_database: bool,
     pub with_imported_subdomains: bool,
     pub enable_dot: bool,
+    pub ipv4_only: bool,
+    pub ipv6_only: bool,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
 }
@@ -72,14 +74,27 @@ pub fn get_args() -> Args {
         quiet_flag: matches.is_present("quiet"),
         with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
-        enable_dot: if matches.is_present("enable-dot")
-            && (matches.is_present("resolved") || matches.is_present("ip"))
-        {
-            true
-        } else {
-            eprintln!("Error: --enable-dot flag needs -i/--ip or -r/--resolved");
-            std::process::exit(1)
-        },
+        enable_dot: eval_resolved_or_ip_present(
+            matches.is_present("enable-dot"),
+            matches.is_present("ip")
+                || matches.is_present("ipv4-only")
+                || matches.is_present("ipv6-only"),
+            matches.is_present("resolved"),
+        ),
+        ipv4_only: eval_resolved_or_ip_present(
+            matches.is_present("ipv4-only"),
+            matches.is_present("ip")
+                || matches.is_present("ipv4-only")
+                || matches.is_present("ipv6-only"),
+            matches.is_present("resolved"),
+        ),
+        ipv6_only: eval_resolved_or_ip_present(
+            matches.is_present("ipv6-only"),
+            matches.is_present("ip")
+                || matches.is_present("ipv4-only")
+                || matches.is_present("ipv6-only"),
+            matches.is_present("resolved"),
+        ),
         subdomains: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches

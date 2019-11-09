@@ -140,3 +140,14 @@ pub fn works_with_data(args: &mut args::Args) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn eval_resolved_or_ip_present(value: bool, with_ip: bool, resolved: bool) -> bool {
+    if value && (with_ip || resolved) {
+        true
+    } else if !value {
+        false
+    } else {
+        eprintln!("Error: --enable-dot flag needs -i/--ip or -r/--resolved");
+        std::process::exit(1)
+    }
+}

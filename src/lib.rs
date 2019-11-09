@@ -267,8 +267,9 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
         println!()
     };
     let mut subdomains_resolved = 0;
-    if args.with_output && (args.only_resolved || args.with_ip) {
-        if args.only_resolved {
+    if args.with_output && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
+    {
+        if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
             for subdomain in &args.subdomains {
                 if resolver.lookup_ip(subdomain).is_ok() {
                     write_to_file(subdomain, &args.file_name)?;
@@ -276,9 +277,9 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
                     subdomains_resolved += 1
                 }
             }
-        } else if args.with_ip {
+        } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
             for subdomain in &args.subdomains {
-                let ip = get_ip(&resolver, subdomain);
+                let ip = get_ip(&resolver, subdomain, args.ipv4_only, args.ipv6_only);
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
                     write_to_file(&data, &args.file_name)?;
@@ -288,17 +289,19 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
             }
         }
         misc::show_subdomains_found(subdomains_resolved, &args.target, args.quiet_flag)
-    } else if !args.with_output && (args.only_resolved || args.with_ip) {
-        if args.only_resolved {
+    } else if !args.with_output
+        && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
+    {
+        if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
             for subdomain in &args.subdomains {
                 if resolver.lookup_ip(subdomain).is_ok() {
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
-        } else if args.with_ip {
+        } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
             for subdomain in &args.subdomains {
-                let ip = get_ip(&resolver, subdomain);
+                let ip = get_ip(&resolver, subdomain, args.ipv4_only, args.ipv6_only);
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
                     subdomains_resolved += 1
@@ -546,14 +549,34 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     Ok(())
 }
 
-fn get_ip(resolver: &Resolver, domain: &str) -> String {
-    match resolver.lookup_ip(&domain) {
-        Ok(ip_address) => ip_address
-            .iter()
-            .next()
-            .expect("An error as ocurred getting the IP address.")
-            .to_string(),
-        Err(_) => String::new(),
+fn get_ip(resolver: &Resolver, domain: &str, ipv4_only: bool, ipv6_only: bool) -> String {
+    if !ipv4_only && ipv6_only {
+        match resolver.ipv6_lookup(&domain) {
+            Ok(ip_address) => ip_address
+                .iter()
+                .next()
+                .expect("An error as ocurred getting the IP address.")
+                .to_string(),
+            Err(_) => String::new(),
+        }
+    } else if ipv4_only && !ipv6_only {
+        match resolver.ipv4_lookup(&domain) {
+            Ok(ip_address) => ip_address
+                .iter()
+                .next()
+                .expect("An error as ocurred getting the IP address.")
+                .to_string(),
+            Err(_) => String::new(),
+        }
+    } else {
+        match resolver.lookup_ip(&domain) {
+            Ok(ip_address) => ip_address
+                .iter()
+                .next()
+                .expect("An error as ocurred getting the IP address.")
+                .to_string(),
+            Err(_) => String::new(),
+        }
     }
 }
 
@@ -572,14 +595,12 @@ fn get_resolver(args: &mut args::Args) -> Resolver {
         } else {
             Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
         }
+    } else if let Ok(cloudflare_resolver_dot) =
+        Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default())
+    {
+        cloudflare_resolver_dot
     } else {
-        if let Ok(cloudflare_resolver_dot) =
-            Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default())
-        {
-            cloudflare_resolver_dot
-        } else {
-            Resolver::new(ResolverConfig::quad9_tls(), ResolverOpts::default()).unwrap()
-        }
+        Resolver::new(ResolverConfig::quad9_tls(), ResolverOpts::default()).unwrap()
     }
 }
 

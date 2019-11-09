@@ -114,3 +114,21 @@ args:
         help: Enable DNS over TLS for resolving subdomains IPs.
         long: enable-dot
         takes_value: false
+
+    - ipv4-only:
+        help: Perform a IPv4 lookup only.
+        long: ipv4-only
+        takes_value: false
+        conflicts_with:
+          - ipv6-only
+          - ip
+          - resolved
+
+    - ipv6-only:
+        help: Perform a IPv6 lookup only.
+        long: ipv6-only
+        takes_value: false
+        conflicts_with:
+          - ipv4-only
+          - ip
+          - resolved
