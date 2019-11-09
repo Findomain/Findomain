@@ -13,7 +13,7 @@ readme = "README.md"
 serde = { version = "1.0.102", features = ["derive"] }
 serde_derive = "1.0.102"
 reqwest = "0.9.22"
-trust-dns-resolver = "0.12.0"
+trust-dns-resolver = { version = "0.12.0", features = ["dns-over-rustls"] }
 clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.2"

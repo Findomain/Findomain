@@ -148,7 +148,6 @@ lazy_static! {
         .timeout(Duration::from_secs(20))
         .build()
         .unwrap();
-    static ref RESOLVER: Resolver = get_resolver();
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
@@ -263,6 +262,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
 }
 
 fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
+    let resolver = get_resolver(args);
     if !args.quiet_flag {
         println!()
     };
@@ -270,7 +270,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     if args.with_output && (args.only_resolved || args.with_ip) {
         if args.only_resolved {
             for subdomain in &args.subdomains {
-                if RESOLVER.lookup_ip(subdomain).is_ok() {
+                if resolver.lookup_ip(subdomain).is_ok() {
                     write_to_file(subdomain, &args.file_name)?;
                     println!("{}", subdomain);
                     subdomains_resolved += 1
@@ -278,7 +278,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
             }
         } else if args.with_ip {
             for subdomain in &args.subdomains {
-                let ip = get_ip(&RESOLVER, subdomain);
+                let ip = get_ip(&resolver, subdomain);
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
                     write_to_file(&data, &args.file_name)?;
@@ -291,14 +291,14 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     } else if !args.with_output && (args.only_resolved || args.with_ip) {
         if args.only_resolved {
             for subdomain in &args.subdomains {
-                if RESOLVER.lookup_ip(subdomain).is_ok() {
+                if resolver.lookup_ip(subdomain).is_ok() {
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
         } else if args.with_ip {
             for subdomain in &args.subdomains {
-                let ip = get_ip(&RESOLVER, subdomain);
+                let ip = get_ip(&resolver, subdomain);
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
                     subdomains_resolved += 1
@@ -557,19 +557,29 @@ fn get_ip(resolver: &Resolver, domain: &str) -> String {
     }
 }
 
-fn get_resolver() -> Resolver {
-    if let Ok(system_resolver) = Resolver::from_system_conf() {
-        system_resolver
-    } else if let Ok(quad9_resolver) =
-        Resolver::new(ResolverConfig::quad9(), ResolverOpts::default())
-    {
-        quad9_resolver
-    } else if let Ok(cloudflare_resolver) =
-        Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default())
-    {
-        cloudflare_resolver
+fn get_resolver(args: &mut args::Args) -> Resolver {
+    if !args.enable_dot {
+        if let Ok(system_resolver) = Resolver::from_system_conf() {
+            system_resolver
+        } else if let Ok(cloudflare_resolver) =
+            Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default())
+        {
+            cloudflare_resolver
+        } else if let Ok(quad9_resolver) =
+            Resolver::new(ResolverConfig::quad9(), ResolverOpts::default())
+        {
+            quad9_resolver
+        } else {
+            Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
+        }
     } else {
-        Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
+        if let Ok(cloudflare_resolver_dot) =
+            Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default())
+        {
+            cloudflare_resolver_dot
+        } else {
+            Resolver::new(ResolverConfig::quad9_tls(), ResolverOpts::default()).unwrap()
+        }
     }
 }
 

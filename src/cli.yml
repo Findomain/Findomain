@@ -109,3 +109,8 @@ args:
         multiple: true
         requires:
           - monitoring-flag
+
+    - enable-dot:
+        help: Enable DNS over TLS for resolving subdomains IPs.
+        long: enable-dot
+        takes_value: false

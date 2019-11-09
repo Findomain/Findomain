@@ -21,6 +21,7 @@ pub struct Args {
     pub quiet_flag: bool,
     pub query_database: bool,
     pub with_imported_subdomains: bool,
+    pub enable_dot: bool,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
 }
@@ -71,6 +72,14 @@ pub fn get_args() -> Args {
         quiet_flag: matches.is_present("quiet"),
         with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
+        enable_dot: if matches.is_present("enable-dot")
+            && (matches.is_present("resolved") || matches.is_present("ip"))
+        {
+            true
+        } else {
+            eprintln!("Error: --enable-dot flag needs -i/--ip or -r/--resolved");
+            std::process::exit(1)
+        },
         subdomains: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches
