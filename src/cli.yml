@@ -23,6 +23,8 @@ args:
         conflicts_with:
           - monitoring-flag
           - ip
+          - ipv4-only
+          - ipv6-only
 
     - ip:
         short: i
@@ -32,6 +34,8 @@ args:
         conflicts_with:
           - monitoring-flag
           - resolved
+          - ipv4-only
+          - ipv6-only
 
     - file:
         short: f
@@ -120,6 +124,7 @@ args:
         long: ipv4-only
         takes_value: false
         conflicts_with:
+          - monitoring-flag
           - ipv6-only
           - ip
           - resolved
@@ -129,6 +134,7 @@ args:
         long: ipv6-only
         takes_value: false
         conflicts_with:
+          - monitoring-flag
           - ipv4-only
           - ip
           - resolved
