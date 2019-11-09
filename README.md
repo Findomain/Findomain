@@ -79,6 +79,30 @@ APIs marked with `*` can *optionally* be used with an access token, create one i
 
 If you know other APIs that should be added, comment [here](https://github.com/Edu4rdSHL/findomain/issues/7).
 
+# Development
+
+In order to make sure Findomain will not be broken on some commit I have created the [develop branch](https://github.com/Edu4rdSHL/findomain/tree/develop) where new features and improvements are pushed before they go to [master branch](https://github.com/Edu4rdSHL/findomain/tree/master). In resume the difference is: **develop branch and beta releases aren't ready for production purposes but testing or development purposes** and **master branch and non-beta releases are ready for production purposes**. If you are a developer or want to be a beta tester of the new features that are added to Findomain then use the develop branch, otherwise always use the master branch. Every new feature is tested before it goes to master by the Findomain beta testers that are only ([@sumgr0](https://github.com/sumgr0)) at the moment, I will appreciate if you join to the testing process, just send me a DM in Twitter ([@edu4rdshl](https://twitter.com/edu4rdshl)).
+
+**If you are a packager of Findomain for X system distribution always go for the master branch if using git or non-beta releases if using releases model**.
+
+**Build the development version:**
+
+You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
+
+```bash
+$ git clone https://github.com/Edu4rdSHL/findomain.git -b develop # Only the develop branch is needed
+$ cd findomain
+$ cargo build --release
+$ ./target/release/findomain
+```
+To update the repository when new commits are added, just go to the folder where Findomain's develop branch was cloned and excute:
+
+```
+$ git pull
+$ cargo build --release
+$ ./target/release/findomain
+```
+
 # Installation
 
 We offer binarys ready to use for the following platforms (all are for 64 bits only):
@@ -126,7 +150,7 @@ If you want to install it, you can do that manually compiling the source or usin
 **Manually:**
 You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
-```
+```bash
 $ git clone https://github.com/Edu4rdSHL/findomain.git
 $ cd findomain
 $ cargo build --release
