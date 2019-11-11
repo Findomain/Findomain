@@ -551,17 +551,21 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
 fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     if args.threads > 500 {
         args.threads = 500
+    } else if args.subdomains.len() < 50 {
+        args.threads = args.subdomains.len()
+    } else if args.subdomains.len() > 50 && args.subdomains.len() < 500 {
+        args.threads = 50
     }
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(args.threads)
+        .build()
+        .unwrap();
     if !args.quiet_flag {
         println!(
             "Performing asynchronous resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
             args.subdomains.len(), args.threads
         )
     }
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(args.threads)
-        .build_global()
-        .unwrap();
     let resolver = get_resolver(args);
     let mut data = HashMap::new();
     data.par_extend(args.subdomains.par_iter().map(|sub| {
