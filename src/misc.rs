@@ -1,4 +1,5 @@
 use crate::{args, errors::*};
+use rand::Rng;
 use std::{
     collections::HashSet,
     fs::{self},
@@ -150,4 +151,20 @@ pub fn eval_resolved_or_ip_present(value: bool, with_ip: bool, resolved: bool) -
         eprintln!("Error: --enable-dot flag needs -i/--ip or -r/--resolved");
         std::process::exit(1)
     }
+}
+
+pub fn return_facebook_token() -> String {
+    let findomain_fb_tokens = vec![
+        "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
+        "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
+        "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
+        "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
+        "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
+        "434231614102088|pLJSVc9iOqxrG6NO7DDPrlkQ1qE",
+        "431009107520610|AX8VNunXMng-ainHO8Ke0sdeMJI",
+        "893300687707948|KW_O07biKRaW5fpNqeAeSrMU1W8",
+        "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
+        "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
+    ];
+    findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())].to_string()
 }

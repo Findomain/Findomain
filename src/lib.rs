@@ -12,7 +12,6 @@ mod misc;
 
 use crate::errors::*;
 use postgres::{Connection, TlsMode};
-use rand::Rng;
 use rayon::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
@@ -215,22 +214,10 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
         thread::spawn(move || get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
         if facebook_access_token.is_empty() {
-            let findomain_fb_tokens = [
-                "688177841647920|RAeNYr8jwFXGH9v-IhGv4tfHMpU",
-                "772592906530976|CNkO7OxM6ssQgOBLCraC_dhKE7M",
-                "1004691886529013|iiUStPqcXCELcwv89-SZQSqqFNY",
-                "2106186849683294|beVoPBtLp3IWjpLsnF6Mpzo1gVM",
-                "2095886140707025|WkO8gTgPtwmnNZL3NQ74z92DA-k",
-                "434231614102088|pLJSVc9iOqxrG6NO7DDPrlkQ1qE",
-                "431009107520610|AX8VNunXMng-ainHO8Ke0sdeMJI",
-                "893300687707948|KW_O07biKRaW5fpNqeAeSrMU1W8",
-                "2477772448946546|BXn-h2zX6qb4WsFvtOywrNsDixo",
-                "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
-            ];
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
-                &findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())]
+                &misc::return_facebook_token()
             );
             thread::spawn(move || get_facebook_subdomains(&url_api_fb, quiet_flag))
         } else {
