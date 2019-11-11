@@ -554,7 +554,7 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     }
     if !args.quiet_flag {
         println!(
-            "Performing asynchronous subdomains resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
+            "Performing asynchronous resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
             args.subdomains.len(), args.threads
         )
     }
