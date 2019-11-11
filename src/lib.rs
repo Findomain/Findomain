@@ -496,9 +496,9 @@ fn get_threatcrowd_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Threadcrowd")
+        misc::show_searching_msg("Threatcrowd")
     }
-    get_from_http_api::<SubdomainsThreadcrowd>(url_api_threatcrowd, "Threadcrowd", quiet_flag)
+    get_from_http_api::<SubdomainsThreadcrowd>(url_api_threatcrowd, "Threatcrowd", quiet_flag)
 }
 
 fn get_virustotal_apikey_subdomains(
@@ -554,7 +554,7 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     }
     if !args.quiet_flag {
         println!(
-            "Performing asyncronous subdomains resolution with {} threads, it will take a while. 🧐\n",
+            "Performing asynchronous subdomains resolution with {} threads, it will take a while. 🧐\n",
             args.threads
         )
     }
