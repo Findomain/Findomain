@@ -564,11 +564,17 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
         .unwrap();
     let resolver = get_resolver(args);
     let mut data = HashMap::new();
-    data.par_extend(
-        args.subdomains
-            .par_iter()
-            .map(|sub| (sub, get_ip(&resolver, &sub, args.ipv4_only, args.ipv6_only))),
-    );
+    data.par_extend(args.subdomains.par_iter().map(|sub| {
+        (
+            sub,
+            get_ip(
+                &resolver,
+                &[sub, "."].concat(),
+                args.ipv4_only,
+                args.ipv6_only,
+            ),
+        )
+    }));
     data
 }
 
