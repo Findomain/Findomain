@@ -13,6 +13,7 @@ mod misc;
 use crate::errors::*;
 use postgres::{Connection, TlsMode};
 use rand::Rng;
+use rayon::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
@@ -262,7 +263,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
 }
 
 fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
-    let resolver = get_resolver(args);
+    let file_name = args.file_name.clone();
     if !args.quiet_flag {
         println!()
     };
@@ -270,19 +271,18 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     if args.with_output && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
     {
         if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
-            for subdomain in &args.subdomains {
-                if resolver.lookup_ip(subdomain).is_ok() {
-                    write_to_file(subdomain, &args.file_name)?;
+            for (subdomain, ip) in async_resolver(args) {
+                if !ip.is_empty() {
+                    write_to_file(subdomain, &file_name)?;
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
         } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
-            for subdomain in &args.subdomains {
-                let ip = get_ip(&resolver, subdomain, args.ipv4_only, args.ipv6_only);
+            for (subdomain, ip) in async_resolver(args) {
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
-                    write_to_file(&data, &args.file_name)?;
+                    write_to_file(&data, &file_name)?;
                     println!("{}", data);
                     subdomains_resolved += 1
                 }
@@ -293,15 +293,14 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
         && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
     {
         if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
-            for subdomain in &args.subdomains {
-                if resolver.lookup_ip(subdomain).is_ok() {
+            for (subdomain, ip) in async_resolver(args) {
+                if !ip.is_empty() {
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
         } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
-            for subdomain in &args.subdomains {
-                let ip = get_ip(&resolver, subdomain, args.ipv4_only, args.ipv6_only);
+            for (subdomain, ip) in async_resolver(args) {
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
                     subdomains_resolved += 1
@@ -312,7 +311,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     } else if !args.only_resolved && !args.with_ip && args.with_output {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
-            write_to_file(subdomain, &args.file_name)?
+            write_to_file(subdomain, &file_name)?
         }
         misc::show_subdomains_found(args.subdomains.len(), &args.target, args.quiet_flag)
     } else {
@@ -549,6 +548,21 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     Ok(())
 }
 
+fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(args.threads)
+        .build_global()
+        .unwrap();
+    let resolver = get_resolver(args);
+    let mut data = HashMap::new();
+    data.par_extend(
+        args.subdomains
+            .par_iter()
+            .map(|sub| (sub, get_ip(&resolver, &sub, args.ipv4_only, args.ipv6_only))),
+    );
+    data
+}
+
 fn get_ip(resolver: &Resolver, domain: &str, ipv4_only: bool, ipv6_only: bool) -> String {
     if !ipv4_only && ipv6_only {
         match resolver.ipv6_lookup(&domain) {
@@ -582,23 +596,13 @@ fn get_ip(resolver: &Resolver, domain: &str, ipv4_only: bool, ipv6_only: bool) -
 
 fn get_resolver(args: &mut args::Args) -> Resolver {
     if !args.enable_dot {
-        if let Ok(system_resolver) = Resolver::from_system_conf() {
-            system_resolver
-        } else if let Ok(cloudflare_resolver) =
-            Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default())
-        {
-            cloudflare_resolver
-        } else if let Ok(quad9_resolver) =
-            Resolver::new(ResolverConfig::quad9(), ResolverOpts::default())
-        {
-            quad9_resolver
+        if args.resolver == "cloudflare" {
+            Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()).unwrap()
         } else {
-            Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap()
+            Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()).unwrap()
         }
-    } else if let Ok(cloudflare_resolver_dot) =
-        Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default())
-    {
-        cloudflare_resolver_dot
+    } else if args.resolver == "cloudflare" {
+        Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default()).unwrap()
     } else {
         Resolver::new(ResolverConfig::quad9_tls(), ResolverOpts::default()).unwrap()
     }

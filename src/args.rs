@@ -12,6 +12,8 @@ pub struct Args {
     pub telegram_bot_token: String,
     pub telegram_webhook: String,
     pub telegram_chat_id: String,
+    pub resolver: String,
+    pub threads: usize,
     pub only_resolved: bool,
     pub with_ip: bool,
     pub with_output: bool,
@@ -64,7 +66,9 @@ pub fn get_args() -> Args {
         telegram_bot_token: String::new(),
         telegram_webhook: String::new(),
         telegram_chat_id: String::new(),
-
+        resolver: value_t!(matches, "resolver", String)
+            .unwrap_or_else(|_| "cloudflare".to_string()),
+        threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),

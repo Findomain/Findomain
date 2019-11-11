@@ -138,3 +138,16 @@ args:
           - ipv4-only
           - ip
           - resolved
+
+    - threads:
+        help: Number of threads to use to perform subdomains resolution.
+        long: threads
+        takes_value: true
+
+    - resolver:
+        help: Specify a resolver to use.
+        long: resolver
+        takes_value: true
+        possible_values:
+          - cloudflare
+          - quad9
