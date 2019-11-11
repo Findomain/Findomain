@@ -549,6 +549,10 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
 }
 
 fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
+    if args.threads > 500 {
+        args.threads = 500
+    }
+    println!("{}", args.threads);
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.threads)
         .build_global()
