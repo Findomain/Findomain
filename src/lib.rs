@@ -552,7 +552,12 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     if args.threads > 500 {
         args.threads = 500
     }
-    println!("{}", args.threads);
+    if !args.quiet_flag {
+        println!(
+            "Performing asyncronous subdomains resolution with {} threads, it will take a while. 🧐\n",
+            args.threads
+        )
+    }
     rayon::ThreadPoolBuilder::new()
         .num_threads(args.threads)
         .build_global()
