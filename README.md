@@ -37,7 +37,10 @@ The tool used to calculate the time, is the `time` command in Linux.
 # Features
 
 * Subdomains monitoring: put data to Discord, Slack or Telegram webhooks.  See [Subdomains Monitoring](README.md#subdomains-monitoring) for more information.
-* Multi-thread support, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
+* Multi-thread support for API querying, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
+* Parallel support for subdomains resolution, in good network conditions can resolv about 2000 subdomains per minute.
+* DNS over TLS support.
+* Specific IPv4 or IPv6 query support.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
 * Discover subdomains IP for data analisis.
