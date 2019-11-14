@@ -3,6 +3,9 @@ use findomain::{args, get_subdomains, read_from_file};
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();
+    if arguments.threads > 500 {
+        arguments.threads = 500
+    }
     rayon::ThreadPoolBuilder::new()
         .num_threads(arguments.threads)
         .build_global()
