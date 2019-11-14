@@ -3,6 +3,10 @@ use findomain::{args, get_subdomains, read_from_file};
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(arguments.threads)
+        .build_global()
+        .unwrap();
     if !arguments.target.is_empty() {
         get_subdomains(&mut arguments)
     } else if !arguments.file.is_empty() {

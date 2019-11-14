@@ -543,10 +543,6 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     } else if args.subdomains.len() > 50 && args.subdomains.len() < 500 {
         args.threads = 50
     }
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(args.threads)
-        .build()
-        .unwrap();
     if !args.quiet_flag {
         println!(
             "Performing asynchronous resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
