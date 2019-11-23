@@ -19,10 +19,10 @@ lazy_static = "1.4.0"
 rand = "0.7.2"
 postgres = "0.15.2"
 failure = "0.1.6"
-rayon = "1.2.0"
+rayon = "1.2.1"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.25", features = ["vendored"] }
+openssl = { version = "0.10.26", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.25", features = ["vendored"] }
+openssl = { version = "0.10.26", features = ["vendored"] }
