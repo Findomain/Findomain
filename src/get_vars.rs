@@ -7,7 +7,7 @@ pub fn get_auth_token(api: &str) -> String {
         } else {
             String::new()
         }
-    } else if api == "spyce" {
+    } else if api == "spyse" {
         if let Ok(token) = env::var("findomain_spyse_token") {
             token
         } else {
