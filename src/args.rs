@@ -1,6 +1,6 @@
 use crate::misc::{eval_resolved_or_ip_present, sanitize_target_string};
 use clap::{load_yaml, value_t, App};
-use std::collections::HashSet;
+use std::{collections::HashSet, time::Instant};
 
 pub struct Args {
     pub target: String,
@@ -28,6 +28,7 @@ pub struct Args {
     pub ipv6_only: bool,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
+    pub time_wasted: Instant,
 }
 
 pub fn get_args() -> Args {
@@ -97,5 +98,6 @@ pub fn get_args() -> Args {
         } else {
             Vec::new()
         },
+        time_wasted: Instant::now(),
     }
 }

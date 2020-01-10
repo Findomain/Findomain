@@ -4,17 +4,25 @@ use std::{
     collections::HashSet,
     fs::{self},
     path::Path,
+    time::Instant,
 };
 
 pub fn show_searching_msg(api: &str) {
     println!("Searching in the {} API... 🔍", api)
 }
 
-pub fn show_subdomains_found(subdomains_found: usize, target: &str, quiet_flag: bool) {
+pub fn show_subdomains_found(
+    subdomains_found: usize,
+    target: &str,
+    quiet_flag: bool,
+    time_wasted: Instant,
+) {
     if !quiet_flag {
         println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽",
-            subdomains_found, target
+            "\nA total of {} subdomains were found for ==>  {} 👽\nTime wasted: {} seconds.⏲️",
+            subdomains_found,
+            target,
+            time_wasted.elapsed().as_secs()
         )
     }
 }
@@ -167,4 +175,11 @@ pub fn return_facebook_token() -> String {
         "509488472952865|kONi75jYL_KQ_6J1CHPQ1MH4x_U",
     ];
     findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())].to_string()
+}
+
+pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
+    !subdomain.is_empty()
+        && !subdomain.contains(&['[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>'][..])
+        && !subdomain.starts_with('.')
+        && subdomain.ends_with(base_target)
 }

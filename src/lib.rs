@@ -244,8 +244,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
-    all_subdomains
-        .retain(|sub| !sub.contains('*') && !sub.starts_with('.') && sub.ends_with(base_target));
+    all_subdomains.retain(|sub| misc::sanitize_subdomain(&base_target, &sub));
     all_subdomains
 }
 
@@ -275,7 +274,12 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
                 }
             }
         }
-        misc::show_subdomains_found(subdomains_resolved, &args.target, args.quiet_flag)
+        misc::show_subdomains_found(
+            subdomains_resolved,
+            &args.target,
+            args.quiet_flag,
+            args.time_wasted,
+        )
     } else if !args.with_output
         && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
     {
@@ -294,18 +298,33 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
                 }
             }
         }
-        misc::show_subdomains_found(subdomains_resolved, &args.target, args.quiet_flag)
+        misc::show_subdomains_found(
+            subdomains_resolved,
+            &args.target,
+            args.quiet_flag,
+            args.time_wasted,
+        )
     } else if !args.only_resolved && !args.with_ip && args.with_output {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
             write_to_file(subdomain, &file_name)?
         }
-        misc::show_subdomains_found(args.subdomains.len(), &args.target, args.quiet_flag)
+        misc::show_subdomains_found(
+            args.subdomains.len(),
+            &args.target,
+            args.quiet_flag,
+            args.time_wasted,
+        )
     } else {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
         }
-        misc::show_subdomains_found(args.subdomains.len(), &args.target, args.quiet_flag)
+        misc::show_subdomains_found(
+            args.subdomains.len(),
+            &args.target,
+            args.quiet_flag,
+            args.time_wasted,
+        )
     }
 
     if !args.quiet_flag {
@@ -768,11 +787,7 @@ fn import_subdomains_from_file(args: &mut args::Args) -> Result<HashSet<String>>
             let file =
                 File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
             for subdomain in BufReader::new(file).lines().flatten() {
-                if !subdomain.is_empty()
-                    && !subdomain.contains('*')
-                    && !subdomain.starts_with('.')
-                    && subdomain.ends_with(base_target)
-                {
+                if misc::sanitize_subdomain(&base_target, &subdomain) {
                     subdomains_from_file.insert(subdomain);
                 }
             }
