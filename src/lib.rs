@@ -15,7 +15,6 @@ use postgres::{Client, NoTls};
 use rayon::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
-    error::Error,
     fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
     thread,
@@ -153,7 +152,7 @@ lazy_static! {
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
-    }
+    };
     if args.query_database {
         query_findomain_database(args)?
     } else {
@@ -407,15 +406,19 @@ fn get_crtsh_db_subdomains(
         misc::show_searching_msg("Crtsh database")
     }
     match Client::connect("postgres://guest@crt.sh:5432/certwatch", NoTls) {
-        Ok(mut crtsh_db_client) => match crtsh_db_client.query(crtsh_db_query, &[]) {
+        Ok(mut crtsh_db_client) => match crtsh_db_client.simple_query(crtsh_db_query) {
             Ok(crtsh_db_subdomains) => Some(
                 crtsh_db_subdomains
-                    .iter()
+                    .into_iter()
                     .map(|row| {
-                        let subdomain = SubdomainsDBCrtsh {
-                            NAME_VALUE: row.get("NAME_VALUE"),
-                        };
-                        subdomain.NAME_VALUE
+                        if let postgres::SimpleQueryMessage::Row(row) = row {
+                            let subdomain = SubdomainsDBCrtsh {
+                                NAME_VALUE: row.get("NAME_VALUE").unwrap().to_owned(),
+                            };
+                            subdomain.NAME_VALUE
+                        } else {
+                            String::new()
+                        }
                     })
                     .collect(),
             ),
@@ -432,7 +435,7 @@ fn get_crtsh_db_subdomains(
             if !quiet_flag {
                 println!(
                 "❌ A error has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
-                e.description()
+                e
             );
             }
             get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
