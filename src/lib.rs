@@ -152,7 +152,7 @@ lazy_static! {
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
-    };
+    }
     if args.query_database {
         query_findomain_database(args)?
     } else {
@@ -409,7 +409,7 @@ fn get_crtsh_db_subdomains(
         Ok(mut crtsh_db_client) => match crtsh_db_client.simple_query(crtsh_db_query) {
             Ok(crtsh_db_subdomains) => Some(
                 crtsh_db_subdomains
-                    .into_iter()
+                    .iter()
                     .map(|row| {
                         if let postgres::SimpleQueryMessage::Row(row) = row {
                             let subdomain = SubdomainsDBCrtsh {
