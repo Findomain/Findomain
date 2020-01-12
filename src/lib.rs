@@ -18,7 +18,7 @@ use std::{
     fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
@@ -329,7 +329,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nGood luck Hax0r 💀!\n");
     }
-
+    args.time_wasted = Instant::now();
     Ok(())
 }
 
