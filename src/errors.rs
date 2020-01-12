@@ -39,7 +39,7 @@ pub fn check_request_errors(error: reqwest::Error, api: &str, quiet_flag: bool) 
 
 pub fn check_json_errors(error: reqwest::Error, api: &str, quiet_flag: bool) {
     if !quiet_flag {
-        eprintln!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {}.", &api, error.description())
+        eprintln!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {:?}.", &api, error)
     }
 }
 

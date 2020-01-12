@@ -342,19 +342,24 @@ fn get_certspotter_subdomains(
         misc::show_searching_msg("CertSpotter")
     }
     match CLIENT.get(url_api_certspotter).send() {
-        Ok(mut data_certspotter) => match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>()
-        {
-            Ok(domains_certspotter) => Some(
-                domains_certspotter
-                    .into_iter()
-                    .flat_map(|sub| sub.dns_names.into_iter())
-                    .collect(),
-            ),
-            Err(e) => {
-                check_json_errors(e, "CertSpotter", quiet_flag);
+        Ok(mut data_certspotter) => {
+            if misc::check_http_response_code("CertSpotter", &data_certspotter, quiet_flag) {
+                match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>() {
+                    Ok(domains_certspotter) => Some(
+                        domains_certspotter
+                            .into_iter()
+                            .flat_map(|sub| sub.dns_names.into_iter())
+                            .collect(),
+                    ),
+                    Err(e) => {
+                        check_json_errors(e, "CertSpotter", quiet_flag);
+                        None
+                    }
+                }
+            } else {
                 None
             }
-        },
+        }
         Err(e) => {
             check_request_errors(e, "CertSpotter", quiet_flag);
             None
@@ -367,18 +372,24 @@ fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<HashSet
         misc::show_searching_msg("Crtsh")
     }
     match CLIENT.get(url_api_crtsh).send() {
-        Ok(mut data_crtsh) => match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
-            Ok(domains_crtsh) => Some(
-                domains_crtsh
-                    .into_iter()
-                    .map(|sub| sub.name_value)
-                    .collect(),
-            ),
-            Err(e) => {
-                check_json_errors(e, "Crtsh", quiet_flag);
+        Ok(mut data_crtsh) => {
+            if misc::check_http_response_code("Crtsh", &data_crtsh, quiet_flag) {
+                match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
+                    Ok(domains_crtsh) => Some(
+                        domains_crtsh
+                            .into_iter()
+                            .map(|sub| sub.name_value)
+                            .collect(),
+                    ),
+                    Err(e) => {
+                        check_json_errors(e, "Crtsh", quiet_flag);
+                        None
+                    }
+                }
+            } else {
                 None
             }
-        },
+        }
         Err(e) => {
             check_request_errors(e, "Crtsh", quiet_flag);
             None
@@ -435,13 +446,19 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     match CLIENT.get(url).send() {
-        Ok(mut data) => match data.json::<T>() {
-            Ok(json) => Some(json.into_subdomains()),
-            Err(e) => {
-                check_json_errors(e, name, quiet_flag);
+        Ok(mut data) => {
+            if misc::check_http_response_code(&name, &data, quiet_flag) {
+                match data.json::<T>() {
+                    Ok(json) => Some(json.into_subdomains()),
+                    Err(e) => {
+                        check_json_errors(e, name, quiet_flag);
+                        None
+                    }
+                }
+            } else {
                 None
             }
-        },
+        }
         Err(e) => {
             check_request_errors(e, name, quiet_flag);
             None

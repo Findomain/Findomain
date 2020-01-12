@@ -183,3 +183,22 @@ pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
         && !subdomain.starts_with('.')
         && subdomain.ends_with(base_target)
 }
+
+pub fn check_http_response_code(
+    api_name: &str,
+    response: &reqwest::Response,
+    quiet_flag: bool,
+) -> bool {
+    if response.status() == 200 {
+        true
+    } else {
+        if !quiet_flag {
+            println!(
+                "The {} API has failed returning the following HTTP status: {}",
+                api_name,
+                response.status(),
+            )
+        };
+        false
+    }
+}
