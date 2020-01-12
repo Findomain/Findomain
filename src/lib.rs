@@ -11,7 +11,7 @@ mod get_vars;
 mod misc;
 
 use crate::errors::*;
-use postgres::{Connection, TlsMode};
+use postgres::{Client, NoTls};
 use rayon::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
@@ -377,8 +377,9 @@ fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<HashSet
                 match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
                     Ok(domains_crtsh) => Some(
                         domains_crtsh
-                            .into_iter()
-                            .map(|sub| sub.name_value)
+                            .iter()
+                            .flat_map(|sub| sub.name_value.split('\n'))
+                            .map(str::to_owned)
                             .collect(),
                     ),
                     Err(e) => {
@@ -405,8 +406,8 @@ fn get_crtsh_db_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("Crtsh database")
     }
-    match Connection::connect("postgres://guest@crt.sh:5432/certwatch", TlsMode::None) {
-        Ok(crtsh_db_client) => match crtsh_db_client.query(&crtsh_db_query, &[]) {
+    match Client::connect("postgres://guest@crt.sh:5432/certwatch", NoTls) {
+        Ok(mut crtsh_db_client) => match crtsh_db_client.query(crtsh_db_query, &[]) {
             Ok(crtsh_db_subdomains) => Some(
                 crtsh_db_subdomains
                     .iter()
@@ -422,8 +423,7 @@ fn get_crtsh_db_subdomains(
                 if !quiet_flag {
                     println!(
                     "❌ A error has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
-                    e.description()
-                );
+                    e);
                 }
                 get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
             }
@@ -646,8 +646,7 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
             args.subdomains.insert(subdomain);
         }
     }
-    let connection: postgres::Connection =
-        Connection::connect(args.postgres_connection.clone(), TlsMode::None)?;
+    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
     let mut telegram_parameters = HashMap::new();
@@ -655,18 +654,16 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     connection.execute(
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
-                   name            VARCHAR NOT NULL UNIQUE
+                   name            TEXT NOT NULL UNIQUE
               )",
         &[],
     )?;
 
-    let existing_subdomains = connection.query(
-        &format!(
-            "SELECT name FROM subdomains WHERE name LIKE '%{}'",
-            &args.target
-        ),
-        &[],
-    )?;
+    let statement: &str = &format!(
+        "SELECT name FROM subdomains WHERE name LIKE '%{}'",
+        &args.target
+    );
+    let existing_subdomains = connection.query(statement, &[])?;
 
     let existing_subdomains: HashSet<String> = existing_subdomains
         .iter()
@@ -729,14 +726,17 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     for (webhook, webhooks_payload) in webhooks_data {
         if !webhook.is_empty() {
             let response = CLIENT.post(webhook).json(&webhooks_payload).send()?;
-            if response.status().is_success()
-                && !new_subdomains.is_empty()
-                && commit_to_db_counter == 0
-            {
-                if commit_to_db(&connection, &new_subdomains).is_ok() {
+            if response.status() == 200 || response.status() == 204 {
+                if commit_to_db_counter == 0
+                    && !new_subdomains.is_empty()
+                    && commit_to_db(
+                        Client::connect(&args.postgres_connection, NoTls)?,
+                        &new_subdomains,
+                    )
+                    .is_ok()
+                {
                     commit_to_db_counter += 1
                 }
-            } else if response.status().is_success() && new_subdomains.is_empty() {
             } else if !args.quiet_flag {
                 eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
@@ -748,8 +748,8 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-fn commit_to_db(conn: &postgres::Connection, new_subdomains: &HashSet<String>) -> Result<()> {
-    let prepared_transaction = conn.transaction()?;
+fn commit_to_db(mut conn: postgres::Client, new_subdomains: &HashSet<String>) -> Result<()> {
+    let mut prepared_transaction = conn.transaction()?;
     for subdomain in new_subdomains {
         prepared_transaction.execute("INSERT INTO subdomains (name) VALUES ($1)", &[&subdomain])?;
     }
@@ -764,22 +764,19 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
             args.target
         )
     }
-    let connection: postgres::Connection =
-        Connection::connect(args.postgres_connection.clone(), TlsMode::None)?;
+    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
     connection.execute(
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
-                   name            VARCHAR NOT NULL UNIQUE
+                   name            TEXT NOT NULL UNIQUE
               )",
         &[],
     )?;
-    let existing_subdomains = connection.query(
-        &format!(
-            "SELECT name FROM subdomains WHERE name LIKE '%{}'",
-            &args.target
-        ),
-        &[],
-    )?;
+    let statement: &str = &format!(
+        "SELECT name FROM subdomains WHERE name LIKE '%{}'",
+        &args.target
+    );
+    let existing_subdomains = connection.query(statement, &[])?;
     args.subdomains = existing_subdomains
         .iter()
         .map(|row| {

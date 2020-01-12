@@ -179,7 +179,11 @@ pub fn return_facebook_token() -> String {
 
 pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
     !subdomain.is_empty()
-        && !subdomain.contains(&['[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>'][..])
+        && !subdomain.contains(
+            &[
+                '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\',
+            ][..],
+        )
         && !subdomain.starts_with('.')
         && subdomain.ends_with(base_target)
 }
@@ -189,7 +193,7 @@ pub fn check_http_response_code(
     response: &reqwest::Response,
     quiet_flag: bool,
 ) -> bool {
-    if response.status().is_success() {
+    if response.status() == 200 {
         true
     } else {
         if !quiet_flag {
