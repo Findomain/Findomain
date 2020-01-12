@@ -19,7 +19,7 @@ pub fn show_subdomains_found(
 ) {
     if !quiet_flag {
         println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽\nTime wasted: {} seconds.⏲️",
+            "\nA total of {} subdomains were found for ==>  {} 👽 in {} seconds.⏲️",
             subdomains_found,
             target,
             time_wasted.elapsed().as_secs()
