@@ -189,7 +189,7 @@ pub fn check_http_response_code(
     response: &reqwest::Response,
     quiet_flag: bool,
 ) -> bool {
-    if response.status() == 200 {
+    if response.status().is_success() {
         true
     } else {
         if !quiet_flag {

@@ -730,16 +730,13 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
         if !webhook.is_empty() {
             let response = CLIENT.post(webhook).json(&webhooks_payload).send()?;
             if response.status().is_success()
-                || response.status() == 204
-                    && !new_subdomains.is_empty()
-                    && commit_to_db_counter == 0
+                && !new_subdomains.is_empty()
+                && commit_to_db_counter == 0
             {
                 if commit_to_db(&connection, &new_subdomains).is_ok() {
                     commit_to_db_counter += 1
                 }
-            } else if response.status().is_success()
-                || response.status() == 204 && new_subdomains.is_empty()
-            {
+            } else if response.status().is_success() && new_subdomains.is_empty() {
             } else if !args.quiet_flag {
                 eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
