@@ -51,3 +51,9 @@ else
   echo "Please install the help2man package."
 fi
 
+echo "Uploading crate to crates.io..."
+if cargo publish --no-verify > /dev/null; then
+  echo "Crate uploaded."
+else
+  echo "An error has occurred."
+fi
