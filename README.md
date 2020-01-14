@@ -63,7 +63,7 @@ It tool doesn't use the common methods for sub(domains) discover, the tool uses 
 APIs that we are using at the moment:
 
 - [Certspotter](https://api.certspotter.com/)
-- [Crt.sh](https://crt.sh)
+- [Crt.sh Database (favorite) or Crt.sh HTTP API](https://crt.sh)
 - [Virustotal](https://www.virustotal.com/ui/domains/)
 - [Sublist3r](https://api.sublist3r.com/)
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
@@ -71,6 +71,7 @@ APIs that we are using at the moment:
 - [Bufferover](http://dns.bufferover.run/)
 - [Threadcrow](https://threatcrowd.org/)
 - [Virustotal with apikey](https://www.virustotal.com/) `**`
+- [AnubisDB](https://jonlu.ca/anubis/)
 
 **Notes**
 
@@ -114,6 +115,7 @@ We offer binarys ready to use for the following platforms (all are for 64 bits o
 * [Windows](README.md#installation-windows)
 * [MacOS](README.md#installation-macos)
 * [Aarch64 (Raspberry Pi)](README.md#installation-aarch64-raspberry-pi)
+* [NixOS](README.md#installation-nixos)
 
 If you need to run Findomain in another platform, continue reading the documentation.
 
@@ -171,7 +173,20 @@ $ ./findomain-linux
 **If you are using the [BlackArch Linux](https://blackarch.org) distribution, you just need to use:**
 
 ```
-$ sudo pacman -S findomain
+$ pacman -S findomain
+```
+**If you are using the [Pentoo](https://pentoo.ch) distribution, you just need to use:**
+
+```
+$ emerge -a findomain
+```
+**If you are using the [ArchLinux](https://archlinux.org) distribution, you can install it from AUR with:**
+
+```
+$ git clone https://aur.archlinux.org/findomain-git.git
+$ cd findomain-git
+$ makepkg -sci
+$ findomain
 ```
 
 # Installation Aarch64 (Raspberry Pi)
@@ -193,10 +208,27 @@ Exec: `findomain-windows` in the CMD shell.
 
 # Installation MacOS
 
+You have two options to install Findomain in MacOS.
+
+**Using Homebrew:**
+
+```
+$ brew install findomain
+$ findomain
+```
+**Manually from the repo:**
+
 ```
 $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-osx
 $ chmod +x findomain-osx.dms
 $ ./findomain-osx.dms
+```
+
+# Installation NixOS
+
+```
+$ nix-env -i findomain
+$ findomain
 ```
 
 # Updating Findomain to latest version
