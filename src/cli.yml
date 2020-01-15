@@ -153,6 +153,6 @@ args:
           - quad9
 
     - enable-empty-push:
-        help: Send data to webhooks still when no new subdomains have been found.
+        help: Send alert to webhooks still when no new subdomains have been found.
         long: aempty
         takes_value: false
