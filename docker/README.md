@@ -10,4 +10,4 @@
 
 3. Execute
 
-``$ ./findomain-linux``
+``$ findomain``

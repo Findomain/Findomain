@@ -4,3 +4,4 @@ RUN  apt-get update \
   && rm -rf /var/lib/apt/lists/*
 RUN wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
 RUN chmod +x findomain-linux
+RUN mv findomain-linux /usr/bin/findomain
