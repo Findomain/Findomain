@@ -116,6 +116,7 @@ We offer binarys ready to use for the following platforms (all are for 64 bits o
 * [MacOS](README.md#installation-macos)
 * [Aarch64 (Raspberry Pi)](README.md#installation-aarch64-raspberry-pi)
 * [NixOS](README.md#installation-nixos)
+* [Docker](README.md#installation-docker)
 
 If you need to run Findomain in another platform, continue reading the documentation.
 
@@ -230,6 +231,22 @@ $ ./findomain-osx.dms
 $ nix-env -i findomain
 $ findomain
 ```
+
+# Installation Docker
+
+You have two options to install Findomain in a docker container.
+
+**Using Dockerhub:**
+
+```
+$ docker pull edu4rdshl/findomain:latest
+$ docker run -it edu4rdshl/findomain:latest /bin/bash
+$ findomain
+```
+
+**Building the docker image:**
+
+Please see [the documentation](docker/).
 
 # Updating Findomain to latest version
 
