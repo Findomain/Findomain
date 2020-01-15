@@ -642,61 +642,20 @@ fn get_resolver(args: &mut args::Args) -> Resolver {
     }
 }
 
-fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
-    if args.with_imported_subdomains {
-        let imported_subdomains = import_subdomains_from_file(args)?;
-        for subdomain in imported_subdomains {
-            args.subdomains.insert(subdomain);
-        }
+fn commit_to_db(mut conn: postgres::Client, new_subdomains: &HashSet<String>) -> Result<()> {
+    let mut prepared_transaction = conn.transaction()?;
+    for subdomain in new_subdomains {
+        prepared_transaction.execute("INSERT INTO subdomains (name) VALUES ($1)", &[&subdomain])?;
     }
-    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
+    prepared_transaction.commit()?;
+    Ok(())
+}
+
+fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>) -> Result<()> {
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
     let mut telegram_parameters = HashMap::new();
     let mut webhooks_data = HashMap::new();
-    connection.execute(
-        "CREATE TABLE IF NOT EXISTS subdomains (
-                   id              SERIAL PRIMARY KEY,
-                   name            TEXT NOT NULL UNIQUE
-              )",
-        &[],
-    )?;
-
-    let statement: &str = &format!(
-        "SELECT name FROM subdomains WHERE name LIKE '%{}'",
-        &args.target
-    );
-    let existing_subdomains = connection.query(statement, &[])?;
-
-    let existing_subdomains: HashSet<String> = existing_subdomains
-        .iter()
-        .map(|row| {
-            let subdomain = Subdomain {
-                name: row.get("name"),
-            };
-            subdomain.name
-        })
-        .collect();
-
-    let new_subdomains: HashSet<String> = args
-        .subdomains
-        .difference(&existing_subdomains)
-        .map(|sub| sub.to_string())
-        .collect();
-
-    if args.with_output && !new_subdomains.is_empty() {
-        let file_name = args.file_name.replace(
-            &args.file_name.split('.').last().unwrap(),
-            "new_subdomains.txt",
-        );
-        misc::check_output_file_exists(&file_name)?;
-        for subdomain in &new_subdomains {
-            write_to_file(subdomain, &file_name)?
-        }
-        if !args.quiet_flag {
-            misc::show_file_location(&args.target, &file_name)
-        }
-    }
 
     if !args.discord_webhook.is_empty() {
         discord_parameters.insert(
@@ -751,12 +710,65 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-fn commit_to_db(mut conn: postgres::Client, new_subdomains: &HashSet<String>) -> Result<()> {
-    let mut prepared_transaction = conn.transaction()?;
-    for subdomain in new_subdomains {
-        prepared_transaction.execute("INSERT INTO subdomains (name) VALUES ($1)", &[&subdomain])?;
+fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
+    if args.with_imported_subdomains {
+        let imported_subdomains = import_subdomains_from_file(args)?;
+        for subdomain in imported_subdomains {
+            args.subdomains.insert(subdomain);
+        }
     }
-    prepared_transaction.commit()?;
+    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS subdomains (
+                   id              SERIAL PRIMARY KEY,
+                   name            TEXT NOT NULL UNIQUE
+              )",
+        &[],
+    )?;
+    let statement: &str = &format!(
+        "SELECT name FROM subdomains WHERE name LIKE '%{}'",
+        &args.target
+    );
+    let existing_subdomains = connection.query(statement, &[])?;
+
+    let existing_subdomains: HashSet<String> = existing_subdomains
+        .iter()
+        .map(|row| {
+            let subdomain = Subdomain {
+                name: row.get("name"),
+            };
+            subdomain.name
+        })
+        .collect();
+
+    let new_subdomains: HashSet<String> = args
+        .subdomains
+        .difference(&existing_subdomains)
+        .map(|sub| sub.to_string())
+        .collect();
+
+    if args.with_output && !new_subdomains.is_empty() {
+        let file_name = args.file_name.replace(
+            &args.file_name.split('.').last().unwrap(),
+            "new_subdomains.txt",
+        );
+        misc::check_output_file_exists(&file_name)?;
+        for subdomain in &new_subdomains {
+            write_to_file(subdomain, &file_name)?
+        }
+        if !args.quiet_flag {
+            misc::show_file_location(&args.target, &file_name)
+        }
+    }
+
+    if !args.enable_empty_push {
+        if !new_subdomains.is_empty() {
+            push_data_to_webhooks(args, &new_subdomains)?
+        }
+    } else {
+        push_data_to_webhooks(args, &new_subdomains)?
+    }
+
     Ok(())
 }
 
