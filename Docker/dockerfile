@@ -1,0 +1,8 @@
+FROM ubuntu:18.04
+RUN  apt-get update \
+  && apt-get install -y wget \
+        libc6 \
+  && rm -rf /var/lib/apt/lists/*
+RUN wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
+RUN chmod +x findomain-linux
+CMD ["./findomain-linux"]
