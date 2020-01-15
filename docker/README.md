@@ -6,7 +6,7 @@
 
 2. Run the image.
 
-``$ docker run -it --rm findomain /bin/bash``
+``$ docker run -it findomain /bin/bash``
 
 3. Execute
 
