@@ -4,3 +4,4 @@ RUN  apt-get update \
   && rm -rf /var/lib/apt/lists/*
 RUN wget -O /usr/bin/findomain https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
 RUN chmod +x /usr/bin/findomain
+RUN  apt-get remove --autoremove -y wget
