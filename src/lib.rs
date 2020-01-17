@@ -727,7 +727,7 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
         &[],
     )?;
 
-    // Update PostgreSQL table schema to match new scheme, will be removed later.
+    // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
     connection.execute("ALTER TABLE subdomains ADD COLUMN IF NOT EXISTS timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP", &[],)?;
     connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
 
@@ -795,7 +795,7 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
         &[],
     )?;
 
-    // Update PostgreSQL table schema to match new scheme, will be removed later.
+    // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
     connection.execute("ALTER TABLE subdomains ADD COLUMN IF NOT EXISTS timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP", &[],)?;
     connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
 
