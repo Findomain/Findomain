@@ -151,10 +151,7 @@ lazy_static! {
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if args.monitoring_flag {
-        if !args.quiet_flag {
-            println!("Monitoring flag enabled, testing connection to database server...");
-        }
-        misc::test_database_connection(args);
+        misc::test_database_connection(args)
     }
 
     if !args.quiet_flag {

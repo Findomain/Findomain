@@ -209,6 +209,9 @@ pub fn check_http_response_code(
 }
 
 pub fn test_database_connection(args: &mut args::Args) {
+    if !args.quiet_flag {
+        println!("Monitoring flag enabled, testing connection to database server...")
+    }
     match Client::connect(&args.postgres_connection, NoTls) {
         Ok(_) => {
             if !args.quiet_flag {
