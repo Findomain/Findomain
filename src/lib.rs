@@ -728,8 +728,15 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     )?;
 
     // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
-    connection.execute("ALTER TABLE subdomains ADD COLUMN IF NOT EXISTS timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP", &[],)?;
-    connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
+    if connection
+        .execute(
+            "ALTER TABLE subdomains ADD COLUMN timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP",
+            &[],
+        )
+        .is_ok()
+    {
+        connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
+    }
 
     let statement: &str = &format!(
         "SELECT name FROM subdomains WHERE name LIKE '%{}'",
@@ -796,8 +803,15 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
     )?;
 
     // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
-    connection.execute("ALTER TABLE subdomains ADD COLUMN IF NOT EXISTS timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP", &[],)?;
-    connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
+    if connection
+        .execute(
+            "ALTER TABLE subdomains ADD COLUMN timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP",
+            &[],
+        )
+        .is_ok()
+    {
+        connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
+    }
 
     let statement: &str = &format!(
         "SELECT name FROM subdomains WHERE name LIKE '%{}'",
