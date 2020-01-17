@@ -1,4 +1,5 @@
 use crate::{args, errors::*};
+use postgres::{Client, NoTls};
 use rand::Rng;
 use std::{
     collections::HashSet,
@@ -204,5 +205,19 @@ pub fn check_http_response_code(
             )
         };
         false
+    }
+}
+
+pub fn test_database_connection(args: &mut args::Args) {
+    match Client::connect(&args.postgres_connection, NoTls) {
+        Ok(_) => {
+            if !args.quiet_flag {
+                println!("Connected, performing enumeration!")
+            }
+        }
+        Err(e) => {
+            println!("The following error happened: {}", e);
+            std::process::exit(1)
+        }
     }
 }
