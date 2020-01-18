@@ -171,7 +171,7 @@ $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain
 $ chmod +x findomain-linux
 $ ./findomain-linux
 ```
-**If you are using the [BlackArch Linux](https://blackarch.org) distribution, you just need to use:**
+**If you are using the [ArchLinux](https://blackarch.org) distribution or any ArchLinux-based distro, you just need to use:**
 
 ```
 $ pacman -S findomain
