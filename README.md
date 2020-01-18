@@ -171,7 +171,7 @@ $ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain
 $ chmod +x findomain-linux
 $ ./findomain-linux
 ```
-**If you are using the [ArchLinux](https://blackarch.org) distribution or any ArchLinux-based distro, you just need to use:**
+**If you are using the [ArchLinux](https://archlinux.org) distribution or any ArchLinux-based distro, you just need to use:**
 
 ```
 $ pacman -S findomain
@@ -180,14 +180,6 @@ $ pacman -S findomain
 
 ```
 $ emerge -a findomain
-```
-**If you are using the [ArchLinux](https://archlinux.org) distribution, you can install it from AUR with:**
-
-```
-$ git clone https://aur.archlinux.org/findomain-git.git
-$ cd findomain-git
-$ makepkg -sci
-$ findomain
 ```
 
 # Installation Aarch64 (Raspberry Pi)
