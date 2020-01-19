@@ -1,4 +1,5 @@
 use crate::{args, errors::*};
+use lazy_static;
 use postgres::{Client, NoTls};
 use rand::Rng;
 use std::{
@@ -7,6 +8,13 @@ use std::{
     path::Path,
     time::Instant,
 };
+
+lazy_static! {
+    static ref SPECIAL_CHARS: Vec<char> = vec![
+        '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\', '%', '&', '¿', '?', '¡',
+        '!', '#',
+    ];
+}
 
 pub fn show_searching_msg(api: &str) {
     println!("Searching in the {} API... 🔍", api)
@@ -125,12 +133,18 @@ pub fn return_webhook_payload(
     }
 }
 
-pub fn sanitize_target_string(target: String) -> String {
-    target
+pub fn sanitize_target_string(mut target: String) -> String {
+    target = target
         .replace("www.", "")
         .replace("https://", "")
         .replace("http://", "")
-        .replace("/", "")
+        .replace("/", "");
+    if !target.contains(&SPECIAL_CHARS[..]) {
+        target
+    } else {
+        println!("Target contains invalid characters, please try again.");
+        std::process::exit(1)
+    }
 }
 
 pub fn works_with_data(args: &mut args::Args) -> Result<()> {
@@ -180,11 +194,7 @@ pub fn return_facebook_token() -> String {
 
 pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
     !subdomain.is_empty()
-        && !subdomain.contains(
-            &[
-                '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\',
-            ][..],
-        )
+        && !subdomain.contains(&SPECIAL_CHARS[..])
         && !subdomain.starts_with('.')
         && subdomain.ends_with(base_target)
 }
