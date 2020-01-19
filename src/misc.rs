@@ -12,7 +12,7 @@ use std::{
 lazy_static! {
     static ref SPECIAL_CHARS: Vec<char> = vec![
         '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\', '%', '&', '¿', '?', '¡',
-        '!', '#', '\''
+        '!', '#', '\'', ' ', ','
     ];
 }
 
@@ -139,10 +139,10 @@ pub fn sanitize_target_string(mut target: String) -> String {
         .replace("https://", "")
         .replace("http://", "")
         .replace("/", "");
-    if !target.contains(&SPECIAL_CHARS[..]) {
+    if !target.starts_with('.') && target.contains('.') && !target.contains(&SPECIAL_CHARS[..]) {
         target
     } else {
-        println!("Target contains invalid characters, please try again.");
+        println!("Target is invalid, please try again.");
         std::process::exit(1)
     }
 }
@@ -194,9 +194,9 @@ pub fn return_facebook_token() -> String {
 
 pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
     !subdomain.is_empty()
-        && !subdomain.contains(&SPECIAL_CHARS[..])
         && !subdomain.starts_with('.')
         && subdomain.ends_with(base_target)
+        && !subdomain.contains(&SPECIAL_CHARS[..])
 }
 
 pub fn check_http_response_code(
