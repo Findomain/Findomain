@@ -1,7 +1,7 @@
 use {
     crate::{
         get_resolver,
-        misc::{eval_resolved_or_ip_present, sanitize_target_string},
+        misc::{eval_resolved_or_ip_present, sanitize_target_string, validate_target},
     },
     clap::{load_yaml, value_t, App},
     std::{collections::HashSet, time::Instant},
@@ -43,12 +43,15 @@ pub fn get_args() -> Args {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
     Args {
-        target: if !matches.is_present("file") {
-            sanitize_target_string(
+        target: {
+            let target = sanitize_target_string(
                 value_t!(matches, "target", String).unwrap_or_else(|_| String::new()),
-            )
-        } else {
-            String::new()
+            );
+            if validate_target(&target) {
+                target
+            } else {
+                String::new()
+            }
         },
         file_name: if matches.is_present("output") && matches.is_present("target") {
             format!(

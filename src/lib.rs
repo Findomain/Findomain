@@ -557,14 +557,16 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     for domain in BufReader::new(file).lines().flatten() {
         if !domain.is_empty() {
             args.target = misc::sanitize_target_string(domain);
-            args.file_name = if file_name.is_empty() && !args.with_ip {
-                format!("{}.txt", &args.target)
-            } else if file_name.is_empty() && args.with_ip {
-                format!("{}-ip.txt", &args.target)
-            } else {
-                file_name.to_string()
-            };
-            get_subdomains(args)?
+            if misc::validate_target(&args.target) {
+                args.file_name = if file_name.is_empty() && !args.with_ip {
+                    format!("{}.txt", &args.target)
+                } else if file_name.is_empty() && args.with_ip {
+                    format!("{}-ip.txt", &args.target)
+                } else {
+                    file_name.to_string()
+                };
+                get_subdomains(args)?
+            }
         }
     }
     Ok(())

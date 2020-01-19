@@ -133,18 +133,16 @@ pub fn return_webhook_payload(
     }
 }
 
-pub fn sanitize_target_string(mut target: String) -> String {
-    target = target
+pub fn sanitize_target_string(target: String) -> String {
+    target
         .replace("www.", "")
         .replace("https://", "")
         .replace("http://", "")
-        .replace("/", "");
-    if !target.starts_with('.') && target.contains('.') && !target.contains(&SPECIAL_CHARS[..]) {
-        target
-    } else {
-        println!("Target is invalid, please try again.");
-        std::process::exit(1)
-    }
+        .replace("/", "")
+}
+
+pub fn validate_target(target: &str) -> bool {
+    !target.starts_with('.') && target.contains('.') && !target.contains(&SPECIAL_CHARS[..])
 }
 
 pub fn works_with_data(args: &mut args::Args) -> Result<()> {
