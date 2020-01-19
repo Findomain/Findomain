@@ -1,5 +1,4 @@
-use findomain::errors::*;
-use findomain::{args, get_subdomains, read_from_file};
+use findomain::{args, errors::*, get_subdomains, read_from_file};
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();

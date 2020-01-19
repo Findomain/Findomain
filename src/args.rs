@@ -1,6 +1,12 @@
-use crate::misc::{eval_resolved_or_ip_present, sanitize_target_string};
-use clap::{load_yaml, value_t, App};
-use std::{collections::HashSet, time::Instant};
+use {
+    crate::{
+        get_resolver,
+        misc::{eval_resolved_or_ip_present, sanitize_target_string},
+    },
+    clap::{load_yaml, value_t, App},
+    std::{collections::HashSet, time::Instant},
+    trust_dns_resolver::Resolver,
+};
 
 pub struct Args {
     pub target: String,
@@ -30,15 +36,20 @@ pub struct Args {
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub time_wasted: Instant,
+    pub domain_resolver: Resolver,
 }
 
 pub fn get_args() -> Args {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
     Args {
-        target: sanitize_target_string(
-            value_t!(matches, "target", String).unwrap_or_else(|_| String::new()),
-        ),
+        target: if !matches.is_present("file") {
+            sanitize_target_string(
+                value_t!(matches, "target", String).unwrap_or_else(|_| String::new()),
+            )
+        } else {
+            String::new()
+        },
         file_name: if matches.is_present("output") && matches.is_present("target") {
             format!(
                 "{}.txt",
@@ -101,5 +112,17 @@ pub fn get_args() -> Args {
             Vec::new()
         },
         time_wasted: Instant::now(),
+        domain_resolver: {
+            let resolver =
+                value_t!(matches, "resolver", String).unwrap_or_else(|_| "cloudflare".to_string());
+            let enable_dot = eval_resolved_or_ip_present(
+                matches.is_present("enable-dot"),
+                matches.is_present("ip")
+                    || matches.is_present("ipv4-only")
+                    || matches.is_present("ipv6-only"),
+                matches.is_present("resolved"),
+            );
+            get_resolver(enable_dot, resolver)
+        },
     }
 }

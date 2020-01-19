@@ -10,17 +10,19 @@ pub mod errors;
 mod get_vars;
 mod misc;
 
-use crate::errors::*;
-use postgres::{Client, NoTls};
-use rayon::prelude::*;
-use std::{
-    collections::{HashMap, HashSet},
-    fs::{File, OpenOptions},
-    io::{BufRead, BufReader, Write},
-    thread,
-    time::{Duration, Instant},
+use {
+    crate::errors::*,
+    postgres::{Client, NoTls},
+    rayon::prelude::*,
+    std::{
+        collections::{HashMap, HashSet},
+        fs::{File, OpenOptions},
+        io::{BufRead, BufReader, Write},
+        thread,
+        time::{Duration, Instant},
+    },
+    trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver},
 };
-use trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver};
 
 trait IntoSubdomains {
     fn into_subdomains(self) -> HashSet<String>;
@@ -585,13 +587,12 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
             args.subdomains.len(), args.threads
         )
     }
-    let resolver = get_resolver(args);
     let mut data = HashMap::new();
     data.par_extend(args.subdomains.par_iter().map(|sub| {
         (
             sub,
             get_ip(
-                &resolver,
+                &args.domain_resolver,
                 &[sub, "."].concat(),
                 args.ipv4_only,
                 args.ipv6_only,
@@ -632,17 +633,23 @@ fn get_ip(resolver: &Resolver, domain: &str, ipv4_only: bool, ipv6_only: bool) -
     }
 }
 
-fn get_resolver(args: &mut args::Args) -> Resolver {
-    if !args.enable_dot {
-        if args.resolver == "cloudflare" {
-            Resolver::new(ResolverConfig::cloudflare(), ResolverOpts::default()).unwrap()
+pub fn get_resolver(enable_dot: bool, resolver: String) -> Resolver {
+    let mut opts = ResolverOpts::default();
+    opts.timeout = Duration::from_secs(2);
+    if !enable_dot {
+        if resolver == "cloudflare" {
+            Resolver::new(ResolverConfig::cloudflare(), opts).unwrap()
+        } else if resolver == "system" {
+            Resolver::from_system_conf().unwrap()
         } else {
-            Resolver::new(ResolverConfig::quad9(), ResolverOpts::default()).unwrap()
+            Resolver::new(ResolverConfig::quad9(), opts).unwrap()
         }
-    } else if args.resolver == "cloudflare" {
-        Resolver::new(ResolverConfig::cloudflare_tls(), ResolverOpts::default()).unwrap()
+    } else if resolver == "cloudflare" {
+        Resolver::new(ResolverConfig::cloudflare_tls(), opts).unwrap()
+    } else if resolver == "system" {
+        Resolver::from_system_conf().unwrap()
     } else {
-        Resolver::new(ResolverConfig::quad9_tls(), ResolverOpts::default()).unwrap()
+        Resolver::new(ResolverConfig::quad9_tls(), opts).unwrap()
     }
 }
 
