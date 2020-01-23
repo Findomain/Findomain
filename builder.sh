@@ -55,7 +55,8 @@ echo "Uploading crate to crates.io..."
 if cargo publish --no-verify > /dev/null; then
   echo "Crate uploaded."
 else
-  echo "An error has occurred."
+  echo "An error has occurred while uploading the crate to crates.io."
+  exit
 fi
 
 echo "Uploading docker image to Dockerhub..."
@@ -63,5 +64,7 @@ if cd docker && docker build -f Dockerfile -t edu4rdshl/findomain:latest . > /de
   && docker push edu4rdshl/findomain:latest > /dev/null; then
   echo "Image uploaded sucessfully."
 else
-  echo "An error has ocurred."
+  echo "An error has ocurred while uploading the docker image."
+  exit
 fi
+echo "All builds have passed!"
