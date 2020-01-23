@@ -9,6 +9,10 @@ license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
 
+[profile.release]
+lto = "fat"
+codegen-units = 1
+
 [dependencies]
 serde = { version = "1.0.104", features = ["derive"] }
 serde_derive = "1.0.104"
