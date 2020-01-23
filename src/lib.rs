@@ -697,13 +697,11 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
         webhooks_data.insert(&args.telegram_webhook, telegram_parameters);
     }
 
-    let mut commit_to_db_counter = 0;
-
     for (webhook, webhooks_payload) in webhooks_data {
         if !webhook.is_empty() {
             let response = CLIENT.post(webhook).json(&webhooks_payload).send()?;
             if response.status() == 200 || response.status() == 204 {
-                if commit_to_db_counter == 0
+                if args.commit_to_db_counter == 0
                     && !new_subdomains.is_empty()
                     && commit_to_db(
                         Client::connect(&args.postgres_connection, NoTls)?,
@@ -711,7 +709,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
                     )
                     .is_ok()
                 {
-                    commit_to_db_counter += 1
+                    args.commit_to_db_counter += 1
                 }
             } else if !args.quiet_flag {
                 eprintln!(
