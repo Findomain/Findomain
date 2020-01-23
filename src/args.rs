@@ -20,6 +20,7 @@ pub struct Args {
     pub telegram_chat_id: String,
     pub resolver: String,
     pub threads: usize,
+    pub database_checker_counter: usize,
     pub only_resolved: bool,
     pub with_ip: bool,
     pub with_output: bool,
@@ -85,6 +86,7 @@ pub fn get_args() -> Args {
         resolver: value_t!(matches, "resolver", String)
             .unwrap_or_else(|_| "cloudflare".to_string()),
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
+        database_checker_counter: 0,
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),

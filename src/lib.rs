@@ -152,8 +152,9 @@ lazy_static! {
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
-    if args.monitoring_flag {
-        misc::test_database_connection(args)
+    if args.monitoring_flag && args.database_checker_counter == 0 {
+        misc::test_database_connection(args);
+        args.database_checker_counter += 1
     }
 
     if !args.quiet_flag {

@@ -227,7 +227,10 @@ pub fn test_database_connection(args: &mut args::Args) {
             }
         }
         Err(e) => {
-            println!("The following error happened: {}", e);
+            println!(
+                "The following error happened while connecting to the database: {}",
+                e
+            );
             std::process::exit(1)
         }
     }
