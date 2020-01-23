@@ -151,7 +151,7 @@ struct PageVecUrlscan {
 }
 
 #[derive(Deserialize)]
-pub struct ResponseDataUrlscan {
+struct ResponseDataUrlscan {
     results: HashSet<PageVecUrlscan>,
 }
 
