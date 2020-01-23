@@ -145,8 +145,8 @@ struct Subdomain {
 }
 
 lazy_static! {
-    static ref CLIENT: reqwest::Client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(20))
+    static ref CLIENT: reqwest::blocking::Client = reqwest::blocking::Client::builder()
+        .timeout(Duration::from_secs(15))
         .build()
         .unwrap();
 }
@@ -348,7 +348,7 @@ fn get_certspotter_subdomains(
         misc::show_searching_msg("CertSpotter")
     }
     match CLIENT.get(url_api_certspotter).send() {
-        Ok(mut data_certspotter) => {
+        Ok(data_certspotter) => {
             if misc::check_http_response_code("CertSpotter", &data_certspotter, quiet_flag) {
                 match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>() {
                     Ok(domains_certspotter) => Some(
@@ -378,7 +378,7 @@ fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<HashSet
         misc::show_searching_msg("Crtsh")
     }
     match CLIENT.get(url_api_crtsh).send() {
-        Ok(mut data_crtsh) => {
+        Ok(data_crtsh) => {
             if misc::check_http_response_code("Crtsh", &data_crtsh, quiet_flag) {
                 match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
                     Ok(domains_crtsh) => Some(
@@ -456,7 +456,7 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     match CLIENT.get(url).send() {
-        Ok(mut data) => {
+        Ok(data) => {
             if misc::check_http_response_code(&name, &data, quiet_flag) {
                 match data.json::<T>() {
                     Ok(json) => Some(json.into_subdomains()),
