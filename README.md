@@ -72,6 +72,7 @@ APIs that we are using at the moment:
 - [Threadcrow](https://threatcrowd.org/)
 - [Virustotal with apikey](https://www.virustotal.com/) `**`
 - [AnubisDB](https://jonlu.ca/anubis/)
+- [Urlscan.io](https://urlscan.io/about-api/)
 
 **Notes**
 
