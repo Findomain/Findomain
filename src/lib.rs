@@ -140,6 +140,30 @@ impl IntoSubdomains for SubdomainsVirustotalApikey {
     }
 }
 
+#[derive(Deserialize, Eq, PartialEq, Hash)]
+struct SubdomainUrlscan {
+    domain: String,
+}
+
+#[derive(Deserialize, Eq, PartialEq, Hash)]
+struct PageVecUrlscan {
+    page: SubdomainUrlscan,
+}
+
+#[derive(Deserialize)]
+pub struct ResponseDataUrlscan {
+    results: HashSet<PageVecUrlscan>,
+}
+
+impl IntoSubdomains for ResponseDataUrlscan {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.results
+            .into_iter()
+            .map(|sub| sub.page.domain)
+            .collect()
+    }
+}
+
 struct Subdomain {
     name: String,
 }
@@ -156,7 +180,6 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         misc::test_database_connection(args);
         args.database_checker_counter += 1
     }
-
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
     }
@@ -214,6 +237,10 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         &args.target
     );
     let url_api_anubisdb = format!("https://jonlu.ca/anubis/subdomains/{}", &args.target);
+    let url_api_urlscan = format!(
+        "https://urlscan.io/api/v1/search/?q=domain:{}",
+        &args.target
+    );
     let mut all_subdomains: HashSet<String> = vec![
         thread::spawn(move || get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
         thread::spawn(move || get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
@@ -248,6 +275,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             })
         },
         thread::spawn(move || get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)),
+        thread::spawn(move || get_urlscan_subdomains(&url_api_urlscan, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains.retain(|sub| misc::sanitize_subdomain(&base_target, &sub));
@@ -546,6 +574,13 @@ fn get_virustotal_apikey_subdomains(
         "Virustotal API using apikey",
         quiet_flag,
     )
+}
+
+fn get_urlscan_subdomains(url_api_urlscan: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Urlscan.io")
+    }
+    get_from_http_api::<ResponseDataUrlscan>(url_api_urlscan, "Urlscan.io", quiet_flag)
 }
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
