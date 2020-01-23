@@ -719,6 +719,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
             }
         }
     }
+    args.commit_to_db_counter = 0;
     Ok(())
 }
 
