@@ -6,7 +6,7 @@ if ! systemctl is-active docker.service >/dev/null; then
   exit
 fi
 
-if cd docker && docker build -f Dockerfile -t edu4rdshl/findomain:latest . > /dev/null \
+if cd docker && docker build --pull -f Dockerfile -t edu4rdshl/findomain:latest . > /dev/null \
   && docker push edu4rdshl/findomain:latest > /dev/null; then
   echo "Image uploaded sucessfully."
 else
