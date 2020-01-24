@@ -65,12 +65,4 @@ else
   exit
 fi
 
-echo "Uploading docker image to Dockerhub..."
-if cd docker && docker build -f Dockerfile -t edu4rdshl/findomain:latest . > /dev/null \
-  && docker push edu4rdshl/findomain:latest > /dev/null; then
-  echo "Image uploaded sucessfully."
-else
-  echo "An error has ocurred while uploading the docker image."
-  exit
-fi
 echo "All builds have passed!"
