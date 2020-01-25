@@ -235,3 +235,10 @@ pub fn test_database_connection(args: &mut args::Args) {
         }
     }
 }
+
+pub fn return_reqwest_client() -> reqwest::blocking::Client {
+    reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .unwrap()
+}

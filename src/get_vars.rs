@@ -25,6 +25,12 @@ pub fn get_auth_token(api: &str) -> String {
         } else {
             String::new()
         }
+    } else if api == "securitytrails" {
+        if let Ok(token) = env::var("findomain_securitytrails_token") {
+            token
+        } else {
+            String::new()
+        }
     } else {
         String::new()
     }
