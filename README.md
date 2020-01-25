@@ -367,6 +367,42 @@ Put in the CMD command prompt:
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export VariableName="VariableValue"` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
 
+# Configuring the SecurityTrails API
+
+**Getting the API key**
+
+The first step is get your SecurityTrails token.Follow the next steps:
+
+1. Open https://securitytrails.com/
+2. Clic in "SIGNUP FOR FREE" (right corner).
+3. Fill the requested fields, **you need to put a valid email address, it's needed for verification.**.
+4. Select the API Pricing plan of your preference, there's a free plan limited to 50 queries per month. Clic in "Get started".
+5. Confirm email address.
+6. Select "Credentials" in the left panel, there's the API Key.
+
+Now you can use that value to set the access token as following:
+
+**Unix based systems (Linux, BSD, MacOS, Android with Termux, etc):**
+
+Put in your terminal:
+
+```
+$ findomain_securitytrails_token="YourAccessToken" findomain -(options)
+```
+
+**Windows systems:**
+
+Put in the CMD command prompt:
+
+```
+> set findomain_securitytrails_token=YourAccessToken && findomain -(options)
+```
+
+**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_securitytrails_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_fb_token` in Unix based systems like putting `export findomain_securitytrails_token="YourAccessToken"` into your `.bashrc` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
+
+
 # Subdomains Monitoring
 
 Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
