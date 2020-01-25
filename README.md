@@ -69,7 +69,7 @@ APIs that we are using at the moment:
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
 - [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
 - [Bufferover](http://dns.bufferover.run/)
-- [Threatcrow](https://threatcrowd.org/)
+- [Threatcrowd](https://threatcrowd.org/)
 - [Virustotal with apikey](https://www.virustotal.com/) `**`
 - [AnubisDB](https://jonlu.ca/anubis/)
 - [Urlscan.io](https://urlscan.io/about-api/)
