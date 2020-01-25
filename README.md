@@ -37,7 +37,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 # Features
 
 * Subdomains monitoring: put data to Discord, Slack or Telegram webhooks.  See [Subdomains Monitoring](README.md#subdomains-monitoring) for more information.
-* Multi-thread support for API querying, it makes that the maximun time that Findomain will take to search subdomains for any target is 20 seconds.
+* Multi-thread support for API querying, it makes that the maximun time that Findomain will take to search subdomains for any target is 15 seconds (in case of API's timeout).
 * Parallel support for subdomains resolution, in good network conditions can resolv about 2000 subdomains per minute.
 * DNS over TLS support.
 * Specific IPv4 or IPv6 query support.
@@ -73,6 +73,8 @@ APIs that we are using at the moment:
 - [Virustotal with apikey](https://www.virustotal.com/) `**`
 - [AnubisDB](https://jonlu.ca/anubis/)
 - [Urlscan.io](https://urlscan.io/about-api/)
+- [SecurityTrails](https://docs.securitytrails.com/docs) `**`
+- [Threatminer](https://www.threatminer.org/api.php)
 
 **Notes**
 
