@@ -69,7 +69,7 @@ APIs that we are using at the moment:
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
 - [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
 - [Bufferover](http://dns.bufferover.run/)
-- [Threadcrow](https://threatcrowd.org/)
+- [Threatcrow](https://threatcrowd.org/)
 - [Virustotal with apikey](https://www.virustotal.com/) `**`
 - [AnubisDB](https://jonlu.ca/anubis/)
 - [Urlscan.io](https://urlscan.io/about-api/)
@@ -248,7 +248,7 @@ Please see [the documentation](docker/).
 To update Findomain to latest version, you can be in some scenarios:
 
 1. **You downloaded a precompiled binary:** If you are using a precompiled binary, then you need to download the new binary.
-2. **You are using it from BlackArch Linux:** Just run `pacman -Syu`
+2. **You are using it in ArchLinux or any Arch-based distro:** Just run `pacman -Syu`
 3. **You have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
 4. **You downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
 5. **I used cargo install findomain:** then just run `cargo install --force findomain`.
