@@ -169,40 +169,20 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
                 subdomains_resolved += 1
             }
         }
-        misc::show_subdomains_found(
-            subdomains_resolved,
-            &args.target,
-            args.quiet_flag,
-            args.time_wasted,
-        )
+        misc::show_subdomains_found(subdomains_resolved, args)
     } else if !args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
-        misc::show_subdomains_found(
-            async_resolver(args).len(),
-            &args.target,
-            args.quiet_flag,
-            args.time_wasted,
-        )
+        misc::show_subdomains_found(async_resolver(args).len(), args)
     } else if !args.only_resolved && !args.with_ip && args.with_output {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
             write_to_file(subdomain, &file_name)?
         }
-        misc::show_subdomains_found(
-            args.subdomains.len(),
-            &args.target,
-            args.quiet_flag,
-            args.time_wasted,
-        )
+        misc::show_subdomains_found(args.subdomains.len(), args)
     } else {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
         }
-        misc::show_subdomains_found(
-            args.subdomains.len(),
-            &args.target,
-            args.quiet_flag,
-            args.time_wasted,
-        )
+        misc::show_subdomains_found(args.subdomains.len(), args)
     }
     args.time_wasted = Instant::now();
     Ok(())

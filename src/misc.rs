@@ -3,7 +3,7 @@ use {
     lazy_static,
     postgres::{Client, NoTls},
     rand::Rng,
-    std::{collections::HashSet, fs, path::Path, time::Instant},
+    std::{collections::HashSet, fs, path::Path},
 };
 
 lazy_static! {
@@ -17,18 +17,21 @@ pub fn show_searching_msg(api: &str) {
     println!("Searching in the {} API... 🔍", api)
 }
 
-pub fn show_subdomains_found(
-    subdomains_found: usize,
-    target: &str,
-    quiet_flag: bool,
-    time_wasted: Instant,
-) {
-    if !quiet_flag {
+pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
+    if !args.quiet_flag && (args.only_resolved || args.with_ip || args.ipv6_only) {
         println!(
-            "\nA total of {} subdomains were found for ==>  {} 👽 in {} seconds.⏲️",
+            "\n{} of {} subdomains found were resolved for domain {} 👽 in {} seconds.⏲️",
             subdomains_found,
-            target,
-            time_wasted.elapsed().as_secs()
+            args.subdomains.len(),
+            args.target,
+            args.time_wasted.elapsed().as_secs()
+        );
+    } else if !args.quiet_flag {
+        println!(
+            "\nA total of {} subdomains were found for domain {} 👽 in {} seconds.⏲️",
+            subdomains_found,
+            args.target,
+            args.time_wasted.elapsed().as_secs()
         )
     }
 }
