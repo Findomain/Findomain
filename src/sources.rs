@@ -1,8 +1,8 @@
 use {
     crate::{errors::*, misc},
-    postgres::{Client, NoTls},
+    postgres::NoTls,
     serde::de::DeserializeOwned,
-    std::collections::HashSet,
+    std::{collections::HashSet, time::Duration},
 };
 
 trait IntoSubdomains {
@@ -298,7 +298,14 @@ pub fn get_crtsh_db_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("Crtsh database")
     }
-    match Client::connect("postgres://guest@crt.sh:5432/certwatch", NoTls) {
+    match postgres::config::Config::new()
+        .connect_timeout(Duration::from_secs(5))
+        .user("guest")
+        .host("crt.sh")
+        .port(5432)
+        .dbname("certwatch")
+        .connect(NoTls)
+    {
         Ok(mut crtsh_db_client) => match crtsh_db_client.simple_query(crtsh_db_query) {
             Ok(crtsh_db_subdomains) => Some(
                 crtsh_db_subdomains
