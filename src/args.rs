@@ -32,7 +32,6 @@ pub struct Args {
     pub query_database: bool,
     pub with_imported_subdomains: bool,
     pub enable_dot: bool,
-    pub ipv4_only: bool,
     pub ipv6_only: bool,
     pub enable_empty_push: bool,
     pub subdomains: HashSet<String>,
@@ -100,12 +99,9 @@ pub fn get_args() -> Args {
         query_database: matches.is_present("query-database"),
         enable_dot: eval_resolved_or_ip_present(
             matches.is_present("enable-dot"),
-            matches.is_present("ip")
-                || matches.is_present("ipv4-only")
-                || matches.is_present("ipv6-only"),
+            matches.is_present("ip") || matches.is_present("ipv6-only"),
             matches.is_present("resolved"),
         ),
-        ipv4_only: matches.is_present("ipv4-only"),
         ipv6_only: matches.is_present("ipv6-only"),
         enable_empty_push: matches.is_present("enable-empty-push"),
         subdomains: HashSet::new(),
@@ -124,9 +120,7 @@ pub fn get_args() -> Args {
                 value_t!(matches, "resolver", String).unwrap_or_else(|_| "cloudflare".to_string());
             let enable_dot = eval_resolved_or_ip_present(
                 matches.is_present("enable-dot"),
-                matches.is_present("ip")
-                    || matches.is_present("ipv4-only")
-                    || matches.is_present("ipv6-only"),
+                matches.is_present("ip") || matches.is_present("ipv6-only"),
                 matches.is_present("resolved"),
             );
             get_resolver(enable_dot, resolver)

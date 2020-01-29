@@ -157,9 +157,8 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
         println!()
     };
     let mut subdomains_resolved = 0;
-    if args.with_output && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
-    {
-        if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
+    if args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
+        if args.only_resolved && !args.with_ip && !args.ipv6_only {
             for (subdomain, ip) in async_resolver(args) {
                 if !ip.is_empty() {
                     write_to_file(subdomain, &file_name)?;
@@ -167,7 +166,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
                     subdomains_resolved += 1
                 }
             }
-        } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
+        } else if (args.with_ip || args.ipv6_only) && !args.only_resolved {
             for (subdomain, ip) in async_resolver(args) {
                 let data = format!("{},{}", subdomain, ip);
                 if !ip.is_empty() {
@@ -183,17 +182,15 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
             args.quiet_flag,
             args.time_wasted,
         )
-    } else if !args.with_output
-        && (args.only_resolved || args.with_ip || args.ipv4_only || args.ipv6_only)
-    {
-        if args.only_resolved && !args.with_ip && !args.ipv4_only && !args.ipv6_only {
+    } else if !args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
+        if args.only_resolved && !args.with_ip && !args.ipv6_only {
             for (subdomain, ip) in async_resolver(args) {
                 if !ip.is_empty() {
                     println!("{}", subdomain);
                     subdomains_resolved += 1
                 }
             }
-        } else if (args.with_ip || args.ipv4_only || args.ipv6_only) && !args.only_resolved {
+        } else if (args.with_ip || args.ipv6_only) && !args.only_resolved {
             for (subdomain, ip) in async_resolver(args) {
                 if !ip.is_empty() {
                     println!("{}", &format!("{},{}", subdomain, ip));
@@ -283,45 +280,31 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     data.par_extend(args.subdomains.par_iter().map(|sub| {
         (
             sub,
-            get_ip(
-                &args.domain_resolver,
-                &[sub, "."].concat(),
-                args.ipv4_only,
-                args.ipv6_only,
-            ),
+            get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only),
         )
     }));
     data
 }
 
-fn get_ip(resolver: &Resolver, domain: &str, ipv4_only: bool, ipv6_only: bool) -> String {
-    if !ipv4_only && ipv6_only {
-        match resolver.ipv6_lookup(&domain) {
-            Ok(ip_address) => ip_address
+fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
+    if ipv6_only {
+        if let Ok(ip_address) = resolver.ipv6_lookup(&domain) {
+            ip_address
                 .iter()
                 .next()
                 .expect("An error as ocurred getting the IP address.")
-                .to_string(),
-            Err(_) => String::new(),
+                .to_string()
+        } else {
+            String::new()
         }
-    } else if ipv4_only && !ipv6_only {
-        match resolver.ipv4_lookup(&domain) {
-            Ok(ip_address) => ip_address
-                .iter()
-                .next()
-                .expect("An error as ocurred getting the IP address.")
-                .to_string(),
-            Err(_) => String::new(),
-        }
+    } else if let Ok(ip_address) = resolver.ipv4_lookup(&domain) {
+        ip_address
+            .iter()
+            .next()
+            .expect("An error as ocurred getting the IP address.")
+            .to_string()
     } else {
-        match resolver.lookup_ip(&domain) {
-            Ok(ip_address) => ip_address
-                .iter()
-                .next()
-                .expect("An error as ocurred getting the IP address.")
-                .to_string(),
-            Err(_) => String::new(),
-        }
+        String::new()
     }
 }
 
