@@ -1,12 +1,9 @@
-use crate::{args, errors::*};
-use lazy_static;
-use postgres::{Client, NoTls};
-use rand::Rng;
-use std::{
-    collections::HashSet,
-    fs::{self},
-    path::Path,
-    time::Instant,
+use {
+    crate::{args, errors::*},
+    lazy_static,
+    postgres::{Client, NoTls},
+    rand::Rng,
+    std::{collections::HashSet, fs, path::Path, time::Instant},
 };
 
 lazy_static! {
