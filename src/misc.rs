@@ -157,6 +157,9 @@ pub fn works_with_data(args: &mut args::Args) -> Result<()> {
     if args.with_output && !args.quiet_flag && !args.monitoring_flag {
         show_file_location(&args.target, &args.file_name)
     }
+    if !args.quiet_flag {
+        println!("\nGood luck Hax0r 💀!\n");
+    }
     Ok(())
 }
 

@@ -159,21 +159,14 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     let mut subdomains_resolved = 0;
     if args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
         if args.only_resolved && !args.with_ip && !args.ipv6_only {
-            for (subdomain, ip) in async_resolver(args) {
-                if !ip.is_empty() {
-                    write_to_file(subdomain, &file_name)?;
-                    println!("{}", subdomain);
-                    subdomains_resolved += 1
-                }
+            for (subdomain, _) in async_resolver(args) {
+                write_to_file(subdomain, &file_name)?;
+                subdomains_resolved += 1
             }
         } else if (args.with_ip || args.ipv6_only) && !args.only_resolved {
             for (subdomain, ip) in async_resolver(args) {
-                let data = format!("{},{}", subdomain, ip);
-                if !ip.is_empty() {
-                    write_to_file(&data, &file_name)?;
-                    println!("{}", data);
-                    subdomains_resolved += 1
-                }
+                write_to_file(&format!("{},{}", subdomain, ip), &file_name)?;
+                subdomains_resolved += 1
             }
         }
         misc::show_subdomains_found(
@@ -183,23 +176,8 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
             args.time_wasted,
         )
     } else if !args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
-        if args.only_resolved && !args.with_ip && !args.ipv6_only {
-            for (subdomain, ip) in async_resolver(args) {
-                if !ip.is_empty() {
-                    println!("{}", subdomain);
-                    subdomains_resolved += 1
-                }
-            }
-        } else if (args.with_ip || args.ipv6_only) && !args.only_resolved {
-            for (subdomain, ip) in async_resolver(args) {
-                if !ip.is_empty() {
-                    println!("{}", &format!("{},{}", subdomain, ip));
-                    subdomains_resolved += 1
-                }
-            }
-        }
         misc::show_subdomains_found(
-            subdomains_resolved,
+            async_resolver(args).len(),
             &args.target,
             args.quiet_flag,
             args.time_wasted,
@@ -225,10 +203,6 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
             args.quiet_flag,
             args.time_wasted,
         )
-    }
-
-    if !args.quiet_flag {
-        println!("\nGood luck Hax0r 💀!\n");
     }
     args.time_wasted = Instant::now();
     Ok(())
@@ -278,11 +252,17 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     }
     let mut data = HashMap::new();
     data.par_extend(args.subdomains.par_iter().map(|sub| {
-        (
-            sub,
-            get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only),
-        )
+        let ip = get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only);
+        if !ip.is_empty() {
+            if args.only_resolved {
+                println!("{}", sub)
+            } else {
+                println!("{},{}", sub, ip)
+            }
+        }
+        (sub, ip)
     }));
+    data.retain(|_, ip| !ip.is_empty());
     data
 }
 
