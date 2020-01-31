@@ -36,7 +36,7 @@ pub struct Args {
     pub enable_dot: bool,
     pub ipv6_only: bool,
     pub enable_empty_push: bool,
-    pub self_update: bool,
+    pub check_updates: bool,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub time_wasted: Instant,
@@ -111,7 +111,7 @@ pub fn get_args() -> Args {
         ),
         ipv6_only: matches.is_present("ipv6-only"),
         enable_empty_push: matches.is_present("enable-empty-push"),
-        self_update: matches.is_present("self-update"),
+        check_updates: matches.is_present("check-updates"),
         subdomains: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches

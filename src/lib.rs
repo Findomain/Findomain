@@ -8,8 +8,8 @@ pub mod args;
 pub mod errors;
 mod get_vars;
 mod misc;
-pub mod selfupdater;
 pub mod sources;
+pub mod update_checker;
 
 use {
     crate::errors::*,

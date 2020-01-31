@@ -144,7 +144,7 @@ args:
         long: aempty
         takes_value: false
 
-    - self-update:
-        help: Use the Findomain self updater to update the tool.
-        long: update
+    - check-updates:
+        help: Check for available Findomain updates.
+        long: check-updates
         takes_value: false
