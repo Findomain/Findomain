@@ -43,11 +43,9 @@ pub fn main(args: &mut args::Args) -> Result<()> {
                 args.version, latest_version
             );
             println!("Update is available, please see https://git.io/Jv3v7 for more information.");
-            std::process::exit(0)
         }
     } else if !args.quiet_flag {
         println!("Findomain is up to date.");
-        std::process::exit(0)
     }
     Ok(())
 }
