@@ -251,7 +251,7 @@ To update Findomain to latest version, you can be in some scenarios:
 2. **You are using it in ArchLinux or any Arch-based distro:** Just run `pacman -Syu`
 3. **You have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
 4. **You downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
-5. **I used cargo install findomain:** then just run `cargo install --force findomain`.
+5. **I used cargo install findomain:** then just run `cargo install findomain`.
 
 # Access tokens configuration
 
