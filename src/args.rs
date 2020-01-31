@@ -4,7 +4,7 @@ use {
         misc::{eval_resolved_or_ip_present, sanitize_target_string, validate_target},
     },
     clap::{load_yaml, value_t, App},
-    std::{collections::HashSet, time::Instant},
+    std::{collections::HashSet, env::current_exe, time::Instant},
     trust_dns_resolver::Resolver,
 };
 
@@ -19,6 +19,8 @@ pub struct Args {
     pub telegram_webhook: String,
     pub telegram_chat_id: String,
     pub resolver: String,
+    pub version: String,
+    pub current_executable_path: String,
     pub threads: usize,
     pub database_checker_counter: usize,
     pub commit_to_db_counter: usize,
@@ -34,6 +36,7 @@ pub struct Args {
     pub enable_dot: bool,
     pub ipv6_only: bool,
     pub enable_empty_push: bool,
+    pub self_update: bool,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub time_wasted: Instant,
@@ -42,7 +45,9 @@ pub struct Args {
 
 pub fn get_args() -> Args {
     let yaml = load_yaml!("cli.yml");
-    let matches = App::from_yaml(yaml).get_matches();
+    let matches = App::from_yaml(yaml)
+        .version(clap::crate_version!())
+        .get_matches();
     Args {
         target: {
             let target = sanitize_target_string(
@@ -86,6 +91,8 @@ pub fn get_args() -> Args {
         resolver: value_t!(matches, "resolver", String)
             .unwrap_or_else(|_| "cloudflare".to_string()),
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
+        version: clap::crate_version!().to_string(),
+        current_executable_path: current_exe().unwrap().display().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
         only_resolved: matches.is_present("resolved"),
@@ -104,6 +111,7 @@ pub fn get_args() -> Args {
         ),
         ipv6_only: matches.is_present("ipv6-only"),
         enable_empty_push: matches.is_present("enable-empty-push"),
+        self_update: matches.is_present("self-update"),
         subdomains: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches

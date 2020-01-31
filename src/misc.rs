@@ -241,6 +241,7 @@ pub fn test_database_connection(args: &mut args::Args) {
 
 pub fn return_reqwest_client() -> reqwest::blocking::Client {
     reqwest::blocking::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3835.0 Safari/537.36")
         .timeout(std::time::Duration::from_secs(15))
         .build()
         .unwrap()

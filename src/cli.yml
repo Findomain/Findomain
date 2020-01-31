@@ -1,5 +1,4 @@
 name: findomain
-version: "1.2.0"
 author: Eduard Tolosa <edu4rdshl@protonmail.com>
 settings:
     - ArgRequiredElseHelp
@@ -143,4 +142,9 @@ args:
     - enable-empty-push:
         help: Send alert to webhooks still when no new subdomains have been found.
         long: aempty
+        takes_value: false
+
+    - self-update:
+        help: Use the Findomain self updater to update the tool.
+        long: update
         takes_value: false

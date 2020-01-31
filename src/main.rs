@@ -1,7 +1,10 @@
-use findomain::{args, errors::*, get_subdomains, read_from_file};
+use findomain::{args, errors::*, get_subdomains, read_from_file, selfupdater};
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();
+    if arguments.self_update {
+        selfupdater::selfupdater(&mut arguments)?
+    }
     if arguments.threads > 500 {
         arguments.threads = 500
     }

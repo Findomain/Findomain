@@ -8,6 +8,7 @@ pub mod args;
 pub mod errors;
 mod get_vars;
 mod misc;
+pub mod selfupdater;
 pub mod sources;
 
 use {
