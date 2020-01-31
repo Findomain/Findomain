@@ -52,6 +52,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
+* Self-updates support for Linux(x86_64), Windows(x86_64), MacOS(x86_64) and Aarch64. Use the `--update` option in Findomain.
 
 # Findomain in depth
 
