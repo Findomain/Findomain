@@ -51,7 +51,7 @@ pub fn selfupdater(args: &mut args::Args) -> Result<()> {
     );
     let latest_version = return_git_version().unwrap();
     println!(
-        "Findomain local release: {}, Findomain latest release: {}",
+        "Findomain local release: {}, Findomain latest stable release: {}",
         args.version, latest_version
     );
     if latest_version.replace(".", "").parse::<usize>().unwrap()
@@ -66,7 +66,6 @@ pub fn selfupdater(args: &mut args::Args) -> Result<()> {
             std::process::exit(1)
         };
         println!("Update is available, trying to update Findomain now...");
-        println!("Downloading latest release from: {}", download_url);
         update_file(latest_version, download_url, args)?;
     } else {
         println!("Findomain is up to date!");
@@ -76,7 +75,7 @@ pub fn selfupdater(args: &mut args::Args) -> Result<()> {
 }
 
 fn update_file(latest_version: String, download_url: String, args: &mut args::Args) -> Result<()> {
-    println!("Removing the old version of Findomain...");
+    println!("Deleting the old version of Findomain...");
     match fs::remove_file(&args.current_executable_path) {
         Ok(_) => {
             match OpenOptions::new()
@@ -86,6 +85,7 @@ fn update_file(latest_version: String, download_url: String, args: &mut args::Ar
                 .open(&args.current_executable_path)
             {
                 Ok(mut out) => {
+                    println!("Downloading latest release from: {}", download_url);
                     println!("Download started, wait...");
                     let mut response = misc::return_reqwest_client().get(&download_url).send()?;
                     io::copy(&mut response, &mut out)?;
