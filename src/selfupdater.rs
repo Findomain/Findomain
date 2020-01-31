@@ -55,7 +55,11 @@ pub fn selfupdater(args: &mut args::Args) -> Result<()> {
         args.version, latest_version
     );
     if latest_version.replace(".", "").parse::<usize>().unwrap()
-        > args.version.replace(".", "").parse::<usize>().unwrap()
+        > args
+            .version
+            .replace(&['.', 'r', 'c', '-'][..], "")
+            .parse::<usize>()
+            .unwrap()
     {
         if download_url.contains("UnknownPlatform") {
             eprintln!("Update is available but you are running a unsupported platform by Findomain self-updater. Please use cargo to update the tool instead. See https://git.io/Jv3v7 for more information.");
@@ -108,10 +112,12 @@ fn update_file(latest_version: String, download_url: String, args: &mut args::Ar
                 }
             }
         }
-        Err(e) => eprintln!(
-            "An error has occurred deleting the file from {} : {}",
-            &args.current_executable_path, e
-        ),
+        Err(e) => {
+            eprintln!(
+                "An error has occurred deleting the file from {} : {}",
+                &args.current_executable_path, e
+            );
+            std::process::exit(1)
+        }
     }
-    Ok(())
 }
