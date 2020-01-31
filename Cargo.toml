@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "1.2.0"
+version = "1.3.0-rc.1"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, don't waste your time."
@@ -27,7 +27,7 @@ failure = "0.1.6"
 rayon = "1.3.0"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.26", features = ["vendored"] }
+openssl = { version = "0.10.27", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.26", features = ["vendored"] }
+openssl = { version = "0.10.27", features = ["vendored"] }
