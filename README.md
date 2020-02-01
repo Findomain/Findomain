@@ -52,6 +52,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
+* Possibility to use as subdomain resolver.
 * Update checker. Use the `--check-updates` flag.
 
 # Findomain in depth
