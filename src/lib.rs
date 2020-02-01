@@ -189,27 +189,44 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
+fn return_file_targets(args: &mut args::Args) -> HashSet<String> {
+    match File::open(&args.file) {
+        Ok(file) => {
+            let mut targets: HashSet<String> = BufReader::new(file).lines().flatten().collect();
+            targets = targets
+                .iter()
+                .map(|target| misc::sanitize_target_string(target.to_string()))
+                .collect();
+            targets.retain(|target| !target.is_empty() && misc::validate_target(target));
+            if !targets.is_empty() {
+                targets
+            } else {
+                println!("No valid sudomains where found in the file {}.", &args.file);
+                std::process::exit(1)
+            }
+        }
+        Err(e) => {
+            println!("Can not open file {}. Error: {}", args.file, e);
+            std::process::exit(1)
+        }
+    }
+}
+
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     let file_name = args.file_name.clone();
     if args.unique_output_flag {
         misc::check_output_file_exists(&args.file_name)?
     }
-    let file =
-        File::open(&args.file).with_context(|_| format!("Can't open file 📁 {}", &args.file))?;
-    for domain in BufReader::new(file).lines().flatten() {
-        if !domain.is_empty() {
-            args.target = misc::sanitize_target_string(domain);
-            if misc::validate_target(&args.target) {
-                args.file_name = if file_name.is_empty() && !args.with_ip {
-                    format!("{}.txt", &args.target)
-                } else if file_name.is_empty() && args.with_ip {
-                    format!("{}-ip.txt", &args.target)
-                } else {
-                    file_name.to_string()
-                };
-                get_subdomains(args)?
-            }
-        }
+    for domain in return_file_targets(args) {
+        args.target = domain;
+        args.file_name = if file_name.is_empty() && !args.with_ip {
+            format!("{}.txt", &args.target)
+        } else if file_name.is_empty() && args.with_ip {
+            format!("{}-ip.txt", &args.target)
+        } else {
+            file_name.to_string()
+        };
+        get_subdomains(args)?
     }
     Ok(())
 }
