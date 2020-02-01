@@ -1,5 +1,6 @@
 use {
     crate::{args, errors::*, misc},
+    semver::Version,
     serde::*,
 };
 
@@ -8,7 +9,7 @@ struct GitVer {
     tag_name: String,
 }
 
-fn return_git_version() -> String {
+fn return_latest_release() -> String {
     println!("Checking for latest Github release... 🔍");
     match misc::return_reqwest_client()
         .get("https://api.github.com/repos/edu4rdshl/findomain/releases/latest")
@@ -29,14 +30,8 @@ fn return_git_version() -> String {
 }
 
 pub fn main(args: &mut args::Args) -> Result<()> {
-    let latest_version = return_git_version();
-    if latest_version.replace(".", "").parse::<usize>().unwrap()
-        > args
-            .version
-            .replace(&['.', '-', 'c', 'r', 'v'][..], "")
-            .parse::<usize>()
-            .unwrap()
-    {
+    let latest_version = return_latest_release();
+    if Version::parse(&latest_version) > Version::parse(&args.version) {
         if !args.quiet_flag {
             println!(
                 "Findomain local release: {}, Findomain latest stable release: {}",
