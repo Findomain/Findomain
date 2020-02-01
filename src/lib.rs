@@ -217,16 +217,27 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     if args.unique_output_flag {
         misc::check_output_file_exists(&args.file_name)?
     }
-    for domain in return_file_targets(args) {
-        args.target = domain;
-        args.file_name = if file_name.is_empty() && !args.with_ip {
-            format!("{}.txt", &args.target)
-        } else if file_name.is_empty() && args.with_ip {
-            format!("{}-ip.txt", &args.target)
+    let targets = return_file_targets(args);
+    if args.as_resolver {
+        if !args.only_resolved && !args.with_ip && !args.ipv6_only {
+            println!("To use Findomain as resolver, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
+            std::process::exit(1)
         } else {
-            file_name.to_string()
-        };
-        get_subdomains(args)?
+            args.subdomains = targets;
+            manage_subdomains_data(args)?
+        }
+    } else {
+        for domain in targets {
+            args.target = domain;
+            args.file_name = if file_name.is_empty() && !args.with_ip {
+                format!("{}.txt", &args.target)
+            } else if file_name.is_empty() && args.with_ip {
+                format!("{}-ip.txt", &args.target)
+            } else {
+                file_name.to_string()
+            };
+            get_subdomains(args)?
+        }
     }
     Ok(())
 }

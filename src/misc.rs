@@ -19,13 +19,22 @@ pub fn show_searching_msg(api: &str) {
 
 pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
     if !args.quiet_flag && (args.only_resolved || args.with_ip || args.ipv6_only) {
-        println!(
-            "\n{} of {} subdomains found were resolved for domain {} 👽 in {} seconds.⏲️",
-            subdomains_found,
-            args.subdomains.len(),
-            args.target,
-            args.time_wasted.elapsed().as_secs()
-        );
+        if args.as_resolver {
+            println!(
+                "\n{} of {} subdomains were resolved in {} seconds.⏲️",
+                subdomains_found,
+                args.subdomains.len(),
+                args.time_wasted.elapsed().as_secs()
+            );
+        } else {
+            println!(
+                "\n{} of {} subdomains found were resolved for domain {} 👽 in {} seconds.⏲️",
+                subdomains_found,
+                args.subdomains.len(),
+                args.target,
+                args.time_wasted.elapsed().as_secs()
+            );
+        }
     } else if !args.quiet_flag {
         println!(
             "\nA total of {} subdomains were found for domain {} 👽 in {} seconds.⏲️",

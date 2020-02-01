@@ -148,3 +148,14 @@ args:
         help: Check for available Findomain updates.
         long: check-updates
         takes_value: false
+
+    - as-resolver:
+        help: Use Findomain as resolver for a list of domains in a file.
+        short: x
+        long: as-resolver
+        takes_value: false
+        requires:
+          - file
+        conflicts_with:
+          - query-database
+          - monitoring-flag
