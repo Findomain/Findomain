@@ -110,7 +110,7 @@ pub fn get_args() -> Args {
         with_output: matches.is_present("output") || matches.is_present("unique-output"),
         unique_output_flag: matches.is_present("unique-output"),
         monitoring_flag: matches.is_present("monitoring-flag"),
-        from_file_flag: matches.is_present("file"),
+        from_file_flag: matches.is_present("files"),
         quiet_flag: matches.is_present("quiet"),
         with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
