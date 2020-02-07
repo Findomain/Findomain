@@ -37,9 +37,12 @@ pub struct Args {
     pub enable_empty_push: bool,
     pub check_updates: bool,
     pub as_resolver: bool,
+    pub bruteforce: bool,
     pub files: Vec<String>,
     pub subdomains: HashSet<String>,
+    pub wordlists_data: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
+    pub wordlists: Vec<String>,
     pub time_wasted: Instant,
     pub domain_resolver: Resolver,
 }
@@ -118,10 +121,21 @@ pub fn get_args() -> Args {
         enable_empty_push: matches.is_present("enable-empty-push"),
         check_updates: matches.is_present("check-updates"),
         as_resolver: matches.is_present("as-resolver"),
+        bruteforce: matches.is_present("wordlists"),
         subdomains: HashSet::new(),
+        wordlists_data: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches
                 .values_of("import-subdomains")
+                .unwrap()
+                .map(str::to_owned)
+                .collect()
+        } else {
+            Vec::new()
+        },
+        wordlists: if matches.is_present("wordlists") {
+            matches
+                .values_of("wordlists")
                 .unwrap()
                 .map(str::to_owned)
                 .collect()

@@ -26,6 +26,13 @@ pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
                 args.subdomains.len(),
                 args.time_wasted.elapsed().as_secs()
             );
+        } else if args.bruteforce {
+            println!(
+                "\n{} of {} bruteforce combinations were resolved in {} seconds.⏲️",
+                subdomains_found,
+                args.subdomains.len(),
+                args.time_wasted.elapsed().as_secs()
+            );
         } else {
             println!(
                 "\n{} of {} subdomains found were resolved for domain {} 👽 in {} seconds.⏲️",

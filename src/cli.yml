@@ -159,3 +159,12 @@ args:
         conflicts_with:
           - query-database
           - monitoring-flag
+
+    - wordlists:
+        help: Wordlist file to use in the bruteforce process.
+        short: w
+        long: wordlist
+        takes_value: true
+        conflicts_with:
+          - query-database
+          - monitoring-flag

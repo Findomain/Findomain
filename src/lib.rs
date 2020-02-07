@@ -39,6 +39,14 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     }
     if args.query_database {
         query_findomain_database(args)?
+    }
+    if args.bruteforce {
+        args.subdomains = args
+            .wordlists_data
+            .iter()
+            .map(|target| format!("{}.{}", target, &args.target))
+            .collect();
+        manage_subdomains_data(args)?
     } else {
         if args.monitoring_flag {
             args.discord_webhook = get_vars::get_webhook("discord");
@@ -189,16 +197,16 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-fn return_file_targets(args: &mut args::Args) -> HashSet<String> {
+pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet<String> {
     let mut targets: HashSet<String> = HashSet::new();
-    args.files.dedup();
-    for f in &args.files {
+    files.clone().dedup();
+    for f in files {
         match File::open(&f) {
             Ok(file) => {
                 for target in BufReader::new(file)
                     .lines()
                     .flatten()
-                    .map(|target| misc::sanitize_target_string(target))
+                    .map(misc::sanitize_target_string)
                     .collect::<HashSet<String>>()
                 {
                     targets.insert(target);
@@ -217,7 +225,14 @@ fn return_file_targets(args: &mut args::Args) -> HashSet<String> {
             }
         }
     }
-    targets.retain(|target| !target.is_empty() && misc::validate_target(target));
+    if args.bruteforce {
+    } else if args.with_imported_subdomains {
+        let base_target = &format!(".{}", args.target);
+        targets
+            .retain(|target| !target.is_empty() && misc::sanitize_subdomain(&base_target, &target))
+    } else {
+        targets.retain(|target| !target.is_empty() && misc::validate_target(target))
+    }
     targets
 }
 
@@ -226,17 +241,16 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
     if args.unique_output_flag {
         misc::check_output_file_exists(&args.file_name)?
     }
-    let targets = return_file_targets(args);
     if args.as_resolver {
         if !args.only_resolved && !args.with_ip && !args.ipv6_only {
             println!("To use Findomain as resolver, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
             std::process::exit(1)
         } else {
-            args.subdomains = targets;
+            args.subdomains = return_file_targets(args, args.files.clone());
             manage_subdomains_data(args)?
         }
     } else {
-        for domain in targets {
+        for domain in return_file_targets(args, args.files.clone()) {
             args.target = domain;
             args.file_name = if file_name.is_empty() && !args.with_ip {
                 format!("{}.txt", &args.target)
@@ -398,7 +412,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     if args.with_imported_subdomains {
-        let imported_subdomains = import_subdomains_from_file(args)?;
+        let imported_subdomains = return_file_targets(args, args.import_subdomains_from.clone());
         for subdomain in imported_subdomains {
             args.subdomains.insert(subdomain);
         }
@@ -515,21 +529,4 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
         .collect();
     misc::works_with_data(args)?;
     Ok(())
-}
-
-fn import_subdomains_from_file(args: &mut args::Args) -> Result<HashSet<String>> {
-    let base_target = &format!(".{}", args.target);
-    let mut subdomains_from_file: HashSet<String> = HashSet::new();
-    if !args.import_subdomains_from.is_empty() {
-        for file in &args.import_subdomains_from {
-            let file =
-                File::open(&file).with_context(|_| format!("Can't open file 📁 {}", &file))?;
-            for subdomain in BufReader::new(file).lines().flatten() {
-                if misc::sanitize_subdomain(&base_target, &subdomain) {
-                    subdomains_from_file.insert(subdomain);
-                }
-            }
-        }
-    }
-    Ok(subdomains_from_file)
 }
