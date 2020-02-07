@@ -12,7 +12,7 @@ args:
         takes_value: true
         multiple: false
         conflicts_with:
-          - file
+          - files
 
     - resolved:
         short: r
@@ -155,7 +155,7 @@ args:
         long: as-resolver
         takes_value: false
         requires:
-          - file
+          - files
         conflicts_with:
           - query-database
           - monitoring-flag
