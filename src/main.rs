@@ -14,7 +14,7 @@ fn run() -> Result<()> {
         .unwrap();
     if !arguments.target.is_empty() {
         get_subdomains(&mut arguments)
-    } else if !arguments.file.is_empty() {
+    } else if !arguments.files.is_empty() {
         read_from_file(&mut arguments)
     } else {
         eprintln!("Error: Target is empty or invalid!");

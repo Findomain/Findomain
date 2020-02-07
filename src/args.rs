@@ -11,7 +11,6 @@ use {
 pub struct Args {
     pub target: String,
     pub file_name: String,
-    pub file: String,
     pub postgres_connection: String,
     pub discord_webhook: String,
     pub slack_webhook: String,
@@ -38,6 +37,7 @@ pub struct Args {
     pub enable_empty_push: bool,
     pub check_updates: bool,
     pub as_resolver: bool,
+    pub files: Vec<String>,
     pub subdomains: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub time_wasted: Instant,
@@ -70,10 +70,14 @@ pub fn get_args() -> Args {
         } else {
             String::new()
         },
-        file: if matches.is_present("file") {
-            matches.value_of("file").unwrap().to_string()
+        files: if matches.is_present("files") {
+            matches
+                .values_of("files")
+                .unwrap()
+                .map(str::to_owned)
+                .collect()
         } else {
-            String::new()
+            Vec::new()
         },
         postgres_connection: format!(
             "postgresql://{}:{}@{}:{}/{}",

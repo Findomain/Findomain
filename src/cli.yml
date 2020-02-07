@@ -34,12 +34,12 @@ args:
           - resolved
           - ipv6-only
 
-    - file:
+    - files:
         short: f
         long: file
         help: Use a list of subdomains writen in a file as input.
         takes_value: true
-        multiple: false
+        multiple: true
         conflicts_with:
           - target
 

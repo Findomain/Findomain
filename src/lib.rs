@@ -190,26 +190,35 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
 }
 
 fn return_file_targets(args: &mut args::Args) -> HashSet<String> {
-    match File::open(&args.file) {
-        Ok(file) => {
-            let mut targets: HashSet<String> = BufReader::new(file).lines().flatten().collect();
-            targets = targets
-                .iter()
-                .map(|target| misc::sanitize_target_string(target.to_string()))
-                .collect();
-            targets.retain(|target| !target.is_empty() && misc::validate_target(target));
-            if !targets.is_empty() {
-                targets
-            } else {
-                println!("No valid sudomains where found in the file {}.", &args.file);
-                std::process::exit(1)
+    let mut targets: HashSet<String> = HashSet::new();
+    args.files.dedup();
+    for f in &args.files {
+        match File::open(&f) {
+            Ok(file) => {
+                for target in BufReader::new(file)
+                    .lines()
+                    .flatten()
+                    .map(|target| misc::sanitize_target_string(target))
+                    .collect::<HashSet<String>>()
+                {
+                    targets.insert(target);
+                }
+            }
+            Err(e) => {
+                if args.files.len() == 1 {
+                    println!("Can not open file {}. Error: {}", f, e);
+                    std::process::exit(1)
+                } else if !args.quiet_flag {
+                    println!(
+                        "Can not open file {}, working with next file. Error: {}",
+                        f, e
+                    );
+                }
             }
         }
-        Err(e) => {
-            println!("Can not open file {}. Error: {}", args.file, e);
-            std::process::exit(1)
-        }
     }
+    targets.retain(|target| !target.is_empty() && misc::validate_target(target));
+    targets
 }
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
