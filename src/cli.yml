@@ -161,7 +161,7 @@ args:
           - monitoring-flag
 
     - wordlists:
-        help: Wordlist file to use in the bruteforce process.
+        help: Wordlist file to use in the bruteforce process. Using it option automatically enables bruteforce mode.
         short: w
         long: wordlist
         takes_value: true
