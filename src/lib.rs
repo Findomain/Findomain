@@ -203,13 +203,12 @@ pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet
     for f in files {
         match File::open(&f) {
             Ok(file) => {
-                for target in BufReader::new(file)
-                    .lines()
-                    .flatten()
-                    .map(misc::sanitize_target_string)
-                    .collect::<HashSet<String>>()
-                {
-                    targets.insert(target);
+                for target in BufReader::new(file).lines().flatten() {
+                    if args.bruteforce {
+                        targets.insert(target);
+                    } else {
+                        targets.insert(misc::sanitize_target_string(target));
+                    }
                 }
             }
             Err(e) => {
