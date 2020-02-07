@@ -10,6 +10,10 @@ fn run() -> Result<()> {
     if arguments.threads > 500 {
         arguments.threads = 500
     }
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(arguments.threads)
+        .build_global()
+        .unwrap();
     if arguments.bruteforce {
         if !arguments.only_resolved && !arguments.with_ip && !arguments.ipv6_only {
             println!("To use Findomain bruteforce method, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
@@ -19,10 +23,6 @@ fn run() -> Result<()> {
             arguments.wordlists_data = return_file_targets(&mut arguments, wordlists)
         }
     }
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(arguments.threads)
-        .build_global()
-        .unwrap();
     if !arguments.target.is_empty() {
         get_subdomains(&mut arguments)
     } else if !arguments.files.is_empty() {
