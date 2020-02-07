@@ -14,6 +14,7 @@ pub mod update_checker;
 use {
     crate::errors::*,
     postgres::{Client, NoTls},
+    rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
     rayon::prelude::*,
     std::{
         collections::{HashMap, HashSet},
@@ -165,6 +166,9 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!()
     };
+    if (args.only_resolved || args.with_ip || args.ipv6_only) && !args.disable_wildcard_check {
+        args.wilcard_ips = detect_wildcard(args);
+    }
     let mut subdomains_resolved = 0;
     if args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
         if args.only_resolved && !args.with_ip && !args.ipv6_only {
@@ -284,7 +288,7 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     let mut data = HashMap::new();
     data.par_extend(args.subdomains.par_iter().map(|sub| {
         let ip = get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only);
-        if !ip.is_empty() {
+        if !ip.is_empty() && !args.wilcard_ips.contains(&ip) {
             if args.only_resolved {
                 println!("{}", sub)
             } else {
@@ -293,7 +297,7 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
         }
         (sub, ip)
     }));
-    data.retain(|_, ip| !ip.is_empty());
+    data.retain(|_, ip| !ip.is_empty() && !args.wilcard_ips.contains(&ip));
     data
 }
 
@@ -528,4 +532,33 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
         .collect();
     misc::works_with_data(args)?;
     Ok(())
+}
+
+fn detect_wildcard(args: &mut args::Args) -> Vec<String> {
+    if !args.quiet_flag {
+        println!("Running wildcards detection for {}...", &args.target)
+    }
+    let mut generated_wilcards: Vec<String> = Vec::new();
+    for _ in 1..10 {
+        generated_wilcards.push(rng().sample_iter(Alphanumeric).take(10).collect());
+    }
+    generated_wilcards = generated_wilcards
+        .iter()
+        .map(|wild| format!("{}.{}", wild, &args.target))
+        .collect::<Vec<String>>()
+        .par_iter()
+        .map(|sub| get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only))
+        .collect();
+    generated_wilcards.retain(|ip| !ip.is_empty());
+    generated_wilcards.dedup();
+    if !generated_wilcards.is_empty() && !args.quiet_flag {
+        println!(
+            "Wilcards detected for {} and wildcard's IP saved for furter work.",
+            &args.target
+        );
+        println!("Wilcard IPs: {:?}\n", generated_wilcards)
+    } else if !args.quiet_flag {
+        println!("No wilcards detected for {}, nice!\n", &args.target)
+    }
+    generated_wilcards
 }

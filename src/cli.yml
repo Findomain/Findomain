@@ -168,3 +168,11 @@ args:
         conflicts_with:
           - query-database
           - monitoring-flag
+
+    - no-wildcards:
+        help: Disable wilcard detection when resolving subdomains.
+        long: no-wildcards
+        takes_value: false
+        conflicts_with:
+          - query-database
+          - monitoring-flag
