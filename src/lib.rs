@@ -297,7 +297,7 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
         }
         (sub, ip)
     }));
-    data.retain(|_, ip| !ip.is_empty() && !args.wilcard_ips.contains(&ip));
+    data.retain(|_, ip| !ip.is_empty() && !args.wilcard_ips.contains(ip));
     data
 }
 
@@ -534,13 +534,13 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-fn detect_wildcard(args: &mut args::Args) -> Vec<String> {
+fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target)
     }
-    let mut generated_wilcards: Vec<String> = Vec::new();
+    let mut generated_wilcards: HashSet<String> = HashSet::new();
     for _ in 1..10 {
-        generated_wilcards.push(rng().sample_iter(Alphanumeric).take(10).collect());
+        generated_wilcards.insert(rng().sample_iter(Alphanumeric).take(15).collect());
     }
     generated_wilcards = generated_wilcards
         .iter()
@@ -550,7 +550,6 @@ fn detect_wildcard(args: &mut args::Args) -> Vec<String> {
         .map(|sub| get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only))
         .collect();
     generated_wilcards.retain(|ip| !ip.is_empty());
-    generated_wilcards.dedup();
     if !generated_wilcards.is_empty() && !args.quiet_flag {
         println!(
             "Wilcards detected for {} and wildcard's IP saved for furter work.",

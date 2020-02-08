@@ -42,9 +42,9 @@ pub struct Args {
     pub files: Vec<String>,
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
+    pub wilcard_ips: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
-    pub wilcard_ips: Vec<String>,
     pub time_wasted: Instant,
     pub domain_resolver: Resolver,
 }
@@ -127,6 +127,7 @@ pub fn get_args() -> Args {
         disable_wildcard_check: matches.is_present("no-wildcards"),
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
+        wilcard_ips: HashSet::new(),
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches
                 .values_of("import-subdomains")
@@ -145,7 +146,6 @@ pub fn get_args() -> Args {
         } else {
             Vec::new()
         },
-        wilcard_ips: Vec::new(),
         time_wasted: Instant::now(),
         domain_resolver: {
             let resolver =
