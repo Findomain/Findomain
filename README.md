@@ -1,13 +1,13 @@
+# Contributing
+
+Maintaining a project like Findomain is not a easy task and take time, anyways I am developing and releasing the tool for free. Please consideer contributing to the project to keep it alive.
+
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
 
 [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
 ![Findomain](images/findomain.png)
-
-# Mixed feelings with Findomain? Show your love
-
-If you want to support the tool development and make it better, see [Contributing to Findomain](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#contributors)
 
 # Findomain
 
@@ -552,8 +552,7 @@ If you have a problem or a feature request, open an [issue](https://github.com/E
 
 ### Code Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/Edu4rdSHL/findomain/graphs/contributors"></a>
+This project exists thanks to all the people who contribute. [See the contributors list](https://github.com/Edu4rdSHL/findomain/graphs/contributors).
 
 ### Financial Contributors
 
