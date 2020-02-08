@@ -1,4 +1,6 @@
-[![Financial Contributors on Open Collective](https://opencollective.com/findomain/all/badge.svg?label=financial+contributors)](https://opencollective.com/findomain) [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+
+[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
 ![Findomain](images/findomain.png)
@@ -551,27 +553,10 @@ If you have a problem or a feature request, open an [issue](https://github.com/E
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/Edu4rdSHL/findomain/graphs/contributors"><img src="https://opencollective.com/findomain/contributors.svg?width=890&button=false" /></a>
+<a href="https://github.com/Edu4rdSHL/findomain/graphs/contributors"></a>
 
 ### Financial Contributors
 
-Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/findomain/contribute)]
+Become a financial contributor and help us sustain our community.
 
-#### Individuals
-
-<a href="https://opencollective.com/findomain"><img src="https://opencollective.com/findomain/individuals.svg?width=890"></a>
-
-#### Organizations
-
-Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/findomain/contribute)]
-
-<a href="https://opencollective.com/findomain/organization/0/website"><img src="https://opencollective.com/findomain/organization/0/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/1/website"><img src="https://opencollective.com/findomain/organization/1/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/2/website"><img src="https://opencollective.com/findomain/organization/2/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/3/website"><img src="https://opencollective.com/findomain/organization/3/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/4/website"><img src="https://opencollective.com/findomain/organization/4/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/5/website"><img src="https://opencollective.com/findomain/organization/5/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/6/website"><img src="https://opencollective.com/findomain/organization/6/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/7/website"><img src="https://opencollective.com/findomain/organization/7/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/8/website"><img src="https://opencollective.com/findomain/organization/8/avatar.svg"></a>
-<a href="https://opencollective.com/findomain/organization/9/website"><img src="https://opencollective.com/findomain/organization/9/avatar.svg"></a>
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
