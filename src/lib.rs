@@ -540,12 +540,13 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
     }
     let mut generated_wilcards: HashSet<String> = HashSet::new();
     for _ in 1..10 {
-        generated_wilcards.insert(rng().sample_iter(Alphanumeric).take(15).collect());
+        generated_wilcards.insert(format!(
+            "{}.{}",
+            rng().sample_iter(Alphanumeric).take(15).collect::<String>(),
+            &args.target
+        ));
     }
     generated_wilcards = generated_wilcards
-        .iter()
-        .map(|wild| format!("{}.{}", wild, &args.target))
-        .collect::<Vec<String>>()
         .par_iter()
         .map(|sub| get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only))
         .collect();
