@@ -55,6 +55,8 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 * Possibility to use as subdomain resolver.
+* Subdomain wildcard detection for accurate results. 
+* Support for subdomain discover using bruteforce method.
 * Update checker. Use the `--check-updates` flag.
 
 # Findomain in depth
@@ -535,10 +537,6 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 11. Import subdomains from several files and work with they in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
 
 `findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
-
-# TODO
-
-- [ ] Add more APIs (It's longterm because I depend of new requests, at the moment I have not more APIs in the mind).
 
 # Issues and requests
 
