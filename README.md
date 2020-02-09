@@ -2,7 +2,13 @@
 
 Maintaining a project like Findomain is not a easy task and take time, anyways I am developing and releasing the tool for free. Please consideer contributing to the project to keep it alive.
 
+## Paypal
+
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+
+## Patreon
+
+<a href="https://patreon.com/edu4rdshl"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
 
 [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
@@ -557,3 +563,5 @@ This project exists thanks to all the people who contribute. [See the contributo
 Become a financial contributor and help us sustain our community.
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+
+<a href="https://patreon.com/edu4rdshl"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
