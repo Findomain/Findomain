@@ -1,6 +1,6 @@
 # Contributing
 
-Maintaining a project like Findomain is not a easy task and take time, anyways I am developing and releasing the tool for free. Please consideer contributing to the project to keep it alive.
+Maintaining a project like Findomain is not a easy task and take time, anyways I am developing and releasing the tool for free. Please consider contributing to the project to keep it alive.
 
 ## Paypal
 
