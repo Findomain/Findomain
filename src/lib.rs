@@ -166,7 +166,10 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!()
     };
-    if (args.only_resolved || args.with_ip || args.ipv6_only) && !args.disable_wildcard_check {
+    if (args.only_resolved || args.with_ip || args.ipv6_only)
+        && !args.disable_wildcard_check
+        && !args.as_resolver
+    {
         args.wilcard_ips = detect_wildcard(args);
     }
     let mut subdomains_resolved = 0;
