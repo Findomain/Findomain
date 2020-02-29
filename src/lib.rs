@@ -40,8 +40,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     }
     if args.query_database {
         query_findomain_database(args)?
-    }
-    if args.bruteforce {
+    } else if args.bruteforce {
         args.subdomains = args
             .wordlists_data
             .iter()
