@@ -17,8 +17,8 @@ opt-level = "z"
 [dependencies]
 serde = { version = "1.0.104", features = ["derive"] }
 serde_derive = "1.0.104"
-reqwest = { version = "0.10.1", features = ["blocking", "json"] }
-trust-dns-resolver = { version = "0.19.2", features = ["dns-over-rustls"] }
+reqwest = { version = "0.10.3", features = ["blocking", "json"] }
+trust-dns-resolver = { version = "0.19.3", features = ["dns-over-rustls"] }
 clap = { version = "2.33.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.3"
