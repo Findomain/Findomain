@@ -9,7 +9,7 @@ use {
 lazy_static! {
     static ref SPECIAL_CHARS: Vec<char> = vec![
         '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\', '%', '&', '¿', '?', '¡',
-        '!', '#', '\'', ' ', ',', 'ï', '¼'
+        '!', '#', '\'', ' ', ','
     ];
 }
 
@@ -158,7 +158,10 @@ pub fn sanitize_target_string(target: String) -> String {
 }
 
 pub fn validate_target(target: &str) -> bool {
-    !target.starts_with('.') && target.contains('.') && !target.contains(&SPECIAL_CHARS[..])
+    !target.starts_with('.')
+        && target.contains('.')
+        && !target.contains(&SPECIAL_CHARS[..])
+        && target.chars().all(|c| c.is_ascii())
 }
 
 pub fn works_with_data(args: &mut args::Args) -> Result<()> {
@@ -214,6 +217,7 @@ pub fn sanitize_subdomain(base_target: &str, subdomain: &str) -> bool {
         && !subdomain.starts_with('.')
         && subdomain.ends_with(base_target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
+        && subdomain.chars().all(|c| c.is_ascii())
 }
 
 pub fn check_http_response_code(
