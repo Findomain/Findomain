@@ -156,7 +156,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
-    all_subdomains.retain(|sub| misc::sanitize_subdomain(&base_target, &sub));
+    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub));
     all_subdomains
 }
 
@@ -234,7 +234,7 @@ pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet
     } else if args.with_imported_subdomains {
         let base_target = &format!(".{}", args.target);
         targets
-            .retain(|target| !target.is_empty() && misc::sanitize_subdomain(&base_target, &target))
+            .retain(|target| !target.is_empty() && misc::validate_subdomain(&base_target, &target))
     } else {
         targets.retain(|target| !target.is_empty() && misc::validate_target(target))
     }
