@@ -1,6 +1,45 @@
-# Contributing
 
-Maintaining a project like Findomain is not a easy task and take time, anyways I am developing and releasing the tool for free. Please consider contributing to the project to keep it alive.
+[![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
+[![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
+[![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/edu4rdshl/findomain?branch=master&svg=true)](https://ci.appveyor.com/project/edu4rdshl/findomain)
+[![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Github%20Actions/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
+
+# Findomain Plus version
+
+Findomain has a Plus version that provides additional features, performance improvements and practical ways to configure and get it working.
+
+The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+
+**Implemented features:**
+| Feature  | Plus Version Support | Free Version Support |
+| ------------- | ------------- | ------------- |
+| [Core features](README.md#features)  | Yes  |Yes|
+| Check subdomains HTTP/S status | Yes  |No|
+| Support for posting HOST, IP and HTTP status to webhook notifications | Yes  |No|
+| Support for "light monitoring" mode | Yes  |No|
+| Support for configuration file in TOML, JSON, HJSON, INI or YAML format. | Yes  |No|
+| Support for automatic detection/read of default configuration file | Yes  |No|
+| Save Host, IP, HTTP Status and Open Ports to database  | Yes  |No|
+| Option to exclude sources | Yes  |No|
+| Filter or exclude subdomains containing specific keywords. | Yes  |No|
+| Maximum number of threads 1000 | Yes  |No|
+| Force all targets to be lowercase | Yes  |No|
+
+**Planned features:**
+| Feature  | Plus Version Plans | Free Version Plans |
+| ------------- | ------------- | ------------- |
+| Port scanner  | Yes  |No|
+| Save root domain to database  | Yes  |No|
+| [Project Sonar](https://www.rapid7.com/research/project-sonar/) integration | Yes  |No|
+| Shodan source support  | Yes  |No|
+| Elastic search support  | Yes  |No|
+| SQLite output  | Yes  |No|
+| Email notifications  | Yes  |No|
+| Screenshot included in notifications  | Yes  |No|
+
+## How to get Findomain Plus?
+
+It so easy, just make a monthly suscription to Patreon or Paypal using one of the following buttons. You will received the binaries in the email associated to your suscription account.
 
 ## Paypal
 
@@ -10,17 +49,21 @@ Maintaining a project like Findomain is not a easy task and take time, anyways I
 
 <a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
 
+**Screenshots:**
+
+![Findomain Scan](images/findomain3.png)
+![Findomain Database](images/findomain4.jpg)
+
+**Demos:**
+[![asciicast](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox.svg)](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox)
+[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
+
 [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
-![Findomain](images/findomain.png)
-
 # Findomain
 
-[![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
-[![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
-[![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/edu4rdshl/findomain?branch=master&svg=true)](https://ci.appveyor.com/project/edu4rdshl/findomain)
-[![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Github%20Actions/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
+![Findomain](images/findomain.png)
 
 The fastest and cross-platform subdomain enumerator.
 
