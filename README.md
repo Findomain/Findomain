@@ -15,6 +15,7 @@ The next table offers you the comparison about what is in Plus version that is n
 | ------------- | ------------- | ------------- |
 | [Core features](README.md#features)  | Yes  |Yes|
 | Check subdomains HTTP/S status | Yes  |No|
+| Check subdomains open ports | Yes  |No|
 | Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
 | Support for "light monitoring" mode | Yes  |No|
 | Support for configuration file in TOML, JSON, HJSON, INI or YAML format. | Yes  |No|
@@ -52,7 +53,7 @@ It so easy, just make a monthly suscription to Patreon using the following butto
 
 ## Paypal
 
-**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries.**
+**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries. Anyways I recommend that you use Patreon for the Findomain+ suscription.**
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
 
