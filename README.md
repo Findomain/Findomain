@@ -15,7 +15,7 @@ The next table offers you the comparison about what is in Plus version that is n
 | ------------- | ------------- | ------------- |
 | [Core features](README.md#features)  | Yes  |Yes|
 | Check subdomains HTTP/S status | Yes  |No|
-| Support for posting HOST, IP and HTTP status to webhook notifications | Yes  |No|
+| Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
 | Support for "light monitoring" mode | Yes  |No|
 | Support for configuration file in TOML, JSON, HJSON, INI or YAML format. | Yes  |No|
 | Support for automatic detection/read of default configuration file | Yes  |No|
@@ -24,30 +24,37 @@ The next table offers you the comparison about what is in Plus version that is n
 | Filter or exclude subdomains containing specific keywords. | Yes  |No|
 | Maximum number of threads 1000 | Yes  |No|
 | Force all targets to be lowercase | Yes  |No|
+| Port scanner  | Yes  |No|
+| Save root domain to database  | Yes  |No|
+| Custom user agent configuration | Yes |No |
+| Rate limit user configuration | Yes | No |
+| Output files written in real-time | Yes | No|
+| Output to unique file while monitoring | Yes | No|
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
 | ------------- | ------------- | ------------- |
-| Port scanner  | Yes  |No|
-| Save root domain to database  | Yes  |No|
 | [Project Sonar](https://www.rapid7.com/research/project-sonar/) integration | Yes  |No|
 | Shodan source support  | Yes  |No|
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
 | Email notifications  | Yes  |No|
 | Screenshot included in notifications  | Yes  |No|
+| Track CNAME for subdomains | Yes | No |
 
 ## How to get Findomain Plus?
 
-It so easy, just make a monthly suscription to Patreon or Paypal using one of the following buttons. You will received the binaries in the email associated to your suscription account.
-
-## Paypal
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the email associated to your suscription account.
 
 ## Patreon
 
 <a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
+
+## Paypal
+
+**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries.**
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
 
 **Screenshots:**
 
