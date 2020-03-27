@@ -156,7 +156,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
-    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub));
+    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
     all_subdomains
 }
 
