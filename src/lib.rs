@@ -412,7 +412,12 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     if args.with_imported_subdomains {
-        let imported_subdomains = return_file_targets(args, args.import_subdomains_from.clone());
+        let mut imported_subdomains =
+            return_file_targets(args, args.import_subdomains_from.clone());
+        let base_target = &format!(".{}", args.target);
+        imported_subdomains.retain(|target| {
+            !target.is_empty() && misc::validate_subdomain(&base_target, &target, args)
+        });
         for subdomain in imported_subdomains {
             args.subdomains.insert(subdomain);
         }
