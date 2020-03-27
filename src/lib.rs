@@ -157,7 +157,6 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub));
-    all_subdomains.insert(args.target.clone());
     all_subdomains
 }
 

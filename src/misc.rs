@@ -215,7 +215,7 @@ pub fn return_facebook_token() -> String {
 pub fn validate_subdomain(base_target: &str, subdomain: &str) -> bool {
     !subdomain.is_empty()
         && !subdomain.starts_with('.')
-        && subdomain.ends_with(base_target)
+        && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
         && subdomain.chars().all(|c| c.is_ascii())
 }
