@@ -231,11 +231,6 @@ pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet
         }
     }
     if args.bruteforce {
-    } else if args.with_imported_subdomains {
-        let base_target = &format!(".{}", args.target);
-        targets
-            .retain(|target| !target.is_empty() && misc::validate_subdomain(&base_target, &target))
-    } else {
         targets.retain(|target| !target.is_empty() && misc::validate_target(target))
     }
     targets
