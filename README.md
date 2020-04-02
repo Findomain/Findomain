@@ -45,7 +45,7 @@ The next table offers you the comparison about what is in Plus version that is n
 
 ## How to get Findomain Plus?
 
-It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the email associated to your suscription account.
+It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the inbox of your Patreon account.
 
 ## Patreon
 
