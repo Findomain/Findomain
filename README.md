@@ -6,7 +6,9 @@
 
 # Findomain Plus version
 
-Findomain has a Plus version that provides additional features, performance improvements and practical ways to configure and get it working.
+Findomain has a Plus version that provides a lot of additional features and [a dedicated monitoring server hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), performance improvements and practical ways to configure and get it working.
+
+**[About the monitoring server](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md)**
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
@@ -31,6 +33,8 @@ The next table offers you the comparison about what is in Plus version that is n
 | Rate limit user configuration | Yes | No |
 | Output files written in real-time | Yes | No|
 | Output to unique file while monitoring | Yes | No|
+| Option to save subdomains data to database without setting up monitoring | Yes | No |
+| Option to save data in your database if the webhook timeout | Yes | No |
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
