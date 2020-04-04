@@ -9,3 +9,15 @@ Findomain+ monitoring server that is included in the tiers from Findomain+ VIP P
 When you configure it, a systemd timer is launched and start the monitoring process for new subdomains according to your configuration file, the frequency is based on your tier as well starting from every 30 hours.
 
 The server will send you the alerts to the webhook(s) you have configured previously according to the frequency that you got in your tier.
+
+# Getting access
+
+## Patreon
+
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
+
+## Paypal
+
+**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries. Anyways I recommend that you use Patreon for the Findomain+ suscription.**
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
