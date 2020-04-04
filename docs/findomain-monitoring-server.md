@@ -12,6 +12,8 @@ The server will send you the alerts to the webhook(s) you have configured previo
 
 # Getting access
 
+[Recommended read](https://github.com/Edu4rdSHL/findomain#findomain-plus-version).
+
 ## Patreon
 
 <a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
