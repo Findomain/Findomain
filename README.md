@@ -477,6 +477,8 @@ Findomain is capable of monitor a specific domain or a list of domains for new s
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
 
+Here's an article that covers the process of monitoring your domains with scheduled [CRON](https://wiki.archlinux.org/index.php/Cron) jobs for \*NIX systems - [Automated subdomain scanning with findomain, PostgreSQL and Webhooks](https://medium.com/heck-the-packet/automated-subdomain-scanning-with-findomain-postgresql-and-webhooks-3e74ce9b5372)
+
 **Options**
 
 You can set the following command line options when using the subdomains monitoring feature:
