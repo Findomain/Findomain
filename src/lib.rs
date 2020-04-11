@@ -99,7 +99,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
     );
-    let url_api_anubisdb = format!("https://jonlu.ca/anubis/subdomains/{}", &args.target);
+    let url_api_anubisdb = format!("https://jldc.me/anubis/subdomains/{}", &args.target);
     let url_api_urlscan = format!(
         "https://urlscan.io/api/v1/search/?q=domain:{}",
         &args.target
