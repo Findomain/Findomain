@@ -10,6 +10,10 @@ Findomain has a Plus version that provides a lot of additional features and [a d
 
 **[Learn more about the monitoring server](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md)**
 
+## Chat
+
+[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
+
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
 **Implemented features:**
