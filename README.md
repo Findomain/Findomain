@@ -8,7 +8,7 @@
 
 Findomain has a Plus version that provides a lot of additional features and [a dedicated monitoring server hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), performance improvements and practical ways to configure and get it working.
 
-**[About the monitoring server](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md)**
+**[Learn more about the monitoring server](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md)**
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
