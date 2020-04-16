@@ -60,9 +60,9 @@ It so easy, just make a monthly suscription to Patreon using the following butto
 
 ## Plans
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus1.png" alt="Findomain Plus 1" /> </a>
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus2.png" alt="Findomain Plus 2" /> </a>
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
 
 ## Patreon
 
