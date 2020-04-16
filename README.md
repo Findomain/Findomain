@@ -39,6 +39,10 @@ The next table offers you the comparison about what is in Plus version that is n
 | Output to unique file while monitoring | Yes | No|
 | Option to save subdomains data to database without setting up monitoring | Yes | No |
 | Option to save data in your database if the webhook timeout | Yes | No |
+| Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default) | Yes | No |
+| Built-in top faster DNS IP addresses | Yes | No |
+| Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
+| Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
@@ -48,12 +52,17 @@ The next table offers you the comparison about what is in Plus version that is n
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
 | Email notifications  | Yes  |No|
-| Screenshot included in notifications  | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
 
 ## How to get Findomain Plus?
 
 It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the inbox of your Patreon account.
+
+## Plans
+
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus1.png" alt="Findomain Plus 1" /> </a>
+
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus2.png" alt="Findomain Plus 2" /> </a>
 
 ## Patreon
 
@@ -67,7 +76,7 @@ It so easy, just make a monthly suscription to Patreon using the following butto
 
 
 **Demos:**
-[![asciicast](https://asciinema.org/a/lIOpi2Cd9U1Ip9KxdiRq4TTw3.svg)](https://asciinema.org/a/lIOpi2Cd9U1Ip9KxdiRq4TTw3)
+
 [![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
 
 **Screenshots:**
