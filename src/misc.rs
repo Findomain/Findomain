@@ -212,10 +212,10 @@ pub fn return_facebook_token() -> String {
     findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())].to_string()
 }
 
-pub fn validate_subdomain(base_target: &str, subdomain: &str) -> bool {
+pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut args::Args) -> bool {
     !subdomain.is_empty()
         && !subdomain.starts_with('.')
-        && subdomain.ends_with(base_target)
+        && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
         && subdomain.chars().all(|c| c.is_ascii())
 }

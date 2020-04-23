@@ -99,7 +99,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
     );
-    let url_api_anubisdb = format!("https://jonlu.ca/anubis/subdomains/{}", &args.target);
+    let url_api_anubisdb = format!("https://jldc.me/anubis/subdomains/{}", &args.target);
     let url_api_urlscan = format!(
         "https://urlscan.io/api/v1/search/?q=domain:{}",
         &args.target
@@ -156,7 +156,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
-    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub));
+    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
     all_subdomains
 }
 
@@ -231,11 +231,6 @@ pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet
         }
     }
     if args.bruteforce {
-    } else if args.with_imported_subdomains {
-        let base_target = &format!(".{}", args.target);
-        targets
-            .retain(|target| !target.is_empty() && misc::validate_subdomain(&base_target, &target))
-    } else {
         targets.retain(|target| !target.is_empty() && misc::validate_target(target))
     }
     targets
@@ -417,7 +412,12 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     if args.with_imported_subdomains {
-        let imported_subdomains = return_file_targets(args, args.import_subdomains_from.clone());
+        let mut imported_subdomains =
+            return_file_targets(args, args.import_subdomains_from.clone());
+        let base_target = &format!(".{}", args.target);
+        imported_subdomains.retain(|target| {
+            !target.is_empty() && misc::validate_subdomain(&base_target, &target, args)
+        });
         for subdomain in imported_subdomains {
             args.subdomains.insert(subdomain);
         }

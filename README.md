@@ -6,7 +6,13 @@
 
 # Findomain Plus version
 
-Findomain has a Plus version that provides additional features, performance improvements and practical ways to configure and get it working.
+Findomain has a Plus version that provides a lot of additional features and [a dedicated monitoring server hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), performance improvements and practical ways to configure and get it working.
+
+Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
+
+## Chat
+
+[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
@@ -15,7 +21,8 @@ The next table offers you the comparison about what is in Plus version that is n
 | ------------- | ------------- | ------------- |
 | [Core features](README.md#features)  | Yes  |Yes|
 | Check subdomains HTTP/S status | Yes  |No|
-| Support for posting HOST, IP and HTTP status to webhook notifications | Yes  |No|
+| Check subdomains open ports | Yes  |No|
+| Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
 | Support for "light monitoring" mode | Yes  |No|
 | Support for configuration file in TOML, JSON, HJSON, INI or YAML format. | Yes  |No|
 | Support for automatic detection/read of default configuration file | Yes  |No|
@@ -24,39 +31,58 @@ The next table offers you the comparison about what is in Plus version that is n
 | Filter or exclude subdomains containing specific keywords. | Yes  |No|
 | Maximum number of threads 1000 | Yes  |No|
 | Force all targets to be lowercase | Yes  |No|
+| Port scanner  | Yes  |No|
+| Save root domain to database  | Yes  |No|
+| Custom user agent configuration | Yes |No |
+| Rate limit user configuration | Yes | No |
+| Output files written in real-time | Yes | No|
+| Output to unique file while monitoring | Yes | No|
+| Option to save subdomains data to database without setting up monitoring | Yes | No |
+| Option to save data in your database if the webhook timeout | Yes | No |
+| Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default) | Yes | No |
+| Built-in top faster DNS IP addresses | Yes | No |
+| Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
+| Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
 | ------------- | ------------- | ------------- |
-| Port scanner  | Yes  |No|
-| Save root domain to database  | Yes  |No|
 | [Project Sonar](https://www.rapid7.com/research/project-sonar/) integration | Yes  |No|
 | Shodan source support  | Yes  |No|
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
 | Email notifications  | Yes  |No|
-| Screenshot included in notifications  | Yes  |No|
+| Track CNAME for subdomains | Yes | No |
 
 ## How to get Findomain Plus?
 
-It so easy, just make a monthly suscription to Patreon or Paypal using one of the following buttons. You will received the binaries in the email associated to your suscription account.
+It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the inbox of your Patreon account.
 
-## Paypal
+## Plans
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
+
+<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
 
 ## Patreon
 
 <a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
 
+## Paypal
+
+**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries. Anyways I recommend that you use Patreon for the Findomain+ suscription.**
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+
+
+**Demos:**
+
+[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
+
 **Screenshots:**
 
 ![Findomain Scan](images/findomain3.png)
 ![Findomain Database](images/findomain4.jpg)
-
-**Demos:**
-[![asciicast](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox.svg)](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox)
-[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
 
 [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
@@ -463,6 +489,8 @@ Put in the CMD command prompt:
 Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
+
+Here's an article that covers the process of monitoring your domains with scheduled [CRON](https://wiki.archlinux.org/index.php/Cron) jobs for \*NIX systems - [Automated subdomain scanning with findomain, PostgreSQL and Webhooks](https://medium.com/heck-the-packet/automated-subdomain-scanning-with-findomain-postgresql-and-webhooks-3e74ce9b5372)
 
 **Options**
 
