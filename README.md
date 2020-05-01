@@ -60,20 +60,15 @@ It so easy, just make a monthly suscription to Patreon using the following butto
 
 ## Plans
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
+<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
+<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
 
-## Patreon
+## Checkout
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
+The accepted method is Paypal. You can use any of your credit cards.
 
-## Paypal
-
-**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries. Anyways I recommend that you use Patreon for the Findomain+ suscription.**
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
-
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
 
 **Demos:**
 
@@ -628,11 +623,3 @@ If you have a problem or a feature request, open an [issue](https://github.com/E
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. [See the contributors list](https://github.com/Edu4rdSHL/findomain/graphs/contributors).
-
-### Financial Contributors
-
-Become a financial contributor and help us sustain our community.
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
-
-<a href="https://patreon.com/edu4rdshl"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
