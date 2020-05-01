@@ -39,10 +39,11 @@ The next table offers you the comparison about what is in Plus version that is n
 | Output to unique file while monitoring | Yes | No|
 | Option to save subdomains data to database without setting up monitoring | Yes | No |
 | Option to save data in your database if the webhook timeout | Yes | No |
-| Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default) | Yes | No |
+| Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default, up to 200 with `--threads 200`) **Note:** if you are going to use Findomain for bruteforce, I highly recommend the Plus version because the free one uses the same DNS resolver for all queries and that leads to requests blocked by DNS provicer but also slow results. | Yes | No |
 | Built-in top faster DNS IP addresses | Yes | No |
 | Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
 | Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
+| Update the existing data in the database | Yes | No |
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
