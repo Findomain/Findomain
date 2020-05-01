@@ -18,3 +18,5 @@ Take me to checkout directly!
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
 
+**Note:** You need at least a $15 plan to get access to server.
+
