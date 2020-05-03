@@ -31,6 +31,12 @@ pub fn get_auth_token(api: &str) -> String {
         } else {
             String::new()
         }
+    } else if api == "c99" {
+        if let Ok(token) = env::var("findomain_c99_token") {
+            token
+        } else {
+            String::new()
+        }
     } else {
         String::new()
     }
