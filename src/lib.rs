@@ -75,6 +75,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
     let facebook_access_token = get_vars::get_auth_token("facebook");
     let virustotal_access_token = get_vars::get_auth_token("virustotal");
     let securitytrails_access_token = get_vars::get_auth_token("securitytrails");
+    let c99_access_token = get_vars::get_auth_token("c99");
 
     let url_api_certspotter = format!(
         "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
@@ -108,6 +109,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         "https://api.threatminer.org/v2/domain.php?q={}&api=True&rt=5",
         &args.target
     );
+    let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
         thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
         thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
@@ -154,6 +156,17 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
         },
         thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
+        thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag)),
+        if c99_access_token.is_empty() { thread::spawn(|| None) }
+        else {
+            let url_api_c99 = format!(
+                "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
+                &c99_access_token, &args.target
+                );
+            thread::spawn(move || {
+                sources::get_c99_subdomains(&url_api_c99, quiet_flag)
+            })
+        },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));

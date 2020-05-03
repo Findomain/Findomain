@@ -3,6 +3,7 @@ use {
     postgres::NoTls,
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
+    url::Url,
 };
 
 trait IntoSubdomains {
@@ -158,6 +159,24 @@ struct SubdomainsThreatminer {
 impl IntoSubdomains for SubdomainsThreatminer {
     fn into_subdomains(self) -> HashSet<String> {
         self.results.into_iter().collect()
+    }
+}
+
+#[derive(Deserialize, Eq, PartialEq, Hash)]
+struct SubdomainsC99 {
+    subdomain: String,
+}
+#[derive(Deserialize, Eq, PartialEq)]
+struct ResponseDataC99 {
+    subdomains: HashSet<SubdomainsC99>,
+}
+
+impl IntoSubdomains for ResponseDataC99 {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.subdomains
+            .into_iter()
+            .map(|sub| sub.subdomain)
+            .collect()
     }
 }
 
@@ -436,4 +455,57 @@ pub fn get_threatminer_subdomains(
         misc::show_searching_msg("Threatminer")
     }
     get_from_http_api::<SubdomainsThreatminer>(url_api_threatminer, "Threatminer", quiet_flag)
+}
+
+pub fn get_c99_subdomains(url_api_c99: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("C99")
+    }
+    get_from_http_api::<ResponseDataC99>(url_api_c99, "C99", quiet_flag)
+}
+
+pub fn get_archiveorg_subdomains(
+    url_api_archiveorg: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Archive.org")
+    }
+    match reqwest::blocking::Client::builder()
+    .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3835.0 Safari/537.36")
+    .timeout(std::time::Duration::from_secs(300))
+    .build()
+    .unwrap()
+        .get(url_api_archiveorg)
+        .send()
+    {
+        Ok(data_archiveorg) => {
+            if misc::check_http_response_code("Archive.org", &data_archiveorg, quiet_flag) {
+                match data_archiveorg.json::<Vec<Vec<String>>>() {
+                    Ok(domains_archiveorg) => Some(if !domains_archiveorg.is_empty() {
+                        domains_archiveorg
+                            .into_iter()
+                            .flatten()
+                            .map(|url| match Url::parse(&url) {
+                                Ok(host) => host.host_str().unwrap_or_else(|| "").to_string(),
+                                _ => String::new(),
+                            })
+                            .collect()
+                    } else {
+                        HashSet::new()
+                    }),
+                    Err(e) => {
+                        check_json_errors(e, "Archive.org", quiet_flag);
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        }
+        Err(e) => {
+            check_request_errors(e, "Archive.org", quiet_flag);
+            None
+        }
+    }
 }
