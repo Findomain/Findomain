@@ -6,7 +6,13 @@
 
 # Findomain Plus version
 
-Findomain has a Plus version that provides additional features, performance improvements and practical ways to configure and get it working.
+Findomain has a Plus version that provides a lot of additional features and [a dedicated monitoring server hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), performance improvements and practical ways to configure and get it working.
+
+Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
+
+## Chat
+
+[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
@@ -31,6 +37,13 @@ The next table offers you the comparison about what is in Plus version that is n
 | Rate limit user configuration | Yes | No |
 | Output files written in real-time | Yes | No|
 | Output to unique file while monitoring | Yes | No|
+| Option to save subdomains data to database without setting up monitoring | Yes | No |
+| Option to save data in your database if the webhook timeout | Yes | No |
+| Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default, up to 200 with `--threads 200`) **Note:** if you are going to use Findomain for bruteforce, I highly recommend the Plus version because the free one uses the same DNS resolver for all queries and that leads to requests blocked by DNS provider but also slow results. | Yes | No |
+| Built-in top faster DNS IP addresses | Yes | No |
+| Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
+| Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
+| Update the existing data in the database | Yes | No |
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
@@ -40,31 +53,32 @@ The next table offers you the comparison about what is in Plus version that is n
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
 | Email notifications  | Yes  |No|
-| Screenshot included in notifications  | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
 
 ## How to get Findomain Plus?
 
-It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the email associated to your suscription account.
+It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the inbox of your Patreon account.
 
-## Patreon
+## Plans
 
-<a href="https://www.patreon.com/bePatron?u=30383720"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
+<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
 
-## Paypal
+<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
 
-**By default donations to Paypal will not give access to the Plus version. If for any reason you want to make your monthly suscription using Paypal instead of Patreon, please reach me out in [Twitter](https://twitter.com/edu4rdshl) and I will send you the binaries. Anyways I recommend that you use Patreon for the Findomain+ suscription.**
+## Checkout
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
+The accepted method is Paypal. You can use any of your credit cards.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
+
+**Demos:**
+
+[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
 
 **Screenshots:**
 
 ![Findomain Scan](images/findomain3.png)
 ![Findomain Database](images/findomain4.jpg)
-
-**Demos:**
-[![asciicast](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox.svg)](https://asciinema.org/a/YQkHcS5Vsx3vt2gbTPodbTIox)
-[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
 
 [![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
@@ -472,6 +486,8 @@ Findomain is capable of monitor a specific domain or a list of domains for new s
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
 
+Here's an article that covers the process of monitoring your domains with scheduled [CRON](https://wiki.archlinux.org/index.php/Cron) jobs for \*NIX systems - [Automated subdomain scanning with findomain, PostgreSQL and Webhooks](https://medium.com/heck-the-packet/automated-subdomain-scanning-with-findomain-postgresql-and-webhooks-3e74ce9b5372)
+
 **Options**
 
 You can set the following command line options when using the subdomains monitoring feature:
@@ -608,11 +624,3 @@ If you have a problem or a feature request, open an [issue](https://github.com/E
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. [See the contributors list](https://github.com/Edu4rdSHL/findomain/graphs/contributors).
-
-### Financial Contributors
-
-Become a financial contributor and help us sustain our community.
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=37K3XKBUD2JJ8)
-
-<a href="https://patreon.com/edu4rdshl"><img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" alt="Patreon donate button" /> </a>
