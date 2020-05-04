@@ -482,7 +482,7 @@ pub fn get_archiveorg_subdomains(
         Ok(data_archiveorg) => {
             if misc::check_http_response_code("Archive.org", &data_archiveorg, quiet_flag) {
                 match data_archiveorg.json::<Vec<Vec<String>>>() {
-                    Ok(domains_archiveorg) => Some(if !domains_archiveorg.is_empty() {
+                    Ok(domains_archiveorg) => Some(
                         domains_archiveorg
                             .into_iter()
                             .flatten()
@@ -491,9 +491,7 @@ pub fn get_archiveorg_subdomains(
                                 _ => String::new(),
                             })
                             .collect()
-                    } else {
-                        HashSet::new()
-                    }),
+                   ),
                     Err(e) => {
                         check_json_errors(e, "Archive.org", quiet_flag);
                         None
