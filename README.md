@@ -61,7 +61,7 @@ It so easy, just make a monthly suscription to Patreon using the following butto
 
 ## Plans
 
-**Important Note:** the subdomains HTTP screenshot feature included in the $30 plan and onwards is only available after the first run for the moment because the high use of resources by chrome.
+**Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
 
 <a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
 
