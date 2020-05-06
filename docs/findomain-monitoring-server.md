@@ -10,13 +10,8 @@ When you configure it, a systemd timer is launched and start the monitoring proc
 
 The server will send you the alerts to the webhook(s) you have configured previously according to the frequency that you got in your tier.
 
-# Getting access
+When you finish your paypment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
 
-[Recommended read](https://github.com/Edu4rdSHL/findomain#findomain-plus-version).
-
-Take me to checkout directly!
+# Checkout
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
-
-**Note:** You need at least a $15 plan to get access to server.
-
