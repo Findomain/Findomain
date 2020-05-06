@@ -4,17 +4,59 @@
 [![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/edu4rdshl/findomain?branch=master&svg=true)](https://ci.appveyor.com/project/edu4rdshl/findomain)
 [![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Github%20Actions/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
 
-# Findomain Plus version
+# Findomain Monitoring Service
 
-Findomain has a Plus version that provides a lot of additional features and [a dedicated monitoring server hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), performance improvements and practical ways to configure and get it working.
+Findomain has [a dedicated monitoring service hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), that allow you to monitor your target domains and send alerts to Discord and Slack webhooks or Telegram chats when new subdomains are found. All your data is securely saved in a relational database and you can request a dump of your data whenever you want. The only action you need to do is configure a file with your webhooks or Telegram chat information and put your domains in another file, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the subdomains and more.
 
 Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
 
-## Chat
+## Chat with us
 
 [![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+
+## Plans
+
+|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special |
+| :---------- | :--: | :--: | :--: | :--: | :--: | 
+| Price in USD/month | $5 | $10 | $15 | $30 | $50 |
+| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 |
+| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 |
+| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Log file. | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
+| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
+| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
+| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * |
+
+
+\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
+
+## Checkout
+
+The accepted method is Paypal. You can use any of your credit cards.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
+
+**Demos:**
+
+[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
+
+**Screenshots:**
+
+![Findomain Scan](images/findomain3.png)
+![Findomain Database](images/findomain4.jpg)
+
+[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
+
+# Findomain
+
+![Findomain](images/findomain.png)
+
+The fastest and cross-platform subdomain enumerator.
 
 **Implemented features:**
 | Feature  | Plus Version Support | Free Version Support |
@@ -54,42 +96,6 @@ The next table offers you the comparison about what is in Plus version that is n
 | SQLite output  | Yes  |No|
 | Email notifications  | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
-
-## How to get Findomain Plus?
-
-It so easy, just make a monthly suscription to Patreon using the following button. You will receive the binaries in the inbox of your Patreon account.
-
-## Plans
-
-**Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
-
-<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus01.png" alt="Findomain Plus 1" /> </a>
-
-<a href="https://securityhacklabs.net/findomain.html"><img src="images/findomainplus02.png" alt="Findomain Plus 2" /> </a>
-
-## Checkout
-
-The accepted method is Paypal. You can use any of your credit cards.
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
-
-**Demos:**
-
-[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
-
-**Screenshots:**
-
-![Findomain Scan](images/findomain3.png)
-![Findomain Database](images/findomain4.jpg)
-
-[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
-
-# Findomain
-
-![Findomain](images/findomain.png)
-
-The fastest and cross-platform subdomain enumerator.
 
 # What Findomain can do?
 
