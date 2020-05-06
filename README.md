@@ -22,7 +22,7 @@ The next table offers you the comparison about what is in Plus version that is n
 
 |Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special |
 | :---------- | :--: | :--: | :--: | :--: | :--: | 
-| Price in USD/month | $5 | $10 | $20 | $30 | $50 |
+| Price in USD/month | $5 | $15 | $20 | $30 | $50 |
 | Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 |
 | Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 |
 | Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
