@@ -12,11 +12,9 @@ When you finish your paypment, you will receive an email with the server credent
 
 Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
 
-## Chat with us
+## Monitoring Methodology
 
-[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
-
-The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology.png)
 
 ## Plans
 
@@ -31,10 +29,13 @@ The next table offers you the comparison about what is in Plus version that is n
 | HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
 | Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
 | Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
+| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ |
 | Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * |
 
 
 \* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
+
+\** **Note about using other tools as sources:** The subdomains discovered with that tools are included in the Findomain+ workflow. That means that any operation done by Findomain+ is also applied to that subdomains, like screenshots, port scan, http status check and more.
 
 ## Checkout
 
@@ -59,6 +60,12 @@ The accepted method is Paypal. You can use any of your credit cards.
 ![Findomain](images/findomain.png)
 
 The fastest and cross-platform subdomain enumerator.
+
+## Chat with us
+
+[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
+
+The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
 **Implemented features:**
 | Feature  | Plus Version Support | Free Version Support |
