@@ -27,9 +27,9 @@ Learn more about the monitoring server following [this link](https://github.com/
 | Log file. | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
+| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ |
 | Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
 | Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
-| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ |
 | Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * |
 
 
