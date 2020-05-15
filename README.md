@@ -69,6 +69,8 @@ The fastest and cross-platform subdomain enumerator.
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
 
+## Plus Features
+
 **Implemented features:**
 | Feature  | Plus Version Support | Free Version Support |
 | ------------- | ------------- | ------------- |
