@@ -18,6 +18,8 @@ Learn more about the monitoring server following [this link](https://github.com/
 
 ## Plans
 
+**Note:** Buying a 3 month plan from Findomain+ VIP and onwards give you an **10% disccount**, 6 month plan gives **20% discount** and yearly plan **30% discount**. If you have choose one of these options, then make the payment to edu4rdshl\[at]protonmail.com using Paypal and send an email with the subject "Applying to \[your plan description here]". Example: "Applying to 3 month Findomain+ Special plan".
+
 |Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special | Findomain+ Corporative |
 | :---------- | :--: | :--: | :--: | :--: | :--: | :--: |
 | Price in USD/month | $5 | $15 | $20 | $30 | $50 | $150 |
