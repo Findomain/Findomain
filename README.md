@@ -24,7 +24,7 @@ Learn more about the monitoring server following [this link](https://github.com/
 | Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 |
 | Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 |
 | Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Log file. | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
 | Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ |
