@@ -18,22 +18,22 @@ Learn more about the monitoring server following [this link](https://github.com/
 
 ## Plans
 
-|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special |
-| :---------- | :--: | :--: | :--: | :--: | :--: | 
-| Price in USD/month | $5 | $15 | $20 | $30 | $50 |
-| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 |
-| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 |
-| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
-| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ |
-| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
-| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
-| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * |
+|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special | Findomain+ Corporative |
+| :---------- | :--: | :--: | :--: | :--: | :--: | :--: |
+| Price in USD/month | $5 | $15 | $20 | $30 | $50 | $150 |
+| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 | 1000 |
+| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 | 10 |
+| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
+| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
+| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
+| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ |
 
 
-\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
+\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment, except for the Findomain+ Corporative plan.
 
 \** **Note about using other tools as sources:** The subdomains discovered with that tools are included in the Findomain+ workflow. That means that any operation done by Findomain+ is also applied to that subdomains, like screenshots, port scan, http status check and more.
 
