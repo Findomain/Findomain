@@ -29,6 +29,8 @@ Learn more about the monitoring server following [this link](https://github.com/
 | Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Push notifications from Findomain Monitoring System through [Pushover](https://pushover.net). | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Email notifications from Findomain Monitoring System. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
 | Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
 | Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
 | Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
@@ -99,6 +101,8 @@ The next table offers you the comparison about what is in Plus version that is n
 | Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
 | Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
 | Update the existing data in the database | Yes | No |
+| Email notifications.  | Yes  |No|
+| Push notifications through [Pushover](https://pushover.net). | Yes  |No|
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
@@ -107,7 +111,6 @@ The next table offers you the comparison about what is in Plus version that is n
 | Shodan source support  | Yes  |No|
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
-| Email notifications  | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
 
 # What Findomain can do?
