@@ -14,7 +14,7 @@ Learn more about the monitoring server following [this link](https://github.com/
 
 ## Monitoring Methodology
 
-![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology.png)
+![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology_final.png)
 
 ## Plans
 
