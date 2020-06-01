@@ -635,6 +635,15 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 
 `findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
 
+# Load findomain in Ram to get the results as fast as possible (Linux)
+
+`sudo mkdir /tmp/ramdisk
+sudo chmod 777 /tmp/ramdisk
+sudo mount -t tmpfs -o size=32m myramdisk /tmp/ramdisk
+cp '/bin/findomain' '/tmp/ramdisk/findomain'
+'/tmp/ramdisk/findomain' --verbose -c '/findomain/config.toml' -f "/URLsToScan.txt" -u '/URLsToScanDONE.txt'
+sudo umount /tmp/ramdisk/`
+
 # Issues and requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
