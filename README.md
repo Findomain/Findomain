@@ -45,7 +45,7 @@ Learn more about the monitoring server following [this link](https://github.com/
 
 The accepted method is Paypal. You can use any of your credit cards.
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://findomain.app)
 
 **Demos:**
 
