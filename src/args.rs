@@ -4,7 +4,12 @@ use {
         misc::{eval_resolved_or_ip_present, sanitize_target_string, validate_target},
     },
     clap::{load_yaml, value_t, App},
-    std::{collections::HashSet, env::current_exe, time::Instant},
+    std::{
+        collections::{HashMap, HashSet},
+        env::current_exe,
+        path::Path,
+        time::Instant,
+    },
     trust_dns_resolver::Resolver,
 };
 
@@ -20,6 +25,11 @@ pub struct Args {
     pub resolver: String,
     pub version: String,
     pub current_executable_path: String,
+    pub spyse_access_token: String,
+    pub facebook_access_token: String,
+    pub virustotal_access_token: String,
+    pub securitytrails_access_token: String,
+    pub c99_api_key: String,
     pub threads: usize,
     pub database_checker_counter: usize,
     pub commit_to_db_counter: usize,
@@ -54,6 +64,8 @@ pub fn get_args() -> Args {
     let matches = App::from_yaml(yaml)
         .version(clap::crate_version!())
         .get_matches();
+    let settings: HashMap<String, String> =
+        return_settings(&matches, &mut config::Config::default());
     Args {
         target: {
             let target = sanitize_target_string(
@@ -84,20 +96,38 @@ pub fn get_args() -> Args {
         } else {
             Vec::new()
         },
-        postgres_connection: format!(
-            "postgresql://{}:{}@{}:{}/{}",
-            value_t!(matches, "postgres-user", String).unwrap_or_else(|_| "postgres".to_string()),
-            value_t!(matches, "postgres-password", String)
-                .unwrap_or_else(|_| "postgres".to_string()),
-            value_t!(matches, "postgres-host", String).unwrap_or_else(|_| "localhost".to_string()),
-            value_t!(matches, "postgres-port", usize).unwrap_or_else(|_| 5432),
-            value_t!(matches, "postgres-database", String).unwrap_or_else(|_| String::new()),
-        ),
-        discord_webhook: String::new(),
-        slack_webhook: String::new(),
-        telegram_bot_token: String::new(),
+        postgres_connection: {
+            let database_connection = format!(
+                "postgresql://{}:{}@{}:{}/{}",
+                value_t!(matches, "postgres-user", String)
+                    .unwrap_or_else(|_| "postgres".to_string()),
+                value_t!(matches, "postgres-password", String)
+                    .unwrap_or_else(|_| "postgres".to_string()),
+                value_t!(matches, "postgres-host", String)
+                    .unwrap_or_else(|_| "localhost".to_string()),
+                value_t!(matches, "postgres-port", usize).unwrap_or_else(|_| 5432),
+                value_t!(matches, "postgres-database", String).unwrap_or_else(|_| String::new()),
+            );
+            return_value_or_default(&settings, "postgres_connection", database_connection)
+        },
+        discord_webhook: return_value_or_default(&settings, "discord_webhook", String::new()),
+        slack_webhook: return_value_or_default(&settings, "slack_webhook", String::new()),
+        telegram_bot_token: return_value_or_default(&settings, "telegrambot_token", String::new()),
         telegram_webhook: String::new(),
-        telegram_chat_id: String::new(),
+        telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
+        spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new()),
+        facebook_access_token: return_value_or_default(&settings, "fb_token", String::new()),
+        virustotal_access_token: return_value_or_default(
+            &settings,
+            "virustotal_token",
+            String::new(),
+        ),
+        securitytrails_access_token: return_value_or_default(
+            &settings,
+            "securitytrails_token",
+            String::new(),
+        ),
+        c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
         resolver: value_t!(matches, "resolver", String)
             .unwrap_or_else(|_| "cloudflare".to_string()),
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
@@ -158,4 +188,74 @@ pub fn get_args() -> Args {
             get_resolver(enable_dot, resolver)
         },
     }
+}
+
+fn return_settings(
+    matches: &clap::ArgMatches,
+    settings: &mut config::Config,
+) -> HashMap<String, String> {
+    if matches.is_present("config-file") {
+        match settings.merge(config::File::with_name(
+            &value_t!(matches, "config-file", String).unwrap(),
+        )) {
+            Ok(settings) => match settings.merge(config::Environment::with_prefix("FINDOMAIN")) {
+                Ok(settings) => settings
+                    .clone()
+                    .try_into::<HashMap<String, String>>()
+                    .unwrap(),
+                Err(e) => {
+                    eprintln!("Error merging environment variables into settings: {}\n", e);
+                    std::process::exit(1)
+                }
+            },
+            Err(e) => {
+                eprintln!("Error reading config file: {}\n", e);
+                std::process::exit(1)
+            }
+        }
+    } else if Path::new("findomain.toml").exists()
+        || Path::new("findomain.json").exists()
+        || Path::new("findomain.hjson").exists()
+        || Path::new("findomain.ini").exists()
+        || Path::new("findomain.yml").exists()
+    {
+        match settings.merge(config::File::with_name("findomain")) {
+            Ok(settings) => match settings.merge(config::Environment::with_prefix("FINDOMAIN")) {
+                Ok(settings) => settings
+                    .clone()
+                    .try_into::<HashMap<String, String>>()
+                    .unwrap(),
+                Err(e) => {
+                    eprintln!("Error merging environment variables into settings: {}\n", e);
+                    std::process::exit(1)
+                }
+            },
+            Err(e) => {
+                eprintln!("Error reading config file: {}\n", e);
+                std::process::exit(1)
+            }
+        }
+    } else {
+        match settings.merge(config::Environment::with_prefix("FINDOMAIN")) {
+            Ok(settings) => settings
+                .clone()
+                .try_into::<HashMap<String, String>>()
+                .unwrap(),
+            Err(e) => {
+                eprintln!("Error merging environment variables into settings: {}\n", e);
+                std::process::exit(1)
+            }
+        }
+    }
+}
+
+fn return_value_or_default(
+    settings: &HashMap<String, String>,
+    value: &str,
+    default_value: String,
+) -> String {
+    settings
+        .get(value)
+        .unwrap_or_else(|| &default_value)
+        .to_string()
 }
