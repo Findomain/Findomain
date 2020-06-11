@@ -12,35 +12,40 @@ When you finish your paypment, you will receive an email with the server credent
 
 Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
 
-## Chat with us
+## Monitoring Methodology
 
-[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
-
-The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology_final.png)
 
 ## Plans
 
-|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special |
-| :---------- | :--: | :--: | :--: | :--: | :--: | 
-| Price in USD/month | $5 | $10 | $15 | $30 | $50 |
-| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 |
-| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 |
-| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Log file. | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
-| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
-| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * |
-| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * |
+**Note:** Buying a 3 month plan from Findomain+ VIP and onwards give you an **10% disccount**, 6 month plan gives **20% discount** and yearly plan **30% discount**. If you have choose one of these options, then make the payment to edu4rdshl\[at]protonmail.com using Paypal and send an email with the subject "Applying to \[your plan description here]". Example: "Applying to 3 month Findomain+ Special plan".
+
+|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special | Findomain+ Corporative |
+| :---------- | :--: | :--: | :--: | :--: | :--: | :--: |
+| Price in USD/month | $5 | $15 | $20 | $30 | $50 | $150 |
+| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 | 1000 |
+| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 | 10 |
+| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Push notifications from Findomain Monitoring System through [Pushover](https://pushover.net). | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Email notifications from Findomain Monitoring System. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
+| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
+| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
+| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ |
 
 
-\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment.
+\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment, except for the Findomain+ Corporative plan.
+
+\** **Note about using other tools as sources:** The subdomains discovered with that tools are included in the Findomain+ workflow. That means that any operation done by Findomain+ is also applied to that subdomains, like screenshots, port scan, http status check and more.
 
 ## Checkout
 
 The accepted method is Paypal. You can use any of your credit cards.
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://securityhacklabs.net/findomain.html)
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://findomain.app)
 
 **Demos:**
 
@@ -59,6 +64,14 @@ The accepted method is Paypal. You can use any of your credit cards.
 ![Findomain](images/findomain.png)
 
 The fastest and cross-platform subdomain enumerator.
+
+## Chat with us
+
+[![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
+
+The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+
+## Plus Features
 
 **Implemented features:**
 | Feature  | Plus Version Support | Free Version Support |
@@ -87,6 +100,8 @@ The fastest and cross-platform subdomain enumerator.
 | Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
 | Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
 | Update the existing data in the database | Yes | No |
+| Email notifications.  | Yes  |No|
+| Push notifications through [Pushover](https://pushover.net). | Yes  |No|
 
 **Planned features:**
 | Feature  | Plus Version Plans | Free Version Plans |
@@ -95,7 +110,6 @@ The fastest and cross-platform subdomain enumerator.
 | Shodan source support  | Yes  |No|
 | Elastic search support  | Yes  |No|
 | SQLite output  | Yes  |No|
-| Email notifications  | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
 
 # What Findomain can do?
