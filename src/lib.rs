@@ -6,7 +6,6 @@ extern crate lazy_static;
 
 pub mod args;
 pub mod errors;
-mod get_vars;
 mod misc;
 pub mod sources;
 pub mod update_checker;
@@ -49,10 +48,6 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         manage_subdomains_data(args)?
     } else {
         if args.monitoring_flag {
-            args.discord_webhook = get_vars::get_webhook("discord");
-            args.slack_webhook = get_vars::get_webhook("slack");
-            args.telegram_bot_token = get_vars::get_auth_token("telegram");
-            args.telegram_chat_id = get_vars::get_chat_id("telegram");
             check_monitoring_parameters(args)?;
         }
         args.subdomains = search_subdomains(args);
@@ -71,11 +66,6 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
 fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
     let quiet_flag = args.quiet_flag;
     let base_target = &format!(".{}", args.target);
-    let spyse_access_token = get_vars::get_auth_token("spyse");
-    let facebook_access_token = get_vars::get_auth_token("facebook");
-    let virustotal_access_token = get_vars::get_auth_token("virustotal");
-    let securitytrails_access_token = get_vars::get_auth_token("securitytrails");
-    let c99_access_token = get_vars::get_auth_token("c99");
 
     let url_api_certspotter = format!(
         "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
@@ -93,7 +83,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
     );
     let url_api_spyse = format!(
         "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-        &args.target, &spyse_access_token
+        &args.target, &args.spyse_access_token
     );
     let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
@@ -115,7 +105,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
         thread::spawn(move || sources::get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
         thread::spawn(move || sources::get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
-        if facebook_access_token.is_empty() {
+        if args.facebook_access_token.is_empty() {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
@@ -126,18 +116,18 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
-                &facebook_access_token);
+                &args.facebook_access_token);
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
         thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)),
         thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)),
         thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)),
-        if virustotal_access_token.is_empty() {
+        if args.virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_virustotal_apikey = format!(
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
-                &virustotal_access_token, &args.target
+                &args.virustotal_access_token, &args.target
             );
             thread::spawn(move || {
                 sources::get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
@@ -145,23 +135,23 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         },
         thread::spawn(move || sources::get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)),
         thread::spawn(move || sources::get_urlscan_subdomains(&url_api_urlscan, quiet_flag)),
-        if securitytrails_access_token.is_empty() {
+        if args.securitytrails_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_api_securitytrails = format!(
                 "https://api.securitytrails.com/v1/domain/{}/subdomains?apikey={}",
-                &args.target, &securitytrails_access_token
+                &args.target, &args.securitytrails_access_token
             );
             let target = args.target.clone();
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
         },
         thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
         thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag)),
-        if c99_access_token.is_empty() { thread::spawn(|| None) }
+        if args.c99_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_c99 = format!(
                 "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
-                &c99_access_token, &args.target
+                &args.c99_api_key, &args.target
                 );
             thread::spawn(move || {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)

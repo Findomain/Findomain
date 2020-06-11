@@ -176,3 +176,10 @@ args:
         conflicts_with:
           - query-database
           - monitoring-flag
+          
+    - config-file:
+        help: Use a configuration file. The default configuration file is findomain and the format can be toml, json, hjson, ini or yml.
+        short: c
+        long: config
+        takes_value: true
+        multiple: false
