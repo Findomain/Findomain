@@ -81,7 +81,6 @@ The next table offers you the comparison about what is in Plus version that is n
 | Check subdomains open ports | Yes  |No|
 | Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
 | Support for "light monitoring" mode | Yes  |No|
-| Support for configuration file in TOML, JSON, HJSON, INI or YAML format. | Yes  |No|
 | Support for automatic detection/read of default configuration file | Yes  |No|
 | Save Host, IP, HTTP Status and Open Ports to database  | Yes  |No|
 | Option to exclude sources | Yes  |No|
@@ -152,7 +151,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Possibility to use as subdomain resolver.
 * Subdomain wildcard detection for accurate results. 
 * Support for subdomain discover using bruteforce method.
-* Update checker. Use the `--check-updates` flag.
+* Support for configuration file in TOML, JSON, HJSON, INI or YAML format.
 
 # Findomain in depth
 
