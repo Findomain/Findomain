@@ -1,0 +1,13 @@
+# Findomain configuration file. The following listed values are all the possible values you can set at the moment.
+# IF YOU ARE NOT USING ONE OF THEM PLEASE LEAVE THIS EMPTY OR DELETE IT FROM THE FILE
+
+postgres_connection: "Your postgres connection URI here in the following format: postgresql://user:password@host:port/database"
+virustotal_token: "Your VirusTotal token here"
+fb_token: "Your Facebook token here"
+securitytrails_token: "Your SecurityTrails token here"
+spyse_token: "Your Spyse token here"
+telegrambot_token: "Your Telegram bot token here"
+telegram_chat_id: "Your Telegram chat ID here"
+slack_webhook: "Your Slack webhook URL here"
+discord_webhook: "Your Discord webhook URL here"
+c99_api_key: "Your C99.nl API Key here"
