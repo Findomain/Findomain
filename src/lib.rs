@@ -169,7 +169,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
         }
-    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
+    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
 
     all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
     all_subdomains
