@@ -183,3 +183,25 @@ args:
         long: config
         takes_value: true
         multiple: false
+
+    - exclude-sources:
+        help: Exclude sources from searching subdomains in.
+        long: exclude-sources
+        takes_value: true
+        multiple: true
+        possible_values:
+          - certspotter
+          - crtsh
+          - virustotal
+          - sublist3r
+          - facebook
+          - spyse
+          - bufferover
+          - threatcrowd
+          - virustotalapikey
+          - anubis
+          - urlscan
+          - securitytrails
+          - threatminer
+          - archiveorg
+          - c99

@@ -53,6 +53,7 @@ pub struct Args {
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
     pub wilcard_ips: HashSet<String>,
+    pub excluded_sources: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
     pub time_wasted: Instant,
@@ -158,6 +159,14 @@ pub fn get_args() -> Args {
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
         wilcard_ips: HashSet::new(),
+        excluded_sources: if matches.is_present("exclude-sources") {
+            return_matches_hashset(&matches, "exclude-sources")
+        } else {
+            return_value_or_default(&settings, "exclude_sources", String::new())
+                .split_whitespace()
+                .map(str::to_owned)
+                .collect()
+        },
         import_subdomains_from: if matches.is_present("import-subdomains") {
             matches
                 .values_of("import-subdomains")
@@ -258,4 +267,16 @@ fn return_value_or_default(
         .get(value)
         .unwrap_or_else(|| &default_value)
         .to_string()
+}
+
+fn return_matches_hashset(matches: &clap::ArgMatches, value: &str) -> HashSet<String> {
+    if matches.is_present(value) {
+        matches
+            .values_of(value)
+            .unwrap()
+            .map(str::to_owned)
+            .collect()
+    } else {
+        HashSet::new()
+    }
 }

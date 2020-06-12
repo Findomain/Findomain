@@ -101,11 +101,16 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
     );
     let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
-        thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, quiet_flag)),
-        thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)),
-        thread::spawn(move || sources::get_virustotal_subdomains(&url_api_virustotal, quiet_flag)),
-        thread::spawn(move || sources::get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)),
-        if args.facebook_access_token.is_empty() {
+        if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, quiet_flag)) },
+        if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)) },
+        if args.excluded_sources.contains("virustotal") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_virustotal_subdomains(&url_api_virustotal, quiet_flag)) },
+        if args.excluded_sources.contains("sublist3r") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)) },
+        if args.excluded_sources.contains("facebook") { thread::spawn(|| None) }
+        else if args.facebook_access_token.is_empty() {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
@@ -119,10 +124,13 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 &args.facebook_access_token);
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
-        thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)),
-        thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)),
-        thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)),
-        if args.virustotal_access_token.is_empty() {
+        if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
+        if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
+        if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)) },
+        if args.excluded_sources.contains("virustotalapikey") || args.virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_virustotal_apikey = format!(
@@ -133,9 +141,11 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 sources::get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
             })
         },
-        thread::spawn(move || sources::get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)),
-        thread::spawn(move || sources::get_urlscan_subdomains(&url_api_urlscan, quiet_flag)),
-        if args.securitytrails_access_token.is_empty() {
+        if args.excluded_sources.contains("anubis") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)) },
+        if args.excluded_sources.contains("urlscan") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_urlscan_subdomains(&url_api_urlscan, quiet_flag)) },
+        if args.excluded_sources.contains("securitytrails") || args.securitytrails_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_api_securitytrails = format!(
@@ -145,9 +155,11 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             let target = args.target.clone();
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
         },
-        thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)),
-        thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag)),
-        if args.c99_api_key.is_empty() { thread::spawn(|| None) }
+        if args.excluded_sources.contains("threatminer") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag))},
+        if args.excluded_sources.contains("archiveorg") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag))},
+        if args.excluded_sources.contains("c99") || args.c99_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_c99 = format!(
                 "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
@@ -156,7 +168,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             thread::spawn(move || {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
-        },
+        }
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
 
     all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
