@@ -3,7 +3,7 @@ author: Eduard Tolosa <edu4rdshl@protonmail.com>
 settings:
     - ArgRequiredElseHelp
     - StrictUtf8
-about: The fastest and cross-platform subdomain enumerator, don not waste your time.
+about: The fastest and cross-platform subdomain enumerator, do not waste your time.
 args:
     - target:
         short: t
