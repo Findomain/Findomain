@@ -69,16 +69,16 @@ impl IntoSubdomains for ResponseDataFacebook {
 }
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
-pub struct SubdomainsSpyse {
-    pub name: String,
+struct SubdomainsSpyse {
+    name: String,
 }
 #[derive(Deserialize, Eq, PartialEq, Hash)]
-pub struct ItemsSpyse {
-    pub items: Vec<SubdomainsSpyse>,
+struct ItemsSpyse {
+    items: Vec<SubdomainsSpyse>,
 }
 #[derive(Deserialize, Eq, PartialEq, Hash)]
-pub struct RootSpyseData {
-    pub data: ItemsSpyse,
+struct RootSpyseData {
+    data: ItemsSpyse,
 }
 
 impl IntoSubdomains for RootSpyseData {
