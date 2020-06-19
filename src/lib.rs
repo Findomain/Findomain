@@ -37,6 +37,22 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
     }
+
+    // Test for new or modified sources.
+    // let subdomains = sources::get_spyse_subdomains(
+    //     &format!(
+    //         "https://api.spyse.com/v3/data/domain/subdomain?limit=100&domain={}",
+    //         &args.target
+    //     ),
+    //     "",
+    //     false,
+    // )
+    // .unwrap();
+    // for sub in subdomains {
+    //     println!("{}", sub)
+    // }
+    // std::process::exit(1);
+
     if args.query_database {
         query_findomain_database(args)?
     } else if args.bruteforce {
@@ -82,8 +98,8 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         &args.target
     );
     let url_api_spyse = format!(
-        "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-        &args.target, &args.spyse_access_token
+        "https://api.spyse.com/v3/data/domain/subdomain?limit=100&domain={}",
+        &args.target
     );
     let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
@@ -124,8 +140,8 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 &args.facebook_access_token);
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
-        if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
+        if args.excluded_sources.contains("spyse") || args.spyse_access_token.is_empty() { thread::spawn(|| None) }
+        else { let spyse_api_token = args.spyse_access_token.clone(); thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, &spyse_api_token, quiet_flag)) },
         if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
         if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
