@@ -6,11 +6,11 @@
 
 # Findomain Monitoring Service
 
-Findomain offers [a dedicated monitoring service hosted in Amazon](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md), that allow you to monitor your target domains and send alerts to Discord and Slack webhooks or Telegram chats when new subdomains are found. All your data is securely saved in a relational database and you can request a dump of your data whenever you want. The only action you need to do is configure a file with your webhooks or Telegram chat information and put your domains in another file, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the subdomains and more.
+Findomain offers [a dedicated monitoring service hosted in Amazon](https://findomain.app/#Pricing), that allow you to monitor your target domains and send alerts to Discord and Slack webhooks or Telegram chats when new subdomains are found. All your data is securely saved in a relational database and you can request a dump of your data whenever you want. The only action you need to do is configure a file with your webhooks or Telegram chat information and put your domains in another file, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the subdomains and more.
 
 When you finish your paypment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
 
-Learn more about the monitoring server following [this link](https://github.com/Edu4rdSHL/findomain/blob/master/docs/findomain-monitoring-server.md).
+Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
 
 ## Monitoring Methodology
 
