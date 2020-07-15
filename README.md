@@ -10,42 +10,15 @@ Findomain offers [a dedicated monitoring service hosted in Amazon](https://findo
 
 When you finish your paypment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
 
-Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
-
 ## Monitoring Methodology
+
+Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
 
 ![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology_final.png)
 
-## Plans
+## Findomain+ Plans
 
-**Note:** Buying a 3 month plan from Findomain+ VIP and onwards give you an **10% disccount**, 6 month plan gives **20% discount** and yearly plan **30% discount**. If you have choose one of these options, then make the payment to edu4rdshl\[at]protonmail.com using Paypal and send an email with the subject "Applying to \[your plan description here]". Example: "Applying to 3 month Findomain+ Special plan".
-
-|Feature| Findomain+ Basic | Findomain+ Plus | Findomain+ VIP | Findomain+ VIP Plus | Findomain+ Special | Findomain+ Corporative |
-| :---------- | :--: | :--: | :--: | :--: | :--: | :--: |
-| Price in USD/month | $5 | $15 | $20 | $30 | $50 | $150 |
-| Maximum number of targets to monitor | 10 | 30 | 50 | 150 | 300 | 1000 |
-| Scan frequency in hours. | 48 | 40 | 30 | 20 | 10 | 10 |
-| Webhook alerts. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Log file. | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| IP discover.  | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| HTTP Status check. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Push notifications from Findomain Monitoring System through [Pushover](https://pushover.net). | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Email notifications from Findomain Monitoring System. | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| Monitoring using other tools as sources (amass, sublist3r, assetfinder, subfinder). ** | ✖️ | ✖️ | ✖️ | ✔️ | ✔️ | ✔️ |
-| Default open ports check (1-1000). | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
-| Subdomains screenshots. | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ * | ✔️ |
-| Custom open ports range check. | ✖️ | ✖️ | ✖️ | ✖️ | ✔️ * | ✔️ |
-
-
-\* **Important Note:** the subdomains HTTP screenshot and ports scan feature included in the $30 plan and onwards is only available after the first run for the moment, except for the Findomain+ Corporative plan.
-
-\** **Note about using other tools as sources:** The subdomains discovered with that tools are included in the Findomain+ workflow. That means that any operation done by Findomain+ is also applied to that subdomains, like screenshots, port scan, http status check and more.
-
-## Checkout
-
-The accepted method is Paypal. You can use any of your credit cards.
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif)](https://findomain.app)
+The accepted method is Paypal. [Click here.](https://findomain.app/#Pricing)
 
 **Demos:**
 
