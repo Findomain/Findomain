@@ -10,15 +10,15 @@ Findomain offers [a dedicated monitoring service hosted in Amazon](https://findo
 
 When you finish your paypment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
 
+## Pricing
+
+[**See available plans here.**](https://findomain.app/#Pricing)
+
 ## Monitoring Methodology
 
 Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
 
 ![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology_final.png)
-
-## Findomain+ Plans
-
-The accepted method is Paypal. [Click here.](https://findomain.app/#Pricing)
 
 **Demos:**
 
