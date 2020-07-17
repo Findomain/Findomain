@@ -438,7 +438,7 @@ Put in the CMD command prompt:
 
 **Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_virustotal_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
-**Tip:** If you don't want to write the access token everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export VariableName="VariableValue"` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
+**Tip:** If you don't want to write the access token everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export findomain_virustotal_token=YourAccessToken` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
 
 # Configuring the SecurityTrails API
 
