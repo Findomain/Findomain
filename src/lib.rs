@@ -636,7 +636,7 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
 }
 
 fn get_records(resolver: &Resolver, domain: &str, record_type: RecordType) -> String {
-    if let Ok(rdata) = resolver.lookup(&domain, record_type.clone()) {
+    if let Ok(rdata) = resolver.lookup(&domain, record_type) {
         let mut record_data: Vec<String> = Vec::new();
         if record_type == RecordType::AAAA {
             record_data = rdata
