@@ -1,7 +1,7 @@
 use {
     crate::{
-        get_resolver,
         misc::{eval_resolved_or_ip_present, sanitize_target_string, validate_target},
+        resolvers,
     },
     clap::{load_yaml, value_t, App},
     std::{
@@ -10,7 +10,6 @@ use {
         path::Path,
         time::Instant,
     },
-    trust_dns_resolver::Resolver,
 };
 
 pub struct Args {
@@ -22,7 +21,6 @@ pub struct Args {
     pub telegram_bot_token: String,
     pub telegram_webhook: String,
     pub telegram_chat_id: String,
-    pub resolver: String,
     pub version: String,
     pub current_executable_path: String,
     pub spyse_access_token: String,
@@ -49,6 +47,7 @@ pub struct Args {
     pub as_resolver: bool,
     pub bruteforce: bool,
     pub disable_wildcard_check: bool,
+    pub custom_resolvers: bool,
     pub files: Vec<String>,
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
@@ -56,8 +55,8 @@ pub struct Args {
     pub excluded_sources: HashSet<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
+    pub resolvers: Vec<String>,
     pub time_wasted: Instant,
-    pub domain_resolver: Resolver,
 }
 
 pub fn get_args() -> Args {
@@ -129,8 +128,7 @@ pub fn get_args() -> Args {
             String::new(),
         ),
         c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
-        resolver: value_t!(matches, "resolver", String)
-            .unwrap_or_else(|_| "cloudflare".to_string()),
+
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
         version: clap::crate_version!().to_string(),
         current_executable_path: current_exe().unwrap().display().to_string(),
@@ -156,6 +154,7 @@ pub fn get_args() -> Args {
         as_resolver: matches.is_present("as-resolver"),
         bruteforce: matches.is_present("wordlists"),
         disable_wildcard_check: matches.is_present("no-wildcards"),
+        custom_resolvers: matches.is_present("custom-resolvers"),
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
         wilcard_ips: HashSet::new(),
@@ -186,15 +185,10 @@ pub fn get_args() -> Args {
             Vec::new()
         },
         time_wasted: Instant::now(),
-        domain_resolver: {
-            let resolver =
-                value_t!(matches, "resolver", String).unwrap_or_else(|_| "cloudflare".to_string());
-            let enable_dot = eval_resolved_or_ip_present(
-                matches.is_present("enable-dot"),
-                matches.is_present("ip") || matches.is_present("ipv6-only"),
-                matches.is_present("resolved"),
-            );
-            get_resolver(enable_dot, resolver)
+        resolvers: if matches.is_present("custom-resolvers") {
+            return_matches_vec(&matches, "custom-resolvers")
+        } else {
+            resolvers::return_ipv4_resolvers()
         },
     }
 }
@@ -278,5 +272,17 @@ fn return_matches_hashset(matches: &clap::ArgMatches, value: &str) -> HashSet<St
             .collect()
     } else {
         HashSet::new()
+    }
+}
+
+pub fn return_matches_vec(matches: &clap::ArgMatches, value: &str) -> Vec<String> {
+    if matches.is_present(value) {
+        matches
+            .values_of(value)
+            .unwrap()
+            .map(str::to_owned)
+            .collect()
+    } else {
+        Vec::new()
     }
 }

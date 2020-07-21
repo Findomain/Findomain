@@ -6,202 +6,199 @@ settings:
 about: The fastest and cross-platform subdomain enumerator, do not waste your time.
 args:
     - target:
-        short: t
-        long: target
-        help: Target host.
-        takes_value: true
-        multiple: false
-        conflicts_with:
-          - files
+          short: t
+          long: target
+          help: Target host.
+          takes_value: true
+          multiple: false
+          conflicts_with:
+              - files
 
     - resolved:
-        short: r
-        long: resolved
-        help: Show/write only resolved subdomains.
-        takes_value: false
-        conflicts_with:
-          - monitoring-flag
-          - ip
-          - ipv6-only
+          short: r
+          long: resolved
+          help: Show/write only resolved subdomains.
+          takes_value: false
+          conflicts_with:
+              - monitoring-flag
+              - ip
+              - ipv6-only
 
     - ip:
-        short: i
-        long: ip
-        help: Show/write the ip address of resolved subdomains.
-        takes_value: false
-        conflicts_with:
-          - monitoring-flag
-          - resolved
-          - ipv6-only
+          short: i
+          long: ip
+          help: Show/write the ip address of resolved subdomains.
+          takes_value: false
+          conflicts_with:
+              - monitoring-flag
+              - resolved
+              - ipv6-only
 
     - files:
-        short: f
-        long: file
-        help: Use a list of subdomains writen in a file as input.
-        takes_value: true
-        multiple: true
-        conflicts_with:
-          - target
+          short: f
+          long: file
+          help: Use a list of subdomains writen in a file as input.
+          takes_value: true
+          multiple: true
+          conflicts_with:
+              - target
 
     - output:
-        short: o
-        long: output
-        help: Write to an output file. The name of the output file will be the target string with TXT format.
-        takes_value: false
+          short: o
+          long: output
+          help: Write to an output file. The name of the output file will be the target string with TXT format.
+          takes_value: false
 
     - unique-output:
-        short: u
-        long: unique-output
-        help: Write all the results for a target or a list of targets to a specified filename.
-        takes_value: true
-        multiple: false
-        conflicts_with:
-          - output
-          - monitoring-flag
+          short: u
+          long: unique-output
+          help: Write all the results for a target or a list of targets to a specified filename.
+          takes_value: true
+          multiple: false
+          conflicts_with:
+              - output
+              - monitoring-flag
 
     - monitoring-flag:
-        short: m
-        long: monitoring-flag
-        help: Activate Findomain monitoring mode.
-        takes_value: false
+          short: m
+          long: monitoring-flag
+          help: Activate Findomain monitoring mode.
+          takes_value: false
 
     - postgres-user:
-        long: postgres-user
-        help: Postgresql username.
-        takes_value: true
+          long: postgres-user
+          help: Postgresql username.
+          takes_value: true
 
     - postgres-password:
-        long: postgres-password
-        help: Postgresql password.
-        takes_value: true
+          long: postgres-password
+          help: Postgresql password.
+          takes_value: true
 
     - postgres-host:
-        long: postgres-host
-        help: Postgresql host.
-        takes_value: true
+          long: postgres-host
+          help: Postgresql host.
+          takes_value: true
 
     - postgres-port:
-        long: postgres-port
-        help: Postgresql port.
-        takes_value: true
+          long: postgres-port
+          help: Postgresql port.
+          takes_value: true
 
     - postgres-database:
-        long: postgres-database
-        help: Postgresql database.
-        takes_value: true
+          long: postgres-database
+          help: Postgresql database.
+          takes_value: true
 
     - quiet:
-        short: q
-        long: quiet
-        help: Remove informative messages but show fatal errors or subdomains not found message.
-        takes_value: false
+          short: q
+          long: quiet
+          help: Remove informative messages but show fatal errors or subdomains not found message.
+          takes_value: false
 
     - query-database:
-        long: query-database
-        help: Query the findomain database to search subdomains that have already been discovered.
-        takes_value: false
-        conflicts_with:
-          - monitoring-flag
+          long: query-database
+          help: Query the findomain database to search subdomains that have already been discovered.
+          takes_value: false
+          conflicts_with:
+              - monitoring-flag
 
     - import-subdomains:
-        help: Import subdomains from one or multiple files. Subdomains need to be one per line in the file to import.
-        long: import-subdomains
-        takes_value: true
-        multiple: true
-        requires:
-          - monitoring-flag
+          help: Import subdomains from one or multiple files. Subdomains need to be one per line in the file to import.
+          long: import-subdomains
+          takes_value: true
+          multiple: true
+          requires:
+              - monitoring-flag
 
     - enable-dot:
-        help: Enable DNS over TLS for resolving subdomains IPs.
-        long: enable-dot
-        takes_value: false
+          help: Enable DNS over TLS for resolving subdomains IPs.
+          long: enable-dot
+          takes_value: false
 
     - ipv6-only:
-        help: Perform a IPv6 lookup only.
-        long: ipv6-only
-        takes_value: false
-        conflicts_with:
-          - monitoring-flag
-          - ip
-          - resolved
+          help: Perform a IPv6 lookup only.
+          long: ipv6-only
+          takes_value: false
+          conflicts_with:
+              - monitoring-flag
+              - ip
+              - resolved
 
     - threads:
-        help: Number of threads to use to perform subdomains resolution.
-        long: threads
-        takes_value: true
-
-    - resolver:
-        help: Specify a resolver to use.
-        long: resolver
-        takes_value: true
-        possible_values:
-          - cloudflare
-          - quad9
-          - system
+          help: Number of threads to use to perform subdomains resolution.
+          long: threads
+          takes_value: true
 
     - enable-empty-push:
-        help: Send alert to webhooks still when no new subdomains have been found.
-        long: aempty
-        takes_value: false
+          help: Send alert to webhooks still when no new subdomains have been found.
+          long: aempty
+          takes_value: false
 
     - check-updates:
-        help: Check for available Findomain updates.
-        long: check-updates
-        takes_value: false
+          help: Check for available Findomain updates.
+          long: check-updates
+          takes_value: false
 
     - as-resolver:
-        help: Use Findomain as resolver for a list of domains in a file.
-        short: x
-        long: as-resolver
-        takes_value: false
-        requires:
-          - files
-        conflicts_with:
-          - query-database
-          - monitoring-flag
+          help: Use Findomain as resolver for a list of domains in a file.
+          short: x
+          long: as-resolver
+          takes_value: false
+          requires:
+              - files
+          conflicts_with:
+              - query-database
+              - monitoring-flag
 
     - wordlists:
-        help: Wordlist file to use in the bruteforce process. Using it option automatically enables bruteforce mode.
-        short: w
-        long: wordlist
-        takes_value: true
-        conflicts_with:
-          - query-database
-          - monitoring-flag
+          help: Wordlist file to use in the bruteforce process. Using it option automatically enables bruteforce mode.
+          short: w
+          long: wordlist
+          takes_value: true
+          conflicts_with:
+              - query-database
+              - monitoring-flag
 
     - no-wildcards:
-        help: Disable wilcard detection when resolving subdomains.
-        long: no-wildcards
-        takes_value: false
-        conflicts_with:
-          - query-database
-          - monitoring-flag
-          
+          help: Disable wilcard detection when resolving subdomains.
+          long: no-wildcards
+          takes_value: false
+          conflicts_with:
+              - query-database
+              - monitoring-flag
+
     - config-file:
-        help: Use a configuration file. The default configuration file is findomain and the format can be toml, json, hjson, ini or yml.
-        short: c
-        long: config
-        takes_value: true
-        multiple: false
+          help: Use a configuration file. The default configuration file is findomain and the format can be toml, json, hjson, ini or yml.
+          short: c
+          long: config
+          takes_value: true
+          multiple: false
 
     - exclude-sources:
-        help: Exclude sources from searching subdomains in.
-        long: exclude-sources
-        takes_value: true
-        multiple: true
-        possible_values:
-          - certspotter
-          - crtsh
-          - virustotal
-          - sublist3r
-          - facebook
-          - spyse
-          - bufferover
-          - threatcrowd
-          - virustotalapikey
-          - anubis
-          - urlscan
-          - securitytrails
-          - threatminer
-          - archiveorg
-          - c99
+          help: Exclude sources from searching subdomains in.
+          long: exclude-sources
+          takes_value: true
+          multiple: true
+          possible_values:
+              - certspotter
+              - crtsh
+              - virustotal
+              - sublist3r
+              - facebook
+              - spyse
+              - bufferover
+              - threatcrowd
+              - virustotalapikey
+              - anubis
+              - urlscan
+              - securitytrails
+              - threatminer
+              - archiveorg
+              - c99
+
+    - custom-resolvers:
+          help: Path to a file (or files) containing a list of DNS IP address. If no specified then 1.5k of built-in valid DNS servers from public-dns.info are used.
+          long: resolvers
+          takes_value: true
+          multiple: true

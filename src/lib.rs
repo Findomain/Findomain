@@ -6,7 +6,8 @@ extern crate lazy_static;
 
 pub mod args;
 pub mod errors;
-mod misc;
+pub mod misc;
+pub mod resolvers;
 pub mod sources;
 pub mod update_checker;
 
@@ -19,14 +20,53 @@ use {
         collections::{HashMap, HashSet},
         fs::{File, OpenOptions},
         io::{BufRead, BufReader, Write},
+        net::{IpAddr, Ipv4Addr},
         thread,
         time::{Duration, Instant},
     },
-    trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver},
+    trust_dns_resolver::{
+        config::{NameServerConfigGroup, ResolverConfig, ResolverOpts},
+        proto::rr::RecordType,
+        Resolver,
+    },
 };
 
 struct Subdomain {
     name: String,
+}
+
+lazy_static! {
+    static ref RESOLVERS: Vec<Ipv4Addr> = {
+        let args = args::get_args();
+        let mut resolver_ips = Vec::new();
+        if args.custom_resolvers {
+            for r in &return_file_targets(&args, args.resolvers.clone()) {
+                match r.parse::<Ipv4Addr>() {
+                    Ok(ip) => resolver_ips.push(ip),
+                    Err(e) => {
+                        eprintln!("Error parsing the {} IP from resolvers file to IP address. Please check and try again. Error: {}\n", r, e);
+                        std::process::exit(1)
+                    }
+                }
+            }
+        } else {
+            for r in args.resolvers {
+                match r.parse::<Ipv4Addr>() {
+                    Ok(ip) => resolver_ips.push(ip),
+                    Err(e) => {
+                        eprintln!("Error parsing the {} IP from resolvers file to IP address. Please check and try again. Error: {}\n", r, e);
+                        std::process::exit(1)
+                    }
+                }
+            }
+        }
+        resolver_ips
+    };
+    static ref OPTS: ResolverOpts = {
+        let mut opts = ResolverOpts::default();
+        opts.timeout = Duration::from_secs(3);
+        opts
+    };
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
@@ -234,7 +274,7 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet<String> {
+pub fn return_file_targets(args: &args::Args, files: Vec<String>) -> HashSet<String> {
     let mut targets: HashSet<String> = HashSet::new();
     files.clone().dedup();
     for f in files {
@@ -315,7 +355,15 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     }
     let mut data = HashMap::new();
     data.par_extend(args.subdomains.par_iter().map(|sub| {
-        let ip = get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only);
+        let ip = get_records(
+            &get_resolver(&RESOLVERS, &OPTS),
+            &format!("{}.", sub),
+            if args.ipv6_only {
+                RecordType::AAAA
+            } else {
+                RecordType::A
+            },
+        );
         if !ip.is_empty() && !args.wilcard_ips.contains(&ip) {
             if args.only_resolved {
                 println!("{}", sub)
@@ -329,45 +377,26 @@ fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
     data
 }
 
-fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
-    if ipv6_only {
-        if let Ok(ip_address) = resolver.ipv6_lookup(&domain) {
-            ip_address
-                .iter()
-                .next()
-                .expect("An error as ocurred getting the IP address.")
-                .to_string()
-        } else {
-            String::new()
-        }
-    } else if let Ok(ip_address) = resolver.ipv4_lookup(&domain) {
-        ip_address
-            .iter()
-            .next()
-            .expect("An error as ocurred getting the IP address.")
-            .to_string()
-    } else {
-        String::new()
-    }
-}
+pub fn get_resolver(resolvers_ips: &[Ipv4Addr], opts: &ResolverOpts) -> Resolver {
+    match Resolver::new(
+        ResolverConfig::from_parts(
+            None,
+            vec![],
+            NameServerConfigGroup::from_ips_clear(
+                &[IpAddr::V4(
+                    resolvers_ips[rand::thread_rng().gen_range(0, resolvers_ips.len())],
+                )],
+                53,
+            ),
+        ),
+        *opts,
+    ) {
+        Ok(resolver) => resolver,
 
-pub fn get_resolver(enable_dot: bool, resolver: String) -> Resolver {
-    let mut opts = ResolverOpts::default();
-    opts.timeout = Duration::from_secs(2);
-    if !enable_dot {
-        if resolver == "cloudflare" {
-            Resolver::new(ResolverConfig::cloudflare(), opts).unwrap()
-        } else if resolver == "system" {
-            Resolver::from_system_conf().unwrap()
-        } else {
-            Resolver::new(ResolverConfig::quad9(), opts).unwrap()
+        Err(e) => {
+            eprintln!("Failed to create the resolver. Error: {}\n", e);
+            std::process::exit(1)
         }
-    } else if resolver == "cloudflare" {
-        Resolver::new(ResolverConfig::cloudflare_tls(), opts).unwrap()
-    } else if resolver == "system" {
-        Resolver::from_system_conf().unwrap()
-    } else {
-        Resolver::new(ResolverConfig::quad9_tls(), opts).unwrap()
     }
 }
 
@@ -581,7 +610,17 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
     }
     generated_wilcards = generated_wilcards
         .par_iter()
-        .map(|sub| get_ip(&args.domain_resolver, &format!("{}.", sub), args.ipv6_only))
+        .map(|sub| {
+            get_records(
+                &get_resolver(&RESOLVERS, &OPTS),
+                &format!("{}.", sub),
+                if args.ipv6_only {
+                    RecordType::AAAA
+                } else {
+                    RecordType::A
+                },
+            )
+        })
         .collect();
     generated_wilcards.retain(|ip| !ip.is_empty());
     if !generated_wilcards.is_empty() && !args.quiet_flag {
@@ -594,4 +633,40 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
         println!("No wilcards detected for {}, nice!\n", &args.target)
     }
     generated_wilcards
+}
+
+fn get_records(resolver: &Resolver, domain: &str, record_type: RecordType) -> String {
+    if let Ok(rdata) = resolver.lookup(&domain, record_type.clone()) {
+        let mut record_data: Vec<String> = Vec::new();
+        if record_type == RecordType::AAAA {
+            record_data = rdata
+                .iter()
+                .filter_map(|rdata| rdata.as_aaaa())
+                .map(|ipv6| ipv6.to_string())
+                .collect();
+        } else if record_type == RecordType::A {
+            record_data = rdata
+                .iter()
+                .filter_map(|rdata| rdata.as_a())
+                .map(|ipv4| ipv4.to_string())
+                .collect();
+        }
+        // else if record_type == RecordType::CNAME {
+        //     record_data = rdata
+        //         .iter()
+        //         .filter_map(|rdata| rdata.as_cname())
+        //         .map(|name| {
+        //             let name = name.to_string();
+        //             name[..name.len() - 1].to_owned()
+        //         })
+        //         .collect();
+        // }
+        record_data
+            .iter()
+            .next()
+            .expect("Failed retrieving records data.")
+            .to_owned()
+    } else {
+        String::new()
+    }
 }
