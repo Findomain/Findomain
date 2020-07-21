@@ -27,9 +27,9 @@ fi
 echo "Building RPi artifact."
 if cross build -q --release --target="$RPI_TARGET"; then
   echo "Windows artifact build: SUCCESS"
-  cp "target/$RPI_TARGET/release/findomain.exe" "target/$RPI_TARGET/release/findomain-rpi"
+  cp "target/$RPI_TARGET/release/findomain" "target/$RPI_TARGET/release/findomain-rpi"
 else
-  echo "Windows artifact build: FAILED"
+  echo "RPi artifact build: FAILED"
 fi
 
 # Aarch64 build
@@ -43,7 +43,7 @@ fi
 
 # Mac OS build
 echo "Building OSX artifact."
-if cross build -q --release --target="$OSX_TARGET"; then
+if CC=o64-clang CXX=o64-clang++ LIBZ_SYS_STATIC=1 cargo build -q --release --target="$OSX_TARGET"; then
   echo "OSX artifact build: SUCCESS"
   cp "target/$OSX_TARGET/release/findomain" "target/$OSX_TARGET/release/findomain-osx"
 else
