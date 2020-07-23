@@ -213,17 +213,19 @@ pub fn return_facebook_token() -> String {
 }
 
 pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut args::Args) -> bool {
-    let subdomain = if subdomain.starts_with("*.") {
-        subdomain.replace("*.", "")
-    } else {
-        subdomain.to_string()
-    };
-
     !subdomain.is_empty()
         && !subdomain.starts_with('.')
         && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
         && subdomain.chars().all(|c| c.is_ascii())
+}
+
+pub fn sanitize_subdomains(subdomain: &str) -> String {
+    if subdomain.starts_with("*.") {
+        subdomain.replace("*.", "").to_lowercase()
+    } else {
+        subdomain.to_string().to_lowercase()
+    }
 }
 
 pub fn check_http_response_code(
