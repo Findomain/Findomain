@@ -281,11 +281,7 @@ pub fn return_file_targets(args: &args::Args, files: Vec<String>) -> HashSet<Str
         match File::open(&f) {
             Ok(file) => {
                 for target in BufReader::new(file).lines().flatten() {
-                    if args.bruteforce {
-                        targets.insert(target);
-                    } else {
-                        targets.insert(misc::sanitize_target_string(target));
-                    }
+                    targets.insert(target);
                 }
             }
             Err(e) => {
