@@ -563,47 +563,43 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 
 # Examples
 
-1. Make a simple search of subdomains and print the info in the screen:
+1. Make a search of subdomains and print the info in the screen:
 
 `findomain -t example.com`
 
-2. Make a search of subdomains and print the info in the screen:
-
-`findomain -t example.com`
-
-3. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com.txt):
+2. Make a search of subdomains and export the data to a output file (the output file name in it case is example.com.txt):
 
 `findomain -t example.com -o`
 
-4. Make a search of subdomains and export the data to a custom output file name:
+3. Make a search of subdomains and export the data to a custom output file name:
 
 `findomain -t example.com -u example.txt`
 
-5. Make a search of only resolvable subdomains:
+4. Make a search of only resolvable subdomains:
 
 `findomain -t example.com -r`
 
-6. Make a search of only resolvable subdomains, exporting the data to a custom output file.
+5. Make a search of only resolvable subdomains, exporting the data to a custom output file.
 
 `findomain -t example.com -r -u example.txt`
 
-7. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
+6. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file):
 
 `findomain -f file_with_domains.txt`
 
-8. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file) and save all the resolved domains into a custom file name:
+7. Search subdomains from a list of domains passed using a file (you need to put a domain in every line into the file) and save all the resolved domains into a custom file name:
 
 `findomain -f file_with_domains.txt -r -u multiple_domains.txt`
 
-9. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring).
+8. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring).
 
 `findomain -t example.com --query-database`
 
-10. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) and save results to a custom filename.
+9. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) and save results to a custom filename.
 
 `findomain -t example.com --query-database -u subdomains.txt`
 
-11. Import subdomains from several files and work with they in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
+10. Import subdomains from several files and work with they in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
 
 `findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
 
