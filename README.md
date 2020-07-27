@@ -599,7 +599,7 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 
 `findomain -t example.com --query-database -u subdomains.txt`
 
-10. Import subdomains from several files and work with they in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
+10. Import subdomains from several files and work with them in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
 
 `findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
 
