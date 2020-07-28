@@ -18,7 +18,7 @@ When you finish your paypment, you will receive an email with the server credent
 
 Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
 
-![Findomain Server Monitoring Methodolofy](images/findomain_server_methodology_final.png)
+![Findomain Server Monitoring Methodolofy](https://findomain.app/wp-content/uploads/2020/05/findo-2-2048x1006.png)
 
 **Demos:**
 
