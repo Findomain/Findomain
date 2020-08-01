@@ -1,3 +1,5 @@
+[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/FindomainApp.svg?logo=twitter)](https://twitter.com/FindomainApp)
 
 [![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
 [![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
@@ -28,9 +30,6 @@ Learn more about the monitoring server following [this link](https://findomain.a
 
 ![Findomain Scan](images/findomain3.png)
 ![Findomain Database](images/findomain4.jpg)
-
-[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
 
 # Findomain
 
