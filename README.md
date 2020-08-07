@@ -1,3 +1,5 @@
+[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/FindomainApp.svg?logo=twitter)](https://twitter.com/FindomainApp)
 
 [![crates.io](https://img.shields.io/crates/v/findomain.svg)](https://crates.io/crates/findomain)
 [![Travis CI Status](https://travis-ci.org/edu4rdshl/findomain.svg?branch=master)](https://travis-ci.org/edu4rdshl/findomain)
@@ -29,9 +31,6 @@ Learn more about the monitoring server following [this link](https://findomain.a
 ![Findomain Scan](images/findomain3.png)
 ![Findomain Database](images/findomain4.jpg)
 
-[![Follow on Twitter](https://img.shields.io/twitter/follow/edu4rdshl.svg?logo=twitter)](https://twitter.com/edu4rdshl)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/sechacklabs.svg?logo=twitter)](https://twitter.com/sechacklabs)
-
 # Findomain
 
 ![Findomain](images/findomain.png)
@@ -52,6 +51,7 @@ The next table offers you the comparison about what is in Plus version that is n
 | [Core features](README.md#features)  | Yes  |Yes|
 | Check subdomains HTTP/S status | Yes  |No|
 | Check subdomains open ports | Yes  |No|
+| Track CNAME for subdomains | Yes | No |
 | Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
 | Support for "light monitoring" mode | Yes  |No|
 | Support for automatic detection/read of default configuration file | Yes  |No|
@@ -124,7 +124,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Subdomain wildcard detection for accurate results. 
 * Support for subdomain discover using bruteforce method.
 * Support for configuration file in TOML, JSON, HJSON, INI or YAML format.
-* Custom DNS IP addresses for fast subdomains resolving, more than 60 per second by default, customizable with the `--threads` option.
+* Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default, adjustable using the `--threads` option.
 
 # Findomain in depth
 
