@@ -225,7 +225,7 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
         }
-    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
+    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| misc::sanitize_subdomains(&sub)).collect();
 
     all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
     all_subdomains
@@ -281,11 +281,7 @@ pub fn return_file_targets(args: &args::Args, files: Vec<String>) -> HashSet<Str
         match File::open(&f) {
             Ok(file) => {
                 for target in BufReader::new(file).lines().flatten() {
-                    if args.bruteforce {
-                        targets.insert(target);
-                    } else {
-                        targets.insert(misc::sanitize_target_string(target));
-                    }
+                    targets.insert(target);
                 }
             }
             Err(e) => {

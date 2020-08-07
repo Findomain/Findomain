@@ -220,6 +220,14 @@ pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut args::A
         && subdomain.chars().all(|c| c.is_ascii())
 }
 
+pub fn sanitize_subdomains(subdomain: &str) -> String {
+    if subdomain.starts_with("*.") {
+        subdomain.replace("*.", "").to_lowercase()
+    } else {
+        subdomain.to_string().to_lowercase()
+    }
+}
+
 pub fn check_http_response_code(
     api_name: &str,
     response: &reqwest::blocking::Response,
