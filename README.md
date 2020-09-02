@@ -111,7 +111,7 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Specific IPv4 or IPv6 query support.
 * Discover subdomains without brute-force, it tool uses Certificate Transparency Logs and APIs.
 * Discover only resolved subdomains.
-* Discover subdomains IP for data analisis.
+* Discover subdomains IP for data analysis.
 * Read target from user argument (-t) or file (-f).
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
