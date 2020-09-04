@@ -24,16 +24,18 @@ Once the bot is created, you will have a long string that is the TOKENID. The me
 
 `Use this token to access the HTTP API:`
 
-It will be used as the `findomain_telegrambot_token` system variable, save it.
+It will be used as the `telegram_bot_token` variable in the config file, save it.
 
 Now, the bot is only the "guy" who will send you the messages. It has to know the chat where to send them. For this reason, got to the search bar of Telegram, and search your bot. Then, start the bot:
 
-`/start`
+`/start` and send a message to your bot.
 
 You can now go to the website https://api.telegram.org/bot[BOT_TOKEN]/getUpdates (replacing [BOT_TOKEN] with the token you received before) and search for your id.
 
 ![Telegram chat id](../images/telegram_chat_id.png)
 
-It will be used as the `findomain_telegrambot_chat_id` system variable, save it.
+It will be used as the `telegram_chat_id` variable in the configuration file, save it.
 
 Now you are ready to use the Telegram webhook.
+
+For configuration file examples, see [this link](https://github.com/Edu4rdSHL/findomain/tree/master/config_examples).
