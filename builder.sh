@@ -1,4 +1,5 @@
 # Findomain releaser
+LINUX_TARGET="x86_64-unknown-linux-musl"
 WIN_TARGET="x86_64-pc-windows-gnu"
 RPI_TARGET="armv7-unknown-linux-gnueabihf"
 AARCH_TARGET="aarch64-unknown-linux-gnu"
@@ -7,9 +8,9 @@ MANPAGE_DIR="./findomain.1"
 
 # Linux build
 echo "Building Linux artifact."
-if cargo build -q --release; then
+if cargo build -q --release --target="$LINUX_TARGET"; then
   echo "Linux artifact build: SUCCESS"
-  cp "target/release/findomain" "target/release/findomain-linux"
+  cp "target/$LINUX_TARGET/release/findomain" "target/$LINUX_TARGET/release/findomain-linux"
 else
   echo "Linux artifact build: FAILED"
 fi
@@ -52,7 +53,7 @@ fi
 
 echo "Creating manpage..."
 if command -v help2man > /dev/null; then
-  if help2man -o "$MANPAGE_DIR" "target/release/findomain"; then
+  if help2man -o "$MANPAGE_DIR" "target/$LINUX_TARGET/release/findomain"; then
     echo "Manpage created sucessfully and saved in $MANPAGE_DIR"
   else
     echo "Error creating manpage."
