@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "2.1.1"
+version = "2.1.2"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2018"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
@@ -8,11 +8,6 @@ repository = "https://github.com/edu4rdshl/findomain"
 license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-opt-level = "z"
 
 [dependencies]
 serde = { version = "1.0.115", features = ["derive"] }
