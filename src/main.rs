@@ -20,7 +20,7 @@ fn run() -> Result<()> {
             std::process::exit(1)
         } else {
             let wordlists = arguments.wordlists.clone();
-            arguments.wordlists_data = return_file_targets(&arguments, wordlists)
+            arguments.wordlists_data = return_file_targets(&arguments, &mut wordlists.clone())
         }
     }
     if !arguments.target.is_empty() {

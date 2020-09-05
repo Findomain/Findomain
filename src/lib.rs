@@ -40,7 +40,7 @@ lazy_static! {
         let args = args::get_args();
         let mut resolver_ips = Vec::new();
         if args.custom_resolvers {
-            for r in &return_file_targets(&args, args.resolvers.clone()) {
+            for r in &return_file_targets(&args, &mut args.resolvers.clone()) {
                 match r.parse::<Ipv4Addr>() {
                     Ok(ip) => resolver_ips.push(ip),
                     Err(e) => {
@@ -274,9 +274,10 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-pub fn return_file_targets(args: &args::Args, files: Vec<String>) -> HashSet<String> {
+pub fn return_file_targets(args: &args::Args, files: &mut Vec<String>) -> HashSet<String> {
     let mut targets: HashSet<String> = HashSet::new();
-    files.clone().dedup();
+    files.sort();
+    files.dedup();
     for f in files {
         match File::open(&f) {
             Ok(file) => {
@@ -297,10 +298,8 @@ pub fn return_file_targets(args: &args::Args, files: Vec<String>) -> HashSet<Str
             }
         }
     }
-    if args.bruteforce {
-        targets.retain(|target| !target.is_empty() && misc::validate_target(target))
-    }
-    targets
+    targets.retain(|target| !target.is_empty());
+    targets.iter().map(|t| t.to_lowercase()).collect()
 }
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
@@ -313,11 +312,11 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
             println!("To use Findomain as resolver, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
             std::process::exit(1)
         } else {
-            args.subdomains = return_file_targets(args, args.files.clone());
+            args.subdomains = return_file_targets(args, &mut args.files.clone());
             manage_subdomains_data(args)?
         }
     } else {
-        for domain in return_file_targets(args, args.files.clone()) {
+        for domain in return_file_targets(args, &mut args.files.clone()) {
             args.target = domain;
             args.file_name = if file_name.is_empty() && !args.with_ip {
                 format!("{}.txt", &args.target)
@@ -469,7 +468,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     if args.with_imported_subdomains {
         let mut imported_subdomains =
-            return_file_targets(args, args.import_subdomains_from.clone());
+            return_file_targets(args, &mut args.import_subdomains_from.clone());
         let base_target = &format!(".{}", args.target);
         imported_subdomains.retain(|target| {
             !target.is_empty() && misc::validate_subdomain(&base_target, &target, args)
