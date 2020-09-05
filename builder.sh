@@ -1,4 +1,5 @@
 # Findomain releaser
+LINUX_TARGET="x86_64-unknown-linux-musl"
 WIN_TARGET="x86_64-pc-windows-gnu"
 RPI_TARGET="armv7-unknown-linux-gnueabihf"
 AARCH_TARGET="aarch64-unknown-linux-gnu"
@@ -7,7 +8,7 @@ MANPAGE_DIR="./findomain.1"
 
 # Linux build
 echo "Building Linux artifact."
-if cargo build -q --release; then
+if cargo build -q --release --target="$LINUX_TARGET"; then
   echo "Linux artifact build: SUCCESS"
   cp "target/release/findomain" "target/release/findomain-linux"
 else
