@@ -10,7 +10,7 @@ MANPAGE_DIR="./findomain.1"
 echo "Building Linux artifact."
 if cargo build -q --release --target="$LINUX_TARGET"; then
   echo "Linux artifact build: SUCCESS"
-  cp "target/release/findomain" "target/release/findomain-linux"
+  cp "target/$LINUX_TARGET/release/findomain" "target/$LINUX_TARGET/release/findomain-linux"
 else
   echo "Linux artifact build: FAILED"
 fi
