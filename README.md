@@ -10,7 +10,7 @@
 
 If you don't want to deal with servers and complex configurations for doing recon, Findomain offers [a dedicated monitoring service hosted in Amazon](https://findomain.app/#Pricing), that allow you to **monitor your target domains with multiple top tools** (OWASP Amass, Sublist3r, Assetfinder and Subfinder) and send alerts to Discord, Slack, Telegram, Email or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. **The only you need to do is configure a file with your email address (if applicable) or/and webhooks/Telegram chat information and put your domains in another file**, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the HTTP websites, Open Ports, Subdomains CNAME and more. All your data is securely saved in a relational database and you can request a dump of your data whenever you want.
 
-When you finish your paypment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
+When you finish your payment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
 
 ## Pricing
 
