@@ -115,10 +115,10 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Read target from user argument (-t) or file (-f).
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
-* Hability to query directly the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) for previous discovered subdomains.
+* Hability to query directly the Findomain database created with [Subdomains Monitoring](docs/INSTALLATION.md#subdomains-monitoring) for previous discovered subdomains.
 * Hability to import and work data discovered by other tools.
 * Quiet mode to run it silently.
-* Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](README.md#build-for-32-bits-or-another-platform) for instructions.
+* Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](docs/INSTALLATION.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 * Possibility to use as subdomain resolver.
 * Subdomain wildcard detection for accurate results. 
@@ -151,7 +151,7 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) how to configure and use it.
 
 APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) how to configure and use it.
 
