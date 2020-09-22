@@ -153,7 +153,7 @@ APIs that we are using at the moment:
 
 APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](README.md#access-tokens-configuration) how to configure and use it.
 
-APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](README.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) how to configure and use it.
 
 **More APIs?**
 
