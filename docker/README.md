@@ -16,6 +16,17 @@ docker run --rm -it -v $(pwd):/opt/findomain findomain -c config.toml -t example
 
 ---
 
+#### Using the image from dockerhub
+
+1. Pull the image
+```
+docker pull edu4rdshl/findomain
+```
+2. Run Findomain
+```
+docker run edu4rdshl/findomain
+```
+
 #### Building the image yourself
 1. Clone the repo
 ```
