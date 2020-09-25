@@ -1,13 +1,34 @@
-# How to execute a findomain in a docker container
+## Basic Usage
+```
+docker run -it findomain -t example.com
+```
 
-1. Build and tag the image.
+Configuration Notes:
+- Pass your config to the container by bind mounting to `/opt/findomain` with the flag `-v`,   
+ie. `-v $(pwd):/opt/findomain`
+- Results saved with `-o` will be saved to `/opt/findomain` inside the container and consequently through the bind mount to your local host. This way the results will persist on your machine even if the container is only temporary.
 
-``$ docker build -f Dockerfile . -t findomain``
 
-2. Run the image.
+## Full Example
+```
+docker run --rm -it -v $(pwd):/opt/findomain findomain -c config.toml -t example.com
+```
 
-``$ docker run -it findomain /bin/bash``
+---
 
-3. Execute
+#### Building the image yourself
+1. Clone the repo
+```
+git clone https://github.com/Findomain/Findomain
+```
 
-``$ findomain``
+2. Build the image
+```
+cd Findomain/docker
+docker build . -t findomain
+```
+
+3. Run it as usual
+```
+docker run -it findomain
+```
