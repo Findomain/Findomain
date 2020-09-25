@@ -1,7 +1,7 @@
-FROM ubuntu:latest
-RUN  apt-get update \
-  && apt-get install -y wget \
-  && rm -rf /var/lib/apt/lists/*
-RUN wget -O /usr/bin/findomain https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
-RUN chmod +x /usr/bin/findomain
-RUN  apt-get remove --autoremove -y wget
+# docker run -it findomain -t example.com
+FROM alpine:latest
+LABEL maintainer="wfnintr@null.net"
+WORKDIR /opt/findomain
+RUN wget -qO /usr/bin/findomain https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux && \
+	chmod +x /usr/bin/findomain
+ENTRYPOINT ["findomain"]
