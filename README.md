@@ -50,17 +50,14 @@ The next table offers you the comparison about what is in Plus version that is n
 | ------------- | ------------- | ------------- |
 | [Core features](README.md#features)  | Yes  |Yes|
 | Check subdomains HTTP/S status | Yes  |No|
-| Check subdomains open ports | Yes  |No|
+| Discover HTML/HTTP data from the hosts | Yes | No |
+| Check subdomains open ports with service and version detection (using Nmap) | Yes  |No|
 | Track CNAME for subdomains | Yes | No |
 | Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
-| Support for "light monitoring" mode | Yes  |No|
 | Support for automatic detection/read of default configuration file | Yes  |No|
 | Save Host, IP, HTTP Status and Open Ports to database  | Yes  |No|
 | Option to exclude sources | Yes  |No|
 | Filter or exclude subdomains containing specific keywords. | Yes  |No|
-| Maximum number of threads 1000 | Yes  |No|
-| Force all targets to be lowercase | Yes  |No|
-| Port scanner  | Yes  |No|
 | Save root domain to database  | Yes  |No|
 | Custom user agent configuration | Yes |No |
 | Rate limit user configuration | Yes | No |
