@@ -10,22 +10,22 @@ keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-su
 readme = "README.md"
 
 [dependencies]
-serde = { version = "1.0.115", features = ["derive"] }
-serde_derive = "1.0.115"
-reqwest = { version = "0.10.8", features = ["blocking", "json"] }
-trust-dns-resolver = { version = "0.19.5", features = ["dns-over-rustls"] }
+serde = { version = "1.0.118", features = ["derive"] }
+serde_derive = "1.0.118"
+reqwest = { version = "0.10.9", features = ["blocking", "json"] }
+trust-dns-resolver = { version = "0.19.6", features = ["dns-over-rustls"] }
 clap = { version = "2.33.3", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.7.3"
-postgres = "0.17.5"
+postgres = "0.18.1"
 failure = "0.1.8"
-rayon = "1.4.0"
-semver = "0.10.0"
-url = "2.1.1"
+rayon = "1.5.0"
+semver = "0.11.0"
+url = "2.2.0"
 config = { version = "0.10.1", features = ["yaml", "json", "toml", "hjson", "ini"] }
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.30", features = ["vendored"] }
+openssl = { version = "0.10.31", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.30", features = ["vendored"] }
+openssl = { version = "0.10.31", features = ["vendored"] }
