@@ -12,7 +12,7 @@ readme = "README.md"
 [dependencies]
 serde = { version = "1.0.118", features = ["derive"] }
 serde_derive = "1.0.118"
-reqwest = { version = "0.10.9", features = ["blocking", "json"] }
+reqwest = { version = "0.10.9", features = ["blocking", "json", "gzip"] }
 trust-dns-resolver = { version = "0.19.6", features = ["dns-over-rustls"] }
 clap = { version = "2.33.3", features = ["yaml"] }
 lazy_static = "1.4.0"
