@@ -9,7 +9,7 @@ use {
 lazy_static! {
     static ref SPECIAL_CHARS: Vec<char> = vec![
         '[', ']', '{', '}', '(', ')', '*', '|', ':', '<', '>', '/', '\\', '%', '&', '¿', '?', '¡',
-        '!', '#', '\'', ' ', ','
+        '!', '#', '\'', ' ', ',', 'ï', '¼'
     ];
 }
 
@@ -18,7 +18,9 @@ pub fn show_searching_msg(api: &str) {
 }
 
 pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
-    if !args.quiet_flag && (args.only_resolved || args.with_ip || args.ipv6_only) {
+    if !args.quiet_flag
+        && (args.only_resolved || args.with_ip || args.ipv6_only || args.http_status)
+    {
         if args.as_resolver {
             println!(
                 "\n{} of {} subdomains were resolved in {} seconds.⏲️",
@@ -33,6 +35,14 @@ pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
                 args.subdomains.len(),
                 args.time_wasted.elapsed().as_secs()
             );
+        } else if args.http_status {
+            println!(
+                    "\n{} of {} subdomains found were checked and have HTTP service running for domain {} 👽 in {} seconds.⏲️",
+                    subdomains_found,
+                    args.subdomains.len(),
+                    args.target,
+                    args.time_wasted.elapsed().as_secs()
+                )
         } else {
             println!(
                 "\n{} of {} subdomains found were resolved for domain {} 👽 in {} seconds.⏲️",
@@ -40,7 +50,7 @@ pub fn show_subdomains_found(subdomains_found: usize, args: &mut args::Args) {
                 args.subdomains.len(),
                 args.target,
                 args.time_wasted.elapsed().as_secs()
-            );
+            )
         }
     } else if !args.quiet_flag {
         println!(
@@ -158,10 +168,7 @@ pub fn sanitize_target_string(target: String) -> String {
 }
 
 pub fn validate_target(target: &str) -> bool {
-    !target.starts_with('.')
-        && target.contains('.')
-        && !target.contains(&SPECIAL_CHARS[..])
-        && target.chars().all(|c| c.is_ascii())
+    !target.starts_with('.') && target.contains('.') && !target.contains(&SPECIAL_CHARS[..])
 }
 
 pub fn works_with_data(args: &mut args::Args) -> Result<()> {
@@ -212,20 +219,25 @@ pub fn return_facebook_token() -> String {
     findomain_fb_tokens[rand::thread_rng().gen_range(0, findomain_fb_tokens.len())].to_string()
 }
 
-pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut args::Args) -> bool {
+pub fn sanitize_subdomain(base_target: &str, subdomain: &str, args: &mut args::Args) -> bool {
     !subdomain.is_empty()
         && !subdomain.starts_with('.')
-        && (subdomain.ends_with(base_target) || subdomain == args.target)
+        && subdomain.ends_with(base_target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
-        && subdomain.chars().all(|c| c.is_ascii())
-}
-
-pub fn sanitize_subdomains(subdomain: &str) -> String {
-    if subdomain.starts_with("*.") {
-        subdomain.replace("*.", "").to_lowercase()
-    } else {
-        subdomain.to_string().to_lowercase()
-    }
+        && if args.filter_by_string.is_empty() {
+            true
+        } else {
+            args.filter_by_string
+                .iter()
+                .any(|key| subdomain.contains(key))
+        }
+        && if args.exclude_by_string.is_empty() {
+            true
+        } else {
+            args.exclude_by_string
+                .iter()
+                .any(|key| !subdomain.contains(key))
+        }
 }
 
 pub fn check_http_response_code(
@@ -267,10 +279,42 @@ pub fn test_database_connection(args: &mut args::Args) {
     }
 }
 
-pub fn return_reqwest_client() -> reqwest::blocking::Client {
+pub fn return_reqwest_client(secs: u64) -> reqwest::blocking::Client {
     reqwest::blocking::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3835.0 Safari/537.36")
-        .timeout(std::time::Duration::from_secs(15))
+        .timeout(std::time::Duration::from_secs(secs))
         .build()
         .unwrap()
+}
+
+pub fn return_matches_vec(matches: &clap::ArgMatches, value: &str) -> Vec<String> {
+    if matches.is_present(value) {
+        matches
+            .values_of(value)
+            .unwrap()
+            .map(str::to_owned)
+            .collect()
+    } else {
+        Vec::new()
+    }
+}
+
+pub fn return_matches_hashset(matches: &clap::ArgMatches, value: &str) -> HashSet<String> {
+    if matches.is_present(value) {
+        matches
+            .values_of(value)
+            .unwrap()
+            .map(str::to_owned)
+            .collect()
+    } else {
+        HashSet::new()
+    }
+}
+
+pub fn null_ip_checker(ip: &str) -> &str {
+    if ip.is_empty() {
+        "NULL"
+    } else {
+        ip
+    }
 }

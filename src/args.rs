@@ -1,17 +1,17 @@
 use {
-    crate::{
-        misc::{eval_resolved_or_ip_present, sanitize_target_string, validate_target},
-        resolvers,
+    crate::misc::{
+        eval_resolved_or_ip_present, return_matches_hashset, return_matches_vec,
+        sanitize_target_string, validate_target,
     },
     clap::{load_yaml, value_t, App},
     std::{
         collections::{HashMap, HashSet},
-        env::current_exe,
         path::Path,
         time::Instant,
     },
 };
 
+#[derive(Clone, Debug)]
 pub struct Args {
     pub target: String,
     pub file_name: String,
@@ -21,17 +21,15 @@ pub struct Args {
     pub telegram_bot_token: String,
     pub telegram_webhook: String,
     pub telegram_chat_id: String,
+    pub resolver: String,
     pub version: String,
-    pub current_executable_path: String,
     pub spyse_access_token: String,
     pub facebook_access_token: String,
     pub virustotal_access_token: String,
     pub securitytrails_access_token: String,
-    pub c99_api_key: String,
     pub threads: usize,
     pub database_checker_counter: usize,
     pub commit_to_db_counter: usize,
-    pub rate_limit: u64,
     pub only_resolved: bool,
     pub with_ip: bool,
     pub with_output: bool,
@@ -48,16 +46,17 @@ pub struct Args {
     pub as_resolver: bool,
     pub bruteforce: bool,
     pub disable_wildcard_check: bool,
-    pub custom_resolvers: bool,
-    pub is_last_target: bool,
+    pub http_status: bool,
+    pub light_monitoring: bool,
     pub files: Vec<String>,
+    pub import_subdomains_from: Vec<String>,
+    pub wordlists: Vec<String>,
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
     pub wilcard_ips: HashSet<String>,
+    pub filter_by_string: HashSet<String>,
+    pub exclude_by_string: HashSet<String>,
     pub excluded_sources: HashSet<String>,
-    pub import_subdomains_from: Vec<String>,
-    pub wordlists: Vec<String>,
-    pub resolvers: Vec<String>,
     pub time_wasted: Instant,
 }
 
@@ -89,15 +88,6 @@ pub fn get_args() -> Args {
         } else {
             String::new()
         },
-        files: if matches.is_present("files") {
-            matches
-                .values_of("files")
-                .unwrap()
-                .map(str::to_owned)
-                .collect()
-        } else {
-            Vec::new()
-        },
         postgres_connection: {
             let database_connection = format!(
                 "postgresql://{}:{}@{}:{}/{}",
@@ -117,6 +107,8 @@ pub fn get_args() -> Args {
         telegram_bot_token: return_value_or_default(&settings, "telegrambot_token", String::new()),
         telegram_webhook: String::new(),
         telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
+        resolver: value_t!(matches, "resolver", String)
+            .unwrap_or_else(|_| "cloudflare".to_string()),
         spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new()),
         facebook_access_token: return_value_or_default(&settings, "fb_token", String::new()),
         virustotal_access_token: return_value_or_default(
@@ -129,20 +121,10 @@ pub fn get_args() -> Args {
             "securitytrails_token",
             String::new(),
         ),
-        c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
-
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
         version: clap::crate_version!().to_string(),
-        current_executable_path: current_exe().unwrap().display().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
-        rate_limit: if matches.is_present("rate-limit") {
-            value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 0)
-        } else {
-            return_value_or_default(&settings, "rate_limit", 0.to_string())
-                .parse::<u64>()
-                .unwrap()
-        },
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),
@@ -163,43 +145,18 @@ pub fn get_args() -> Args {
         as_resolver: matches.is_present("as-resolver"),
         bruteforce: matches.is_present("wordlists"),
         disable_wildcard_check: matches.is_present("no-wildcards"),
-        custom_resolvers: matches.is_present("custom-resolvers"),
-        is_last_target: false,
+        http_status: matches.is_present("http-status"),
+        light_monitoring: matches.is_present("light-monitoring"),
+        files: return_matches_vec(&matches, "files"),
+        import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
+        wordlists: return_matches_vec(&matches, "wordlists"),
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
         wilcard_ips: HashSet::new(),
-        excluded_sources: if matches.is_present("exclude-sources") {
-            return_matches_hashset(&matches, "exclude-sources")
-        } else {
-            return_value_or_default(&settings, "exclude_sources", String::new())
-                .split_whitespace()
-                .map(str::to_owned)
-                .collect()
-        },
-        import_subdomains_from: if matches.is_present("import-subdomains") {
-            matches
-                .values_of("import-subdomains")
-                .unwrap()
-                .map(str::to_owned)
-                .collect()
-        } else {
-            Vec::new()
-        },
-        wordlists: if matches.is_present("wordlists") {
-            matches
-                .values_of("wordlists")
-                .unwrap()
-                .map(str::to_owned)
-                .collect()
-        } else {
-            Vec::new()
-        },
+        filter_by_string: return_matches_hashset(&matches, "string-filter"),
+        exclude_by_string: return_matches_hashset(&matches, "string-exclude"),
+        excluded_sources: return_matches_hashset(&matches, "exclude-sources"),
         time_wasted: Instant::now(),
-        resolvers: if matches.is_present("custom-resolvers") {
-            return_matches_vec(&matches, "custom-resolvers")
-        } else {
-            resolvers::return_ipv4_resolvers()
-        },
     }
 }
 
@@ -217,12 +174,12 @@ fn return_settings(
                     .try_into::<HashMap<String, String>>()
                     .unwrap(),
                 Err(e) => {
-                    eprintln!("Error merging environment variables into settings: {}\n", e);
+                    eprintln!("Error merging environment variables into settings: {}", e);
                     std::process::exit(1)
                 }
             },
             Err(e) => {
-                eprintln!("Error reading config file: {}\n", e);
+                eprintln!("Error reading config file: {}", e);
                 std::process::exit(1)
             }
         }
@@ -239,12 +196,12 @@ fn return_settings(
                     .try_into::<HashMap<String, String>>()
                     .unwrap(),
                 Err(e) => {
-                    eprintln!("Error merging environment variables into settings: {}\n", e);
+                    eprintln!("Error merging environment variables into settings: {}", e);
                     std::process::exit(1)
                 }
             },
             Err(e) => {
-                eprintln!("Error reading config file: {}\n", e);
+                eprintln!("Error reading config file: {}", e);
                 std::process::exit(1)
             }
         }
@@ -255,7 +212,7 @@ fn return_settings(
                 .try_into::<HashMap<String, String>>()
                 .unwrap(),
             Err(e) => {
-                eprintln!("Error merging environment variables into settings: {}\n", e);
+                eprintln!("Error merging environment variables into settings: {}", e);
                 std::process::exit(1)
             }
         }
@@ -271,28 +228,4 @@ fn return_value_or_default(
         .get(value)
         .unwrap_or_else(|| &default_value)
         .to_string()
-}
-
-fn return_matches_hashset(matches: &clap::ArgMatches, value: &str) -> HashSet<String> {
-    if matches.is_present(value) {
-        matches
-            .values_of(value)
-            .unwrap()
-            .map(str::to_owned)
-            .collect()
-    } else {
-        HashSet::new()
-    }
-}
-
-pub fn return_matches_vec(matches: &clap::ArgMatches, value: &str) -> Vec<String> {
-    if matches.is_present(value) {
-        matches
-            .values_of(value)
-            .unwrap()
-            .map(str::to_owned)
-            .collect()
-    } else {
-        Vec::new()
-    }
 }

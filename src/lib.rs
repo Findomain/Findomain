@@ -6,8 +6,7 @@ extern crate lazy_static;
 
 pub mod args;
 pub mod errors;
-pub mod misc;
-pub mod resolvers;
+mod misc;
 pub mod sources;
 pub mod update_checker;
 
@@ -20,57 +19,23 @@ use {
         collections::{HashMap, HashSet},
         fs::{File, OpenOptions},
         io::{BufRead, BufReader, Write},
-        iter::FromIterator,
-        net::{IpAddr, Ipv4Addr},
         thread,
         time::{Duration, Instant},
     },
-    trust_dns_resolver::{
-        config::{NameServerConfigGroup, ResolverConfig, ResolverOpts},
-        proto::rr::RecordType,
-        Resolver,
-    },
+    trust_dns_resolver::{config::ResolverConfig, config::ResolverOpts, Resolver},
 };
 
 struct Subdomain {
     name: String,
 }
 
-lazy_static! {
-    static ref RESOLVERS: Vec<Ipv4Addr> = {
-        let args = args::get_args();
-        let mut resolver_ips = Vec::new();
-        if args.custom_resolvers {
-            for r in &return_file_targets(&args, args.resolvers.clone()) {
-                match r.parse::<Ipv4Addr>() {
-                    Ok(ip) => resolver_ips.push(ip),
-                    Err(e) => {
-                        eprintln!("Error parsing the {} IP from resolvers file to IP address. Please check and try again. Error: {}\n", r, e);
-                        std::process::exit(1)
-                    }
-                }
-            }
-        } else {
-            for r in args.resolvers {
-                match r.parse::<Ipv4Addr>() {
-                    Ok(ip) => resolver_ips.push(ip),
-                    Err(e) => {
-                        eprintln!("Error parsing the {} IP from resolvers file to IP address. Please check and try again. Error: {}\n", r, e);
-                        std::process::exit(1)
-                    }
-                }
-            }
-        }
-        resolver_ips
-    };
-    static ref OPTS: ResolverOpts = {
-        let mut opts = ResolverOpts::default();
-        opts.timeout = Duration::from_secs(3);
-        opts
-    };
+struct ResolvData {
+    ip: String,
+    http_status: String,
 }
 
 pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
+    args.target = args.target.to_lowercase();
     if args.monitoring_flag && args.database_checker_counter == 0 {
         misc::test_database_connection(args);
         args.database_checker_counter += 1
@@ -78,22 +43,6 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
     if !args.quiet_flag {
         println!("\nTarget ==> {}\n", &args.target)
     }
-
-    // Test for new or modified sources.
-    // let subdomains = sources::get_spyse_subdomains(
-    //     &format!(
-    //         "https://api.spyse.com/v3/data/domain/subdomain?limit=100&domain={}",
-    //         &args.target
-    //     ),
-    //     "",
-    //     false,
-    // )
-    // .unwrap();
-    // for sub in subdomains {
-    //     println!("{}", sub)
-    // }
-    // std::process::exit(1);
-
     if args.query_database {
         query_findomain_database(args)?
     } else if args.bruteforce {
@@ -105,7 +54,7 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         manage_subdomains_data(args)?
     } else {
         if args.monitoring_flag {
-            check_monitoring_parameters(args)?;
+            check_monitoring_parameters(args)?
         }
         args.subdomains = search_subdomains(args);
         if args.subdomains.is_empty() {
@@ -116,18 +65,6 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         } else {
             misc::works_with_data(args)?
         }
-    }
-    if !args.quiet_flag
-        && args.rate_limit != 0
-        && args.from_file_flag
-        && !args.is_last_target
-        && !args.monitoring_flag
-    {
-        println!(
-            "Rate limit set to {} seconds, waiting to start next enumeration.",
-            args.rate_limit
-        );
-        thread::sleep(Duration::from_secs(args.rate_limit))
     }
     Ok(())
 }
@@ -151,15 +88,15 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         &args.target
     );
     let url_api_spyse = format!(
-        "https://api.spyse.com/v3/data/domain/subdomain?limit=100&domain={}",
-        &args.target
+        "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
+        &args.target, &args.spyse_access_token
     );
     let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
     );
-    let url_api_anubisdb = format!("https://jldc.me/anubis/subdomains/{}", &args.target);
+    let url_api_anubisdb = format!("https://jonlu.ca/anubis/subdomains/{}", &args.target);
     let url_api_urlscan = format!(
         "https://urlscan.io/api/v1/search/?q=domain:{}",
         &args.target
@@ -168,7 +105,6 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         "https://api.threatminer.org/v2/domain.php?q={}&api=True&rt=5",
         &args.target
     );
-    let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
         if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, quiet_flag)) },
@@ -193,13 +129,14 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
                 &args.facebook_access_token);
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
-        if args.excluded_sources.contains("spyse") || args.spyse_access_token.is_empty() { thread::spawn(|| None) }
-        else { let spyse_api_token = args.spyse_access_token.clone(); thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, &spyse_api_token, quiet_flag)) },
+        if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
+        else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
         if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
         if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)) },
-        if args.excluded_sources.contains("virustotalapikey") || args.virustotal_access_token.is_empty() {
+        if args.excluded_sources.contains("virustotalapikey") { thread::spawn(|| None) }
+        else if args.virustotal_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_virustotal_apikey = format!(
@@ -214,7 +151,8 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
         else { thread::spawn(move || sources::get_anubisdb_subdomains(&url_api_anubisdb, quiet_flag)) },
         if args.excluded_sources.contains("urlscan") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_urlscan_subdomains(&url_api_urlscan, quiet_flag)) },
-        if args.excluded_sources.contains("securitytrails") || args.securitytrails_access_token.is_empty() {
+        if args.excluded_sources.contains("securitytrails") { thread::spawn(|| None) }
+        else if args.securitytrails_access_token.is_empty() {
             thread::spawn(|| None)
         } else {
             let url_api_securitytrails = format!(
@@ -225,22 +163,9 @@ fn search_subdomains(args: &mut args::Args) -> HashSet<String> {
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
         },
         if args.excluded_sources.contains("threatminer") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag))},
-        if args.excluded_sources.contains("archiveorg") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag))},
-        if args.excluded_sources.contains("c99") || args.c99_api_key.is_empty() { thread::spawn(|| None) }
-        else {
-            let url_api_c99 = format!(
-                "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
-                &args.c99_api_key, &args.target
-                );
-            thread::spawn(move || {
-                sources::get_c99_subdomains(&url_api_c99, quiet_flag)
-            })
-        }
-    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| misc::sanitize_subdomains(&sub)).collect();
-
-    all_subdomains.retain(|sub| misc::validate_subdomain(&base_target, &sub, args));
+        else { thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag)) },
+    ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().collect();
+    all_subdomains.retain(|sub| misc::sanitize_subdomain(&base_target, &sub, args));
     all_subdomains
 }
 
@@ -256,22 +181,44 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
         args.wilcard_ips = detect_wildcard(args);
     }
     let mut subdomains_resolved = 0;
-    if args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
-        if args.only_resolved && !args.with_ip && !args.ipv6_only {
+    if args.with_output
+        && (args.only_resolved || args.with_ip || args.ipv6_only || args.http_status)
+    {
+        if args.only_resolved && !args.with_ip && !args.ipv6_only && !args.http_status {
             for (subdomain, _) in async_resolver(args) {
                 write_to_file(subdomain, &file_name)?;
                 subdomains_resolved += 1
             }
-        } else if (args.with_ip || args.ipv6_only) && !args.only_resolved {
-            for (subdomain, ip) in async_resolver(args) {
-                write_to_file(&format!("{},{}", subdomain, ip), &file_name)?;
+        } else if (args.with_ip || args.ipv6_only) && !args.only_resolved && !args.http_status {
+            for (subdomain, resolv_data) in async_resolver(args) {
+                write_to_file(&format!("{},{}", subdomain, resolv_data.ip), &file_name)?;
+                subdomains_resolved += 1
+            }
+        } else if args.http_status && (!args.only_resolved && !args.with_ip && !args.ipv6_only) {
+            for (subdomain, _) in async_resolver(args) {
+                write_to_file(&format!("http://{}", subdomain), &file_name)?;
+                subdomains_resolved += 1
+            }
+        } else if args.http_status && (args.only_resolved || args.with_ip || args.ipv6_only) {
+            for (subdomain, resolv_data) in async_resolver(args) {
+                write_to_file(
+                    &format!(
+                        "HOST: {},IP: {},HTTP/S: {}",
+                        subdomain,
+                        misc::null_ip_checker(&resolv_data.ip),
+                        resolv_data.http_status
+                    ),
+                    &file_name,
+                )?;
                 subdomains_resolved += 1
             }
         }
         misc::show_subdomains_found(subdomains_resolved, args)
-    } else if !args.with_output && (args.only_resolved || args.with_ip || args.ipv6_only) {
+    } else if !args.with_output
+        && (args.only_resolved || args.with_ip || args.ipv6_only || args.http_status)
+    {
         misc::show_subdomains_found(async_resolver(args).len(), args)
-    } else if !args.only_resolved && !args.with_ip && args.with_output {
+    } else if !args.only_resolved && !args.with_ip && !args.http_status && args.with_output {
         for subdomain in &args.subdomains {
             println!("{}", subdomain);
             write_to_file(subdomain, &file_name)?
@@ -287,15 +234,18 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-pub fn return_file_targets(args: &args::Args, mut files: Vec<String>) -> Vec<String> {
-    let mut targets: Vec<String> = Vec::new();
-    files.sort();
-    files.dedup();
+pub fn return_file_targets(args: &mut args::Args, files: Vec<String>) -> HashSet<String> {
+    let mut targets: HashSet<String> = HashSet::new();
+    files.clone().dedup();
     for f in files {
         match File::open(&f) {
             Ok(file) => {
                 for target in BufReader::new(file).lines().flatten() {
-                    targets.push(target);
+                    if args.bruteforce || args.as_resolver {
+                        targets.insert(target);
+                    } else {
+                        targets.insert(misc::sanitize_target_string(target));
+                    }
                 }
             }
             Err(e) => {
@@ -311,10 +261,16 @@ pub fn return_file_targets(args: &args::Args, mut files: Vec<String>) -> Vec<Str
             }
         }
     }
-    targets.sort();
-    targets.dedup();
-    targets.retain(|target| !target.is_empty());
-    targets.iter().map(|t| t.to_lowercase()).collect()
+    if args.bruteforce {
+    } else if args.with_imported_subdomains {
+        let base_target = &format!(".{}", args.target);
+        targets.retain(|target| {
+            !target.is_empty() && misc::sanitize_subdomain(&base_target, &target, args)
+        })
+    } else {
+        targets.retain(|target| !target.is_empty() && misc::validate_target(target))
+    }
+    targets
 }
 
 pub fn read_from_file(args: &mut args::Args) -> Result<()> {
@@ -327,16 +283,11 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
             println!("To use Findomain as resolver, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
             std::process::exit(1)
         } else {
-            args.subdomains = HashSet::from_iter(return_file_targets(args, args.files.clone()));
+            args.subdomains = return_file_targets(args, args.files.clone());
             manage_subdomains_data(args)?
         }
     } else {
-        let file_targets = return_file_targets(args, args.files.clone());
-        let last_target = file_targets.last().unwrap().to_string();
-        for domain in file_targets {
-            if domain == last_target {
-                args.is_last_target = true
-            }
+        for domain in return_file_targets(args, args.files.clone()) {
             args.target = domain;
             args.file_name = if file_name.is_empty() && !args.with_ip {
                 format!("{}.txt", &args.target)
@@ -361,70 +312,176 @@ fn write_to_file(data: &str, file_name: &str) -> Result<()> {
     Ok(())
 }
 
-fn async_resolver(args: &mut args::Args) -> HashMap<&String, String> {
+fn async_resolver(args: &mut args::Args) -> HashMap<&String, ResolvData> {
     if !args.quiet_flag {
         println!(
             "Performing asynchronous resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
             args.subdomains.len(), args.threads
         )
     }
-    let mut data = HashMap::new();
-    data.par_extend(args.subdomains.par_iter().map(|sub| {
-        let ip = get_records(
-            &get_resolver(&RESOLVERS, &OPTS),
-            &format!("{}.", sub),
-            if args.ipv6_only {
-                RecordType::AAAA
-            } else {
-                RecordType::A
-            },
-        );
-        if !ip.is_empty() && !args.wilcard_ips.contains(&ip) {
-            if args.only_resolved {
-                println!("{}", sub)
-            } else {
-                println!("{},{}", sub, ip)
-            }
-        }
-        (sub, ip)
-    }));
-    data.retain(|_, ip| !ip.is_empty() && !args.wilcard_ips.contains(ip));
-    data
-}
-
-pub fn get_resolver(resolvers_ips: &[Ipv4Addr], opts: &ResolverOpts) -> Resolver {
-    match Resolver::new(
-        ResolverConfig::from_parts(
-            None,
-            vec![],
-            NameServerConfigGroup::from_ips_clear(
-                &[IpAddr::V4(
-                    resolvers_ips[rand::thread_rng().gen_range(0, resolvers_ips.len())],
-                )],
-                53,
-            ),
-        ),
-        *opts,
-    ) {
-        Ok(resolver) => resolver,
-
-        Err(e) => {
-            eprintln!("Failed to create the resolver. Error: {}\n", e);
-            std::process::exit(1)
-        }
+    if (args.only_resolved || args.with_ip || args.ipv6_only) && !args.http_status {
+        paralell_subdomain_resolution(args)
+    } else if args.http_status && (!args.only_resolved && !args.with_ip && !args.ipv6_only) {
+        paralell_http_status_check(args)
+    } else if (args.only_resolved || args.with_ip || args.ipv6_only) && args.http_status {
+        paralell_subdomain_all(args, false)
+    } else {
+        HashMap::new()
     }
 }
 
-fn commit_to_db(mut conn: postgres::Client, new_subdomains: &HashSet<String>) -> Result<()> {
+fn paralell_subdomain_resolution(args: &mut args::Args) -> HashMap<&String, ResolvData> {
+    let domain_resolver = get_resolver(args.enable_dot, args.resolver.clone());
+    let mut data = HashMap::new();
+    data.par_extend(args.subdomains.par_iter().map(|sub| {
+        let resolv_data = ResolvData {
+            ip: get_ip(&domain_resolver, &format!("{}.", sub), args.ipv6_only),
+            http_status: String::new(),
+        };
+        if !resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip) {
+            if args.only_resolved {
+                println!("{}", sub)
+            } else {
+                println!("{},{}", sub, resolv_data.ip)
+            }
+        }
+        (sub, resolv_data)
+    }));
+    data.retain(|_, resolv_data| {
+        !resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip)
+    });
+    data
+}
+
+fn paralell_http_status_check(args: &mut args::Args) -> HashMap<&String, ResolvData> {
+    let mut data = HashMap::new();
+    let client = misc::return_reqwest_client(3);
+    data.par_extend(args.subdomains.par_iter().map(|sub| {
+        let resolv_data = ResolvData {
+            ip: String::new(),
+            http_status: {
+                if client.get(&format!("https://{}", sub)).send().is_ok()
+                    || client.get(&format!("http://{}", sub)).send().is_ok()
+                {
+                    String::from("OK")
+                } else {
+                    String::new()
+                }
+            },
+        };
+        if !resolv_data.http_status.is_empty() {
+            println!("http://{}", sub)
+        }
+        (sub, resolv_data)
+    }));
+    data.retain(|_, resolv_data| !resolv_data.http_status.is_empty());
+    data
+}
+
+fn paralell_subdomain_all(args: &mut args::Args, return_all: bool) -> HashMap<&String, ResolvData> {
+    let domain_resolver = get_resolver(args.enable_dot, args.resolver.clone());
+    let client = misc::return_reqwest_client(3);
+    let mut data = HashMap::new();
+    data.par_extend(args.subdomains.par_iter().map(|sub| {
+        let resolv_data = ResolvData {
+            ip: get_ip(&domain_resolver, &format!("{}.", sub), args.ipv6_only),
+            http_status: {
+                if client.get(&format!("https://{}", sub)).send().is_ok()
+                    || client.get(&format!("http://{}", sub)).send().is_ok()
+                {
+                    String::from("ACTIVE")
+                } else {
+                    String::from("INACTIVE")
+                }
+            },
+        };
+        if !resolv_data.ip.is_empty()
+            && !args.wilcard_ips.contains(&resolv_data.ip)
+            && !args.monitoring_flag
+        {
+            println!(
+                "HOST: {},IP: {},HTTP/S: {}",
+                sub,
+                misc::null_ip_checker(&resolv_data.ip),
+                resolv_data.http_status
+            )
+        }
+        (sub, resolv_data)
+    }));
+    if !return_all {
+        data.retain(|_, resolv_data| {
+            !resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip)
+        })
+    }
+    data
+}
+
+fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
+    if ipv6_only {
+        if let Ok(ip_address) = resolver.ipv6_lookup(domain) {
+            ip_address
+                .iter()
+                .next()
+                .expect("An error as ocurred getting the IP address.")
+                .to_string()
+        } else {
+            String::new()
+        }
+    } else if let Ok(ip_address) = resolver.ipv4_lookup(domain) {
+        ip_address
+            .iter()
+            .next()
+            .expect("An error as ocurred getting the IP address.")
+            .to_string()
+    } else {
+        String::new()
+    }
+}
+
+pub fn get_resolver(enable_dot: bool, resolver: String) -> Resolver {
+    let mut opts = ResolverOpts::default();
+    opts.timeout = Duration::from_secs(2);
+    if !enable_dot {
+        if resolver == "cloudflare" {
+            Resolver::new(ResolverConfig::cloudflare(), opts).unwrap()
+        } else if resolver == "system" {
+            Resolver::from_system_conf().unwrap()
+        } else {
+            Resolver::new(ResolverConfig::quad9(), opts).unwrap()
+        }
+    } else if resolver == "cloudflare" {
+        Resolver::new(ResolverConfig::cloudflare_tls(), opts).unwrap()
+    } else if resolver == "system" {
+        Resolver::from_system_conf().unwrap()
+    } else {
+        Resolver::new(ResolverConfig::quad9_tls(), opts).unwrap()
+    }
+}
+
+fn commit_to_db(
+    mut conn: postgres::Client,
+    subdomains_data: &HashMap<&String, ResolvData>,
+) -> Result<()> {
     let mut prepared_transaction = conn.transaction()?;
-    for subdomain in new_subdomains {
-        prepared_transaction.execute("INSERT INTO subdomains (name) VALUES ($1)", &[&subdomain])?;
+    for (subdomain, resolv_data) in subdomains_data {
+        prepared_transaction.execute(
+            "INSERT INTO subdomains (name, ip, http_status) VALUES ($1, $2, $3)",
+            &[
+                &subdomain,
+                &misc::null_ip_checker(&resolv_data.ip),
+                &resolv_data.http_status,
+            ],
+        )?;
     }
     prepared_transaction.commit()?;
     Ok(())
 }
 
-fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>) -> Result<()> {
+fn push_data_to_webhooks(
+    args: &mut args::Args,
+    new_subdomains: &HashSet<String>,
+    subdomains_data: HashMap<&String, ResolvData>,
+) -> Result<()> {
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
     let mut telegram_parameters = HashMap::new();
@@ -458,7 +515,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 
     for (webhook, webhooks_payload) in webhooks_data {
         if !webhook.is_empty() {
-            let response = misc::return_reqwest_client()
+            let response = misc::return_reqwest_client(15)
                 .post(webhook)
                 .json(&webhooks_payload)
                 .send()?;
@@ -467,13 +524,13 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
                     && !new_subdomains.is_empty()
                     && commit_to_db(
                         Client::connect(&args.postgres_connection, NoTls)?,
-                        &new_subdomains,
+                        &subdomains_data,
                     )
                     .is_ok()
                 {
                     args.commit_to_db_counter += 1
                 }
-            } else if !args.quiet_flag {
+            } else {
                 eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
                     webhook, response.status()
@@ -486,13 +543,10 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 }
 
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
+    let mut new_subdomains = HashSet::new();
+    let mut resolv_data = HashMap::new();
     if args.with_imported_subdomains {
-        let mut imported_subdomains =
-            return_file_targets(args, args.import_subdomains_from.clone());
-        let base_target = &format!(".{}", args.target);
-        imported_subdomains.retain(|target| {
-            !target.is_empty() && misc::validate_subdomain(&base_target, &target, args)
-        });
+        let imported_subdomains = return_file_targets(args, args.import_subdomains_from.clone());
         for subdomain in imported_subdomains {
             args.subdomains.insert(subdomain);
         }
@@ -502,21 +556,13 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
                    name            TEXT NOT NULL UNIQUE,
+                   ip              TEXT,
+                   http_status     TEXT,
+                   open_ports      TEXT,
                    timestamp       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
               )",
         &[],
     )?;
-
-    // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
-    if connection
-        .execute(
-            "ALTER TABLE subdomains ADD COLUMN timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP",
-            &[],
-        )
-        .is_ok()
-    {
-        connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
-    }
 
     let statement: &str = &format!(
         "SELECT name FROM subdomains WHERE name LIKE '%{}'",
@@ -534,11 +580,48 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
         })
         .collect();
 
-    let new_subdomains: HashSet<String> = args
-        .subdomains
-        .difference(&existing_subdomains)
-        .map(|sub| sub.to_string())
-        .collect();
+    args.subdomains = {
+        let newsubs: HashSet<String> = args
+            .subdomains
+            .difference(&existing_subdomains)
+            .map(|sub| sub.to_string())
+            .collect();
+        if !newsubs.is_empty() {
+            newsubs
+        } else {
+            HashSet::new()
+        }
+    };
+
+    let mut sargs = args.clone();
+    let total_subdomains = args.subdomains.clone();
+    if !args.light_monitoring {
+        resolv_data = paralell_subdomain_all(&mut sargs, true);
+        for (sub, resolv_data) in &resolv_data {
+            new_subdomains.insert(format!(
+                "HOST: {},IP: {},HTTP/S: {}",
+                sub,
+                misc::null_ip_checker(&resolv_data.ip),
+                resolv_data.http_status
+            ));
+        }
+    } else {
+        for sub in &total_subdomains {
+            resolv_data.insert(
+                &sub,
+                ResolvData {
+                    ip: "NOT CHECKED".to_string(),
+                    http_status: "NOT CHECKED".to_string(),
+                },
+            );
+        }
+        for (sub, resolv_data) in &resolv_data {
+            new_subdomains.insert(format!(
+                "HOST: {},IP: {},HTTP/S: {}",
+                sub, resolv_data.ip, resolv_data.http_status,
+            ));
+        }
+    }
 
     if args.with_output && !new_subdomains.is_empty() {
         let file_name = args.file_name.replace(
@@ -556,18 +639,10 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
 
     if !args.enable_empty_push {
         if !new_subdomains.is_empty() {
-            push_data_to_webhooks(args, &new_subdomains)?
+            push_data_to_webhooks(args, &new_subdomains, resolv_data)?
         }
     } else {
-        push_data_to_webhooks(args, &new_subdomains)?
-    }
-
-    if !args.quiet_flag && args.rate_limit != 0 && args.from_file_flag && !args.is_last_target {
-        println!(
-            "Rate limit set to {} seconds, waiting to start next enumeration.",
-            args.rate_limit
-        );
-        thread::sleep(Duration::from_secs(args.rate_limit))
+        push_data_to_webhooks(args, &new_subdomains, resolv_data)?
     }
 
     Ok(())
@@ -585,21 +660,13 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
                    name            TEXT NOT NULL UNIQUE,
+                   ip              TEXT,
+                   http_status     TEXT,
+                   open_ports      TEXT,
                    timestamp       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
               )",
         &[],
     )?;
-
-    // Update existing/old PostgreSQL table schema to match new scheme, will be removed later.
-    if connection
-        .execute(
-            "ALTER TABLE subdomains ADD COLUMN timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP",
-            &[],
-        )
-        .is_ok()
-    {
-        connection.execute("UPDATE subdomains SET timestamp = CURRENT_TIMESTAMP", &[])?;
-    }
 
     let statement: &str = &format!(
         "SELECT name FROM subdomains WHERE name LIKE '%{}'",
@@ -620,6 +687,7 @@ fn query_findomain_database(args: &mut args::Args) -> Result<()> {
 }
 
 fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
+    let domain_resolver = get_resolver(args.enable_dot, args.resolver.clone());
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target)
     }
@@ -633,17 +701,7 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
     }
     generated_wilcards = generated_wilcards
         .par_iter()
-        .map(|sub| {
-            get_records(
-                &get_resolver(&RESOLVERS, &OPTS),
-                &format!("{}.", sub),
-                if args.ipv6_only {
-                    RecordType::AAAA
-                } else {
-                    RecordType::A
-                },
-            )
-        })
+        .map(|sub| get_ip(&domain_resolver, &format!("{}.", sub), args.ipv6_only))
         .collect();
     generated_wilcards.retain(|ip| !ip.is_empty());
     if !generated_wilcards.is_empty() && !args.quiet_flag {
@@ -656,40 +714,4 @@ fn detect_wildcard(args: &mut args::Args) -> HashSet<String> {
         println!("No wilcards detected for {}, nice!\n", &args.target)
     }
     generated_wilcards
-}
-
-fn get_records(resolver: &Resolver, domain: &str, record_type: RecordType) -> String {
-    if let Ok(rdata) = resolver.lookup(&domain, record_type) {
-        let mut record_data: Vec<String> = Vec::new();
-        if record_type == RecordType::AAAA {
-            record_data = rdata
-                .iter()
-                .filter_map(|rdata| rdata.as_aaaa())
-                .map(|ipv6| ipv6.to_string())
-                .collect();
-        } else if record_type == RecordType::A {
-            record_data = rdata
-                .iter()
-                .filter_map(|rdata| rdata.as_a())
-                .map(|ipv4| ipv4.to_string())
-                .collect();
-        }
-        // else if record_type == RecordType::CNAME {
-        //     record_data = rdata
-        //         .iter()
-        //         .filter_map(|rdata| rdata.as_cname())
-        //         .map(|name| {
-        //             let name = name.to_string();
-        //             name[..name.len() - 1].to_owned()
-        //         })
-        //         .collect();
-        // }
-        record_data
-            .iter()
-            .next()
-            .expect("Failed retrieving records data.")
-            .to_owned()
-    } else {
-        String::new()
-    }
 }

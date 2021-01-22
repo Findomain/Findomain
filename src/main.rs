@@ -1,17 +1,25 @@
-use {
-    findomain::{
-        args, errors::*, get_subdomains, read_from_file, return_file_targets, update_checker,
-    },
-    std::{collections::HashSet, iter::FromIterator},
+use findomain::{
+    args, errors::*, get_subdomains, read_from_file, return_file_targets, update_checker,
 };
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();
+    if !arguments.filter_by_string.is_empty()
+        && !arguments.exclude_by_string.is_empty()
+        && arguments
+            .filter_by_string
+            .difference(&arguments.exclude_by_string)
+            .next()
+            .is_none()
+    {
+        eprintln!("Wait, you are filtering and excluding exactly the same keywords? Please check and try again. \nFiltering keywords: {:?} \nExcluding keywords: {:?}", arguments.filter_by_string, arguments.exclude_by_string);
+        std::process::exit(1)
+    }
     if arguments.check_updates {
         update_checker::main(&mut arguments)?
     }
-    if arguments.threads > 500 {
-        arguments.threads = 500
+    if arguments.threads > 1000 {
+        arguments.threads = 1000
     }
     rayon::ThreadPoolBuilder::new()
         .num_threads(arguments.threads)
@@ -23,8 +31,7 @@ fn run() -> Result<()> {
             std::process::exit(1)
         } else {
             let wordlists = arguments.wordlists.clone();
-            arguments.wordlists_data =
-                HashSet::from_iter(return_file_targets(&arguments, wordlists.clone()))
+            arguments.wordlists_data = return_file_targets(&mut arguments, wordlists)
         }
     }
     if !arguments.target.is_empty() {

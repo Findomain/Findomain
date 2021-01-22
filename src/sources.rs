@@ -1,10 +1,8 @@
 use {
     crate::{errors::*, misc},
     postgres::NoTls,
-    reqwest::header,
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
-    url::Url,
 };
 
 trait IntoSubdomains {
@@ -70,20 +68,17 @@ impl IntoSubdomains for ResponseDataFacebook {
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsSpyse {
-    name: String,
-}
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct ItemsSpyse {
-    items: Vec<SubdomainsSpyse>,
-}
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct RootSpyseData {
-    data: ItemsSpyse,
+    domain: String,
 }
 
-impl IntoSubdomains for RootSpyseData {
+#[derive(Deserialize, Eq, PartialEq)]
+struct ResponseDataSpyse {
+    records: HashSet<SubdomainsSpyse>,
+}
+
+impl IntoSubdomains for ResponseDataSpyse {
     fn into_subdomains(self) -> HashSet<String> {
-        self.data.items.into_iter().map(|sub| sub.name).collect()
+        self.records.into_iter().map(|sub| sub.domain).collect()
     }
 }
 
@@ -166,26 +161,8 @@ impl IntoSubdomains for SubdomainsThreatminer {
     }
 }
 
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct SubdomainsC99 {
-    subdomain: String,
-}
-#[derive(Deserialize, Eq, PartialEq)]
-struct ResponseDataC99 {
-    subdomains: HashSet<SubdomainsC99>,
-}
-
-impl IntoSubdomains for ResponseDataC99 {
-    fn into_subdomains(self) -> HashSet<String> {
-        self.subdomains
-            .into_iter()
-            .map(|sub| sub.subdomain)
-            .collect()
-    }
-}
-
 lazy_static! {
-    static ref CLIENT: reqwest::blocking::Client = misc::return_reqwest_client();
+    static ref CLIENT: reqwest::blocking::Client = misc::return_reqwest_client(15);
 }
 
 fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
@@ -313,40 +290,6 @@ pub fn get_securitytrails_subdomains(
     }
 }
 
-pub fn get_spyse_subdomains(
-    url_api_spyse: &str,
-    spyse_token: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("Spyse")
-    }
-    match CLIENT
-        .get(url_api_spyse)
-        .header(header::ACCEPT, "application/json")
-        .header(header::AUTHORIZATION, &format!("Bearer {}", spyse_token))
-        .send()
-    {
-        Ok(data) => {
-            if misc::check_http_response_code("Spyse", &data, quiet_flag) {
-                match data.json::<RootSpyseData>() {
-                    Ok(json) => Some(json.into_subdomains()),
-                    Err(e) => {
-                        check_json_errors(e, "Spyse", quiet_flag);
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        }
-        Err(e) => {
-            check_request_errors(e, "Spyse", quiet_flag);
-            None
-        }
-    }
-}
-
 pub fn get_crtsh_db_subdomains(
     crtsh_db_query: &str,
     url_api_crtsh: &str,
@@ -427,6 +370,13 @@ pub fn get_facebook_subdomains(url_api_fb: &str, quiet_flag: bool) -> Option<Has
     get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook", quiet_flag)
 }
 
+pub fn get_spyse_subdomains(url_api_spyse: &str, quiet_flag: bool) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("Spyse")
+    }
+    get_from_http_api::<ResponseDataSpyse>(url_api_spyse, "Spyse", quiet_flag)
+}
+
 pub fn get_anubisdb_subdomains(
     url_api_anubisdb: &str,
     quiet_flag: bool,
@@ -486,55 +436,4 @@ pub fn get_threatminer_subdomains(
         misc::show_searching_msg("Threatminer")
     }
     get_from_http_api::<SubdomainsThreatminer>(url_api_threatminer, "Threatminer", quiet_flag)
-}
-
-pub fn get_c99_subdomains(url_api_c99: &str, quiet_flag: bool) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("C99")
-    }
-    get_from_http_api::<ResponseDataC99>(url_api_c99, "C99", quiet_flag)
-}
-
-pub fn get_archiveorg_subdomains(
-    url_api_archiveorg: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("Archive.org")
-    }
-    match reqwest::blocking::Client::builder()
-    .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3835.0 Safari/537.36")
-    .timeout(std::time::Duration::from_secs(300))
-    .build()
-    .unwrap()
-        .get(url_api_archiveorg)
-        .send()
-    {
-        Ok(data_archiveorg) => {
-            if misc::check_http_response_code("Archive.org", &data_archiveorg, quiet_flag) {
-                match data_archiveorg.json::<Vec<Vec<String>>>() {
-                    Ok(domains_archiveorg) => Some(
-                        domains_archiveorg
-                            .into_iter()
-                            .flatten()
-                            .map(|url| match Url::parse(&url) {
-                                Ok(host) => host.host_str().unwrap_or_else(|| "").to_string(),
-                                _ => String::new(),
-                            })
-                            .collect()
-                   ),
-                    Err(e) => {
-                        check_json_errors(e, "Archive.org", quiet_flag);
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        }
-        Err(e) => {
-            check_request_errors(e, "Archive.org", quiet_flag);
-            None
-        }
-    }
 }

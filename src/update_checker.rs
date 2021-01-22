@@ -11,7 +11,7 @@ struct GitVer {
 
 fn return_latest_release() -> String {
     println!("Checking for latest Github release... 🔍");
-    match misc::return_reqwest_client()
+    match misc::return_reqwest_client(10)
         .get("https://api.github.com/repos/edu4rdshl/findomain/releases/latest")
         .send()
     {
