@@ -3,7 +3,7 @@ author: Eduard Tolosa <edu4rdshl@protonmail.com>
 settings:
     - ArgRequiredElseHelp
     - StrictUtf8
-about: The fastest and cross-platform subdomain enumerator, don not waste your time.
+about: The fastest and cross-platform subdomain enumerator, do not waste your time.
 args:
     - target:
           short: t
@@ -20,7 +20,6 @@ args:
           help: Show/write only resolved subdomains.
           takes_value: false
           conflicts_with:
-              - monitoring-flag
               - ip
               - ipv6-only
 
@@ -30,7 +29,6 @@ args:
           help: Show/write the ip address of resolved subdomains.
           takes_value: false
           conflicts_with:
-              - monitoring-flag
               - resolved
               - ipv6-only
 
@@ -57,7 +55,6 @@ args:
           multiple: false
           conflicts_with:
               - output
-              - monitoring-flag
 
     - monitoring-flag:
           short: m
@@ -95,6 +92,8 @@ args:
           long: quiet
           help: Remove informative messages but show fatal errors or subdomains not found message.
           takes_value: false
+          conflicts_with:
+              - verbose
 
     - query-database:
           long: query-database
@@ -121,7 +120,6 @@ args:
           long: ipv6-only
           takes_value: false
           conflicts_with:
-              - monitoring-flag
               - ip
               - resolved
 
@@ -130,23 +128,15 @@ args:
           long: threads
           takes_value: true
 
-    - resolver:
-          help: Specify a resolver to use.
-          long: resolver
+    - custom-resolvers:
+          help: Path to a file (or files) containing a list of DNS IP address. If no specified then Google, Cloudflare and Quad9 DNS servers are used.
+          long: resolvers
           takes_value: true
-          possible_values:
-              - cloudflare
-              - quad9
-              - system
+          multiple: true
 
     - enable-empty-push:
           help: Send alert to webhooks still when no new subdomains have been found.
           long: aempty
-          takes_value: false
-
-    - check-updates:
-          help: Check for available Findomain updates.
-          long: check-updates
           takes_value: false
 
     - as-resolver:
@@ -175,7 +165,6 @@ args:
           takes_value: false
           conflicts_with:
               - query-database
-              - monitoring-flag
 
     - string-filter:
           help: Filter subdomains containing specifics strings.
@@ -208,6 +197,9 @@ args:
               - urlscan
               - securitytrails
               - threatminer
+              - archiveorg
+              - c99
+              - ctsearch
 
     - http-status:
           help: Check the HTTP status of subdomains.
@@ -222,8 +214,98 @@ args:
           takes_value: true
           multiple: false
 
-    - light-monitoring:
-          help: Does not discover IP or HTTP status when sending notifications to webhooks (faster).
-          long: lmonitoring
+    - rate-limit:
+          help: Set the rate limit in seconds for each target during enumeration.
+          long: rate-limit
+          takes_value: true
+          multiple: false
+
+    - port-scan:
+          help: Enable port scanner.
+          long: pscan
           takes_value: false
           multiple: false
+
+    - initial-port:
+          help: Initial port to scan. Default 0.
+          long: iport
+          takes_value: true
+          multiple: false
+
+    - last-port:
+          help: Last port to scan. Default 1000.
+          long: lport
+          takes_value: true
+          multiple: false
+
+    - verbose:
+          help: Enable verbose mode (useful to debug problems).
+          short: v
+          long: verbose
+          takes_value: false
+          multiple: false
+          conflicts_with:
+              - quiet
+              - ipv6-only
+
+    - dbpush-if-timeout:
+          help: Allow Findomain to insert data in the database when the webhook returns a timeout error.
+          long: mtimeout
+          takes_value: false
+          multiple: false
+          requires:
+              - monitoring-flag
+
+    - unlock:
+          help: Bypass Findomain threads limit (use with precaution).
+          long: unlock
+          takes_value: false
+          multiple: false
+
+    - no-monitor:
+          help: Disable monitoring mode while saving data to database.
+          long: no-monitor
+          takes_value: false
+          multiple: false
+          conflicts_with:
+              - monitoring-flag
+
+    - screenshots-path:
+          help: Path to save the screenshots of the HTTP(S) website for subdomains with active ones.
+          short: s
+          long: screenshots
+          takes_value: true
+          multiple: false
+
+    - sandbox:
+          help: Enable Chrome/Chromium sandbox. It is disabled by default because a big number of users run the tool using the root user by default. Make sure you are not running the program as root user before using this option.
+          long: sandbox
+          takes_value: false
+          multiple: false
+          requires:
+              - screenshots
+
+    - jobname:
+          help: Use an database identifier for jobs. It is useful when you want to relate different targets into a same job name. To extract the data by job name identifier, use the query-jobname option.
+          short: j
+          long: jobname
+          takes_value: true
+          multiple: false
+
+    - query-jobname:
+          help: Extract all the subdomains from the database where the job name is the specified using the jobname option.
+          long: query-jobname
+          takes_value: false
+          multiple: false
+          requires:
+              - jobname
+          conflicts_with:
+              - query-database
+
+    - http-timeout:
+          help: Value in seconds for the HTTP Status check of subdomains. Default 5.
+          long: http-timeout
+          takes_value: true
+          multiple: false
+          requires:
+              - http-status

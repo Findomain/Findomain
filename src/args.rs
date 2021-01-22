@@ -1,7 +1,9 @@
 use {
-    crate::misc::{
-        eval_resolved_or_ip_present, return_matches_hashset, return_matches_vec,
-        sanitize_target_string, validate_target,
+    crate::{
+        logic::{eval_resolved_or_ip_present, validate_target},
+        misc::{return_matches_hashset, return_matches_vec, sanitize_target_string},
+        resolvers,
+        structs::Args,
     },
     clap::{load_yaml, value_t, App},
     std::{
@@ -11,55 +13,7 @@ use {
     },
 };
 
-#[derive(Clone, Debug)]
-pub struct Args {
-    pub target: String,
-    pub file_name: String,
-    pub postgres_connection: String,
-    pub discord_webhook: String,
-    pub slack_webhook: String,
-    pub telegram_bot_token: String,
-    pub telegram_webhook: String,
-    pub telegram_chat_id: String,
-    pub resolver: String,
-    pub version: String,
-    pub spyse_access_token: String,
-    pub facebook_access_token: String,
-    pub virustotal_access_token: String,
-    pub securitytrails_access_token: String,
-    pub threads: usize,
-    pub database_checker_counter: usize,
-    pub commit_to_db_counter: usize,
-    pub only_resolved: bool,
-    pub with_ip: bool,
-    pub with_output: bool,
-    pub unique_output_flag: bool,
-    pub monitoring_flag: bool,
-    pub from_file_flag: bool,
-    pub quiet_flag: bool,
-    pub query_database: bool,
-    pub with_imported_subdomains: bool,
-    pub enable_dot: bool,
-    pub ipv6_only: bool,
-    pub enable_empty_push: bool,
-    pub check_updates: bool,
-    pub as_resolver: bool,
-    pub bruteforce: bool,
-    pub disable_wildcard_check: bool,
-    pub http_status: bool,
-    pub light_monitoring: bool,
-    pub files: Vec<String>,
-    pub import_subdomains_from: Vec<String>,
-    pub wordlists: Vec<String>,
-    pub subdomains: HashSet<String>,
-    pub wordlists_data: HashSet<String>,
-    pub wilcard_ips: HashSet<String>,
-    pub filter_by_string: HashSet<String>,
-    pub exclude_by_string: HashSet<String>,
-    pub excluded_sources: HashSet<String>,
-    pub time_wasted: Instant,
-}
-
+#[allow(clippy::cognitive_complexity)]
 pub fn get_args() -> Args {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml)
@@ -107,8 +61,6 @@ pub fn get_args() -> Args {
         telegram_bot_token: return_value_or_default(&settings, "telegrambot_token", String::new()),
         telegram_webhook: String::new(),
         telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
-        resolver: value_t!(matches, "resolver", String)
-            .unwrap_or_else(|_| "cloudflare".to_string()),
         spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new()),
         facebook_access_token: return_value_or_default(&settings, "fb_token", String::new()),
         virustotal_access_token: return_value_or_default(
@@ -121,10 +73,49 @@ pub fn get_args() -> Args {
             "securitytrails_token",
             String::new(),
         ),
-        threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| 50),
+        user_agent: return_value_or_default(
+            &settings,
+            "user_agent",
+            "APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)".to_string(),
+        ),
+        c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
+        jobname: if matches.is_present("jobname") {
+            value_t!(matches, "jobname", String).unwrap_or_else(|_| String::from("findomain"))
+        } else {
+            return_value_or_default(&settings, "jobname", String::from("findomain"))
+        },
+        screenshots_path: value_t!(matches, "screenshots-path", String)
+            .unwrap_or_else(|_| String::from("screenshots")),
+        threads: if matches.is_present("threads") {
+            value_t!(matches, "threads", usize).unwrap_or_else(|_| 50)
+        } else if matches.is_present("screenshots-path") {
+            return_value_or_default(&settings, "threads", 5.to_string())
+                .parse::<usize>()
+                .unwrap()
+        } else {
+            return_value_or_default(&settings, "threads", 50.to_string())
+                .parse::<usize>()
+                .unwrap()
+        },
         version: clap::crate_version!().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
+        rate_limit: if matches.is_present("rate-limit") {
+            value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 5)
+        } else {
+            return_value_or_default(&settings, "rate_limit", 5.to_string())
+                .parse::<u64>()
+                .unwrap()
+        },
+        http_timeout: if matches.is_present("http-timeout") {
+            value_t!(matches, "http-timeout", u64).unwrap_or_else(|_| 5)
+        } else {
+            return_value_or_default(&settings, "http_timeout", 5.to_string())
+                .parse::<u64>()
+                .unwrap()
+        },
+        initial_port: value_t!(matches, "initial-port", u16).unwrap_or_else(|_| 1),
+        last_port: value_t!(matches, "last-port", u16).unwrap_or_else(|_| 1000),
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),
@@ -141,21 +132,59 @@ pub fn get_args() -> Args {
         ),
         ipv6_only: matches.is_present("ipv6-only"),
         enable_empty_push: matches.is_present("enable-empty-push"),
-        check_updates: matches.is_present("check-updates"),
         as_resolver: matches.is_present("as-resolver"),
         bruteforce: matches.is_present("wordlists"),
         disable_wildcard_check: matches.is_present("no-wildcards"),
-        http_status: matches.is_present("http-status"),
-        light_monitoring: matches.is_present("light-monitoring"),
+        http_status: matches.is_present("http-status") || matches.is_present("screenshots-path"),
+        is_last_target: false,
+        enable_port_scan: matches.is_present("port-scan")
+            || matches.is_present("initial-port")
+            || matches.is_present("last-port"),
+        custom_threads: matches.is_present("threads"),
+        discover_ip: matches.is_present("ip")
+            || matches.is_present("resolved")
+            || matches.is_present("ipv6-only"),
+        verbose: matches.is_present("verbose"),
+        unlock_threads: matches.is_present("unlock"),
+        custom_resolvers: matches.is_present("custom-resolvers"),
+        dbpush_if_timeout: if matches.is_present("dbpush-if-timeout") {
+            matches.is_present("dbpush-if-timeout")
+        } else {
+            return_value_or_default(&settings, "dbpush_if_timeout", false.to_string())
+                .parse::<bool>()
+                .unwrap()
+        },
+        no_monitor: if matches.is_present("no-monitor") {
+            matches.is_present("no-monitor")
+        } else {
+            return_value_or_default(&settings, "no_monitor", false.to_string())
+                .parse::<bool>()
+                .unwrap()
+        },
+        take_screenshots: matches.is_present("screenshots-path"),
+        chrome_sandbox: matches.is_present("sandbox"),
+        query_jobname: matches.is_present("query-jobname"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
         wordlists: return_matches_vec(&matches, "wordlists"),
+        resolvers: if matches.is_present("custom-resolvers") {
+            return_matches_vec(&matches, "custom-resolvers")
+        } else {
+            resolvers::return_ipv4_resolvers()
+        },
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
         wilcard_ips: HashSet::new(),
         filter_by_string: return_matches_hashset(&matches, "string-filter"),
         exclude_by_string: return_matches_hashset(&matches, "string-exclude"),
-        excluded_sources: return_matches_hashset(&matches, "exclude-sources"),
+        excluded_sources: if matches.is_present("exclude-sources") {
+            return_matches_hashset(&matches, "exclude-sources")
+        } else {
+            return_value_or_default(&settings, "exclude_sources", String::new())
+                .split_whitespace()
+                .map(str::to_owned)
+                .collect()
+        },
         time_wasted: Instant::now(),
     }
 }

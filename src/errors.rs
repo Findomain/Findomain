@@ -1,20 +1,22 @@
-use crate::args;
+use crate::{args, structs::Args};
 pub use failure::{Error, ResultExt};
 pub type Result<T> = ::std::result::Result<T, Error>;
 
-pub fn check_request_errors(error: reqwest::Error, api: &str, quiet_flag: bool) {
-    if !quiet_flag {
+pub fn check_request_errors(error: reqwest::Error, api: &str) {
+    let args = args::get_args();
+    if !args.quiet_flag && args.verbose {
         eprintln!("❌ Error in {} API. {} ", &api, &error)
     }
 }
 
-pub fn check_json_errors(error: reqwest::Error, api: &str, quiet_flag: bool) {
-    if !quiet_flag {
+pub fn check_json_errors(error: reqwest::Error, api: &str) {
+    let args = args::get_args();
+    if !args.quiet_flag && args.verbose {
         eprintln!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {:?}.", &api, error)
     }
 }
 
-pub fn check_monitoring_parameters(args: &mut args::Args) -> Result<()> {
+pub fn check_monitoring_parameters(args: &mut Args) -> Result<()> {
     if args.discord_webhook.is_empty()
         && args.slack_webhook.is_empty()
         && args.telegram_bot_token.is_empty()
