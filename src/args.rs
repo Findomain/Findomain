@@ -137,9 +137,9 @@ pub fn get_args() -> Args {
         database_checker_counter: 0,
         commit_to_db_counter: 0,
         rate_limit: if matches.is_present("rate-limit") {
-            value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 3)
+            value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 0)
         } else {
-            return_value_or_default(&settings, "rate_limit", 3.to_string())
+            return_value_or_default(&settings, "rate_limit", 0.to_string())
                 .parse::<u64>()
                 .unwrap()
         },
