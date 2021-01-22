@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Findomain releaser
 LINUX_TARGET="x86_64-unknown-linux-musl"
 WIN_TARGET="x86_64-pc-windows-gnu"
@@ -52,7 +53,7 @@ else
 fi
 
 echo "Creating manpage..."
-if command -v help2man > /dev/null; then
+if command -v help2man >/dev/null; then
   if help2man -o "$MANPAGE_DIR" "target/$LINUX_TARGET/release/findomain"; then
     echo "Manpage created sucessfully and saved in $MANPAGE_DIR"
   else
@@ -69,7 +70,7 @@ if command -v git >/dev/null; then
 fi
 
 echo "Uploading crate to crates.io..."
-if cargo publish --no-verify > /dev/null; then
+if cargo publish --no-verify >/dev/null; then
   echo "Crate uploaded."
 else
   echo "An error has occurred while uploading the crate to crates.io."
