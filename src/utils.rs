@@ -16,6 +16,7 @@ pub fn return_headless_browser(sandbox: bool) -> Browser {
     Browser::new(
         LaunchOptionsBuilder::default()
             .sandbox(sandbox)
+            .window_size(Some((1920, 2500)))
             .build()
             .expect("Could not find appropriate Chrome binary."),
     )
