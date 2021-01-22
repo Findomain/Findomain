@@ -1,5 +1,8 @@
-use findomain::{
-    args, errors::*, get_subdomains, read_from_file, return_file_targets, update_checker,
+use {
+    findomain::{
+        args, errors::*, get_subdomains, read_from_file, return_file_targets, update_checker,
+    },
+    std::{collections::HashSet, iter::FromIterator},
 };
 
 fn run() -> Result<()> {
@@ -20,7 +23,8 @@ fn run() -> Result<()> {
             std::process::exit(1)
         } else {
             let wordlists = arguments.wordlists.clone();
-            arguments.wordlists_data = return_file_targets(&arguments, &mut wordlists.clone())
+            arguments.wordlists_data =
+                HashSet::from_iter(return_file_targets(&arguments, wordlists.clone()))
         }
     }
     if !arguments.target.is_empty() {

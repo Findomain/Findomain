@@ -31,6 +31,7 @@ pub struct Args {
     pub threads: usize,
     pub database_checker_counter: usize,
     pub commit_to_db_counter: usize,
+    pub rate_limit: u64,
     pub only_resolved: bool,
     pub with_ip: bool,
     pub with_output: bool,
@@ -48,6 +49,7 @@ pub struct Args {
     pub bruteforce: bool,
     pub disable_wildcard_check: bool,
     pub custom_resolvers: bool,
+    pub is_last_target: bool,
     pub files: Vec<String>,
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
@@ -134,6 +136,13 @@ pub fn get_args() -> Args {
         current_executable_path: current_exe().unwrap().display().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
+        rate_limit: if matches.is_present("rate-limit") {
+            value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 3)
+        } else {
+            return_value_or_default(&settings, "rate_limit", 3.to_string())
+                .parse::<u64>()
+                .unwrap()
+        },
         only_resolved: matches.is_present("resolved"),
         with_ip: matches.is_present("ip"),
         with_output: matches.is_present("output") || matches.is_present("unique-output"),
@@ -155,6 +164,7 @@ pub fn get_args() -> Args {
         bruteforce: matches.is_present("wordlists"),
         disable_wildcard_check: matches.is_present("no-wildcards"),
         custom_resolvers: matches.is_present("custom-resolvers"),
+        is_last_target: false,
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),
         wilcard_ips: HashSet::new(),

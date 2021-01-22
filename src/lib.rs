@@ -20,6 +20,7 @@ use {
         collections::{HashMap, HashSet},
         fs::{File, OpenOptions},
         io::{BufRead, BufReader, Write},
+        iter::FromIterator,
         net::{IpAddr, Ipv4Addr},
         thread,
         time::{Duration, Instant},
@@ -40,7 +41,7 @@ lazy_static! {
         let args = args::get_args();
         let mut resolver_ips = Vec::new();
         if args.custom_resolvers {
-            for r in &return_file_targets(&args, &mut args.resolvers.clone()) {
+            for r in &return_file_targets(&args, args.resolvers.clone()) {
                 match r.parse::<Ipv4Addr>() {
                     Ok(ip) => resolver_ips.push(ip),
                     Err(e) => {
@@ -115,6 +116,18 @@ pub fn get_subdomains(args: &mut args::Args) -> Result<()> {
         } else {
             misc::works_with_data(args)?
         }
+    }
+    if !args.quiet_flag
+        && args.rate_limit != 0
+        && args.from_file_flag
+        && !args.is_last_target
+        && !args.monitoring_flag
+    {
+        println!(
+            "Rate limit set to {} seconds, waiting to start next enumeration.",
+            args.rate_limit
+        );
+        thread::sleep(Duration::from_secs(args.rate_limit))
     }
     Ok(())
 }
@@ -274,15 +287,15 @@ fn manage_subdomains_data(args: &mut args::Args) -> Result<()> {
     Ok(())
 }
 
-pub fn return_file_targets(args: &args::Args, files: &mut Vec<String>) -> HashSet<String> {
-    let mut targets: HashSet<String> = HashSet::new();
+pub fn return_file_targets(args: &args::Args, mut files: Vec<String>) -> Vec<String> {
+    let mut targets: Vec<String> = Vec::new();
     files.sort();
     files.dedup();
     for f in files {
         match File::open(&f) {
             Ok(file) => {
                 for target in BufReader::new(file).lines().flatten() {
-                    targets.insert(target);
+                    targets.push(target);
                 }
             }
             Err(e) => {
@@ -298,6 +311,8 @@ pub fn return_file_targets(args: &args::Args, files: &mut Vec<String>) -> HashSe
             }
         }
     }
+    targets.sort();
+    targets.dedup();
     targets.retain(|target| !target.is_empty());
     targets.iter().map(|t| t.to_lowercase()).collect()
 }
@@ -312,11 +327,16 @@ pub fn read_from_file(args: &mut args::Args) -> Result<()> {
             println!("To use Findomain as resolver, use one of the --resolved/-r, --ip/-i or --ipv6-only options.");
             std::process::exit(1)
         } else {
-            args.subdomains = return_file_targets(args, &mut args.files.clone());
+            args.subdomains = HashSet::from_iter(return_file_targets(args, args.files.clone()));
             manage_subdomains_data(args)?
         }
     } else {
-        for domain in return_file_targets(args, &mut args.files.clone()) {
+        let file_targets = return_file_targets(args, args.files.clone());
+        let last_target = file_targets.last().unwrap().to_string();
+        for domain in file_targets {
+            if domain == last_target {
+                args.is_last_target = true
+            }
             args.target = domain;
             args.file_name = if file_name.is_empty() && !args.with_ip {
                 format!("{}.txt", &args.target)
@@ -468,7 +488,7 @@ fn push_data_to_webhooks(args: &mut args::Args, new_subdomains: &HashSet<String>
 fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
     if args.with_imported_subdomains {
         let mut imported_subdomains =
-            return_file_targets(args, &mut args.import_subdomains_from.clone());
+            return_file_targets(args, args.import_subdomains_from.clone());
         let base_target = &format!(".{}", args.target);
         imported_subdomains.retain(|target| {
             !target.is_empty() && misc::validate_subdomain(&base_target, &target, args)
@@ -540,6 +560,14 @@ fn subdomains_alerts(args: &mut args::Args) -> Result<()> {
         }
     } else {
         push_data_to_webhooks(args, &new_subdomains)?
+    }
+
+    if !args.quiet_flag && args.rate_limit != 0 && args.from_file_flag && !args.is_last_target {
+        println!(
+            "Rate limit set to {} seconds, waiting to start next enumeration.",
+            args.rate_limit
+        );
+        thread::sleep(Duration::from_secs(args.rate_limit))
     }
 
     Ok(())
