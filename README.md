@@ -18,21 +18,6 @@ When you finish your payment, you will receive an email with the server credenti
 
 [**See available plans here.**](https://findomain.app/#Pricing)
 
-## Monitoring Methodology
-
-Learn more about the monitoring server following [this link](https://findomain.app/findomain-advanced-automated-and-modern-recon/).
-
-![Findomain Server Monitoring Methodolofy](images/findomain5.png)
-
-**Demos:**
-
-[![asciicast](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX.svg)](https://asciinema.org/a/3kHnCYTDsOp20ttgNXXgvCRjX)
-
-**Screenshots:**
-
-![Findomain Scan](images/findomain3.png)
-![Findomain Database](images/findomain4.jpg)
-
 # Findomain
 
 ![Findomain](images/findomain.png)
