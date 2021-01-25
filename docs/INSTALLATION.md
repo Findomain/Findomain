@@ -1,6 +1,6 @@
 # Installation
 
-We offer binarys ready to use for the following platforms (all are for 64 bits only):
+We offer binaries ready to use for the following platforms (all are for 64 bits only):
 
 * [Linux](README.md#installation-in-linux-using-compiled-artifacts)
 * [Windows](README.md#installation-windows)
@@ -158,9 +158,9 @@ Since Findomain 0.2.4 you don't need to explicity set the `findomain_fb_token` v
 The first step is get your Facebook application token. You need to create a Webhook, follow the next steps:
 
 1. Open https://developers.facebook.com/apps/
-2. Clic in "Create App", put the name that you want and send the information.
+2. Click in "Create App", put the name that you want and send the information.
 3. In the next screen, select "Configure" in the Webhooks option.
-4. Go to "Configuration" -> "Basic" and clic on "Show" in the "App secret key" option.
+4. Go to "Configuration" -> "Basic" and click on "Show" in the "App secret key" option.
 5. Now open in your browser the following URL: https://graph.facebook.com/oauth/access_token?client_id=your-app-id&client_secret=your-secret-key&grant_type=client_credentials
 
 **Note:** replace `your-app-id` by the number of your webhook identifier and `your-secret-key` for the key that you got in the 4th step.
@@ -201,7 +201,7 @@ Put in the CMD command prompt:
 
 1. Open https://account.spyse.com/register and make the registration process (include email verification).
 2. Log in into your spyse account and go to https://account.spyse.com/user
-3. Search for the "API token" section and clic in "Show".
+3. Search for the "API token" section and click in "Show".
 4. Save that access token.
 
 Now you can use that value to set the access token as following:
@@ -229,7 +229,7 @@ Put in the CMD command prompt:
 # Configuring the Virustotal API to use with token
 
 1. Open https://www.virustotal.com/gui/join-us and make the registration process (include email verification).
-2. Log in into your spyse account and go to https://www.virustotal.com/gui/user/YourUsername/apikey
+2. Log in into your Virustotal account and go to https://www.virustotal.com/gui/user/YourUsername/apikey
 3. Search for the "API key" section.
 4. Save that API key.
 
@@ -262,9 +262,9 @@ Put in the CMD command prompt:
 The first step is get your SecurityTrails token.Follow the next steps:
 
 1. Open https://securitytrails.com/
-2. Clic in "SIGNUP FOR FREE" (right corner).
+2. Click in "SIGNUP FOR FREE" (right corner).
 3. Fill the requested fields, **you need to put a valid email address, it's needed for verification.**.
-4. Select the API Pricing plan of your preference, there's a free plan limited to 50 queries per month. Clic in "Get started".
+4. Select the API Pricing plan of your preference, there's a free plan limited to 50 queries per month. Click on "Get started".
 5. Confirm email address.
 6. Select "Credentials" in the left panel, there's the API Key.
 
