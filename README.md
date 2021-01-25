@@ -8,9 +8,11 @@
 
 # Findomain Monitoring Service
 
-If you don't want to deal with servers and complex configurations for doing recon, Findomain offers [a dedicated monitoring service hosted in Amazon](https://findomain.app/#Pricing), that allow you to **monitor your target domains with multiple top tools** (OWASP Amass, Sublist3r, Assetfinder and Subfinder) and send alerts to Discord, Slack, Telegram, Email or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. **The only you need to do is configure a file with your email address (if applicable) or/and webhooks/Telegram chat information and put your domains in another file**, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the HTTP websites, Open Ports, Subdomains CNAME and more. All your data is securely saved in a relational database and you can request a dump of your data whenever you want.
+If you don't want to deal with servers and complex configurations for doing recon but also have more features in an integrated solution, Findomain offers [a subdomains monitoring service that provides:](https://findomain.app/#Pricing) **directory fuzzing/ports scan/vulnerabilities discovery (with Nuclei) - and more** that allow you to **monitor your target domains with multiple top tools** (OWASP Amass, Sublist3r, Assetfinder and Subfinder) and send alerts to Discord, Slack, Telegram, Email or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. **The only you need to do is configure a file with your email address (if applicable) or/and webhooks/Telegram chat information and put your domains in another file**, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the HTTP websites, Open Ports, Subdomains CNAME and more. All your data is securely saved in a relational database and you can request a dump of your data whenever you want.
 
 When you finish your payment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
+
+**Note:** Our private version is superior to the public version and you can't achieve the same results using the last one, plus if you use our service you help us to keep the project alive and we will release plus features to this repo every X time.
 
 ## Pricing
 
@@ -42,44 +44,6 @@ The fastest and cross-platform subdomain enumerator.
 [![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
 
 The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
-
-## Plus Features
-
-**Implemented features:**
-| Feature  | Plus Version Support | Free Version Support |
-| ------------- | ------------- | ------------- |
-| [Core features](README.md#features)  | Yes  |Yes|
-| Check subdomains HTTP/S status | Yes  |No|
-| Discover HTML/HTTP data from the hosts | Yes | No |
-| Check subdomains open ports with service and version detection (using Nmap) | Yes  |No|
-| Track CNAME for subdomains | Yes | No |
-| Support for posting HOST, IP, HTTP status and open ports to webhook notifications | Yes  |No|
-| Support for automatic detection/read of default configuration file | Yes  |No|
-| Save Host, IP, HTTP Status and Open Ports to database  | Yes  |No|
-| Option to exclude sources | Yes  |No|
-| Filter or exclude subdomains containing specific keywords. | Yes  |No|
-| Save root domain to database  | Yes  |No|
-| Custom user agent configuration | Yes |No |
-| Rate limit user configuration | Yes | No |
-| Output files written in real-time | Yes | No|
-| Output to unique file while monitoring | Yes | No|
-| Option to save subdomains data to database without setting up monitoring | Yes | No |
-| Option to save data in your database if the webhook timeout | Yes | No |
-| Built-in top faster DNS IP addresses | Yes | No |
-| Subdomains screenshots of HTTP server support (requires Chrome/Chromium to run in headless mode) | Yes | No |
-| Use job names to identify targets (see [this tweet](https://twitter.com/Edu4rdSHL/status/1250847891238854656)) | Yes | No |
-| Update the existing data in the database | Yes | No |
-| Email notifications.  | Yes  |No|
-| Push notifications through [Pushover](https://pushover.net). | Yes  |No|
-| Track CNAME for subdomains | Yes | No |
-
-**Planned features:**
-| Feature  | Plus Version Plans | Free Version Plans |
-| ------------- | ------------- | ------------- |
-| [Project Sonar](https://www.rapid7.com/research/project-sonar/) integration | Yes  |No|
-| Shodan source support  | Yes  |No|
-| Elastic search support  | Yes  |No|
-| SQLite output  | Yes  |No|
 
 # What Findomain can do?
 
@@ -145,6 +109,9 @@ APIs that we are using at the moment:
 - [Urlscan.io](https://urlscan.io/about-api/)
 - [SecurityTrails](https://docs.securitytrails.com/docs) `**`
 - [Threatminer](https://www.threatminer.org/api.php)
+- [C99](https://api.c99.nl/) `**`
+- [Archive.org](https://archive.org/)
+- [CTSearch](https://ui.ctsearch.entrust.com/ui/ctsearchui)
 
 **Notes**
 
@@ -155,30 +122,6 @@ APIs marked with `*` can *optionally* be used with an access token, create one i
 **More APIs?**
 
 If you know other APIs that should be added, comment [here](https://github.com/Edu4rdSHL/findomain/issues/7).
-
-# Development
-
-In order to make sure Findomain will not be broken on some commit I have created the [develop branch](https://github.com/Edu4rdSHL/findomain/tree/develop) where new features and improvements are pushed before they go to [master branch](https://github.com/Edu4rdSHL/findomain/tree/master). In resume the difference is: **develop branch and beta releases aren't ready for production purposes but testing or development purposes** and **master branch and non-beta releases are ready for production purposes**. If you are a developer or want to be a beta tester of the new features that are added to Findomain then use the develop branch, otherwise always use the master branch. Every new feature is tested before it goes to master by the Findomain beta testers that are only ([@sumgr0](https://github.com/sumgr0)) at the moment, I will appreciate if you join to the testing process, just send me a DM in Twitter ([@edu4rdshl](https://twitter.com/edu4rdshl)).
-
-**If you are a packager of Findomain for X system distribution always go for the master branch if using git or non-beta releases if using releases model**.
-
-**Build the development version:**
-
-You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
-
-```bash
-$ git clone https://github.com/Edu4rdSHL/findomain.git -b develop # Only the develop branch is needed
-$ cd findomain
-$ cargo build --release
-$ ./target/release/findomain
-```
-To update the repository when new commits are added, just go to the folder where Findomain's develop branch was cloned and excute:
-
-```
-$ git pull
-$ cargo build --release
-$ ./target/release/findomain
-```
 
 # Installation
 
