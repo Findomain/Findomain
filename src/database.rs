@@ -28,13 +28,15 @@ pub fn prepare_database(postgres_connection: &str) -> Result<()> {
 }
 
 fn update_database_schema(mut connection: postgres::Client) -> Result<()> {
-    let _ = connection
-        .execute("ALTER TABLE subdomains ADD COLUMN root_domain TEXT", &[])
-        .is_ok();
-
-    let _ = connection
-        .execute("ALTER TABLE subdomains ADD COLUMN jobname TEXT", &[])
-        .is_ok();
+    let database_columns = vec!["ip", "http_status", "open_ports", "root_domain", "jobname"];
+    for column in database_columns {
+        let _ = connection
+            .execute(
+                format!("ALTER TABLE subdomains ADD COLUMN {} TEXT", column).as_str(),
+                &[],
+            )
+            .is_ok();
+    }
     Ok(())
 }
 
