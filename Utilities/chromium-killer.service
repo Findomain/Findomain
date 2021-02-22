@@ -1,0 +1,15 @@
+[Unit]
+ Description=Kill hanged chromium instances.
+ After=network-online.target
+
+[Service]
+ ExecStart=/bin/bash -c "kill -9 $(ps -eo comm,pid,etimes | awk '/^chromium-*/ {if ($3 > 300) { print $2}}')"
+ StartLimitBurst=5
+ StartLimitInterval=500
+ Restart=on-failure
+ RestartSec=5s
+ KillMode=process
+ KillSignal=SIGINT
+
+[Install]
+ WantedBy=default.target

@@ -1,0 +1,9 @@
+[Unit]
+ Description=Kill hanged Chromium instances.
+
+[Timer]
+ OnBootSec=10min
+ OnUnitActiveSec=15min
+
+[Install]
+ WantedBy=timers.target
