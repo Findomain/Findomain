@@ -86,14 +86,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         else { thread::spawn(move || sources::get_virustotal_subdomains(&url_api_virustotal, quiet_flag)) },
         if args.excluded_sources.contains("sublist3r") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)) },
-        if args.excluded_sources.contains("facebook") { thread::spawn(|| None) }
-        else if args.facebook_access_token.is_empty() {
-            let url_api_fb = format!(
-                "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
-                &args.target,
-                &misc::return_facebook_token()
-            );
-            thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
+        if args.excluded_sources.contains("facebook") || args.facebook_access_token.is_empty() { thread::spawn(|| None)
         } else {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
