@@ -13,14 +13,21 @@ pub fn return_reqwest_client(secs: u64, args: &Args) -> Client {
 }
 
 pub fn return_headless_browser(sandbox: bool) -> Browser {
-    Browser::new(
+    match Browser::new(
         LaunchOptionsBuilder::default()
             .sandbox(sandbox)
             .window_size(Some((1920, 2500)))
             .build()
             .expect("Could not find appropriate Chrome binary."),
-    )
-    .unwrap()
+    ) {
+        Ok(browser) => browser,
+        Err(e) => {
+            eprintln!("Error getting the Chrome/Chromium instance, make sure that it's properly installed.
+            Chromium/Chrome from Snap are known to cause problems, if you have installed it from there,
+            please uninstall it and install it without using Snap. Error: {}", e);
+            std::process::exit(1)
+        }
+    }
 }
 
 pub fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
