@@ -23,8 +23,8 @@ pub fn return_headless_browser(sandbox: bool) -> Browser {
         Ok(browser) => browser,
         Err(e) => {
             eprintln!("Error getting the Chrome/Chromium instance, make sure that it's properly installed.
-            Chromium/Chrome from Snap are known to cause problems, if you have installed it from there,
-            please uninstall it and install it without using Snap. Error: {}", e);
+Chromium/Chrome from Snap are known to cause problems, if you have installed it from there,
+please uninstall it and reinstall without using Snap. Error: {}", e);
             std::process::exit(1)
         }
     }

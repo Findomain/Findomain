@@ -4,6 +4,7 @@ use {
         errors::*,
         files, logic, misc, networking,
         structs::{Args, HttpStatus},
+        utils,
     },
     lazy_static,
     postgres::{Client, NoTls},
@@ -141,6 +142,14 @@ pub fn test_database_connection(args: &mut Args) {
             std::process::exit(1)
         }
     }
+}
+
+pub fn test_chrome_availability(args: &mut Args) {
+    if !args.quiet_flag {
+        println!("Testing Chromium/Chrome availability...")
+    }
+    utils::return_headless_browser(args.chrome_sandbox);
+    println!("Chromium/Chrome is correctly installed, performing enumeration!")
 }
 
 pub fn null_ip_checker(ip: &str) -> String {

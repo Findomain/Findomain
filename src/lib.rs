@@ -39,6 +39,9 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
     //    println!("{}", sub)
     //    }
     //  std::process::exit(1);
+    if args.take_screenshots {
+        logic::test_chrome_availability(args)
+    }
     if (args.monitoring_flag || args.no_monitor) && args.database_checker_counter == 0 {
         logic::test_database_connection(args);
         args.database_checker_counter += 1
