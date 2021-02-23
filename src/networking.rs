@@ -1,6 +1,6 @@
 use {
     crate::{
-        args, files, logic, misc, port_scanner, screenshots, sources,
+        args, files, logic, port_scanner, screenshots, sources,
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },

@@ -1,4 +1,4 @@
-use {rand::Rng, std::collections::HashSet};
+use std::collections::HashSet;
 
 pub fn show_searching_msg(api: &str) {
     println!("Searching in the {} API... 🔍", api)
