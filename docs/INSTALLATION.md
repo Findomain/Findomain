@@ -2,12 +2,12 @@
 
 We offer binaries ready to use for the following platforms (all are for 64 bits only):
 
-* [Linux](README.md#installation-in-linux-using-compiled-artifacts)
-* [Windows](README.md#installation-windows)
-* [MacOS](README.md#installation-macos)
-* [Aarch64 (Raspberry Pi)](README.md#installation-aarch64-raspberry-pi)
-* [NixOS](README.md#installation-nixos)
-* [Docker](README.md#installation-docker)
+* [Linux](INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
+* [Windows](INSTALLATION.md#installation-windows)
+* [MacOS](INSTALLATION.md#installation-macos)
+* [Aarch64 (Raspberry Pi)](INSTALLATION.md#installation-aarch64-raspberry-pi)
+* [NixOS](INSTALLATION.md#installation-nixos)
+* [Docker](INSTALLATION.md#installation-docker)
 
 If you need to run Findomain in another platform, continue reading the documentation.
 
