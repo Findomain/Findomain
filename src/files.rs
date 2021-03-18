@@ -1,5 +1,5 @@
 use {
-    crate::{errors::*, logic, misc, structs::Args},
+    crate::{errors::*, logic, misc, structs::Args, utils},
     std::{
         collections::HashSet,
         fs::{self, File, OpenOptions},
@@ -51,13 +51,21 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             println!("To use Findomain as resolver, use one or more of the --resolved/-r, --ip/-i, --ipv6-only, --http-status or --pscan/--iport/--lport options.");
             std::process::exit(1)
         } else {
-            args.subdomains = HashSet::from_iter(return_file_targets(args, args.files.clone()));
+            args.subdomains = if !args.files.is_empty() {
+                HashSet::from_iter(return_file_targets(args, args.files.clone()))
+            } else {
+                HashSet::from_iter(utils::read_stdin())
+            };
             args.subdomains
                 .retain(|target| !target.is_empty() && logic::validate_target(target));
             logic::manage_subdomains_data(args)?
         }
     } else {
-        let mut file_targets = return_file_targets(args, args.files.clone());
+        let mut file_targets = if !args.files.is_empty() {
+            return_file_targets(args, args.files.clone())
+        } else {
+            utils::read_stdin()
+        };
         file_targets.retain(|target| !target.is_empty() && logic::validate_target(target));
         let last_target = file_targets.last().unwrap().to_string();
         for domain in file_targets {

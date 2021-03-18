@@ -147,6 +147,7 @@ pub fn get_args() -> Args {
         verbose: matches.is_present("verbose"),
         unlock_threads: matches.is_present("unlock"),
         custom_resolvers: matches.is_present("custom-resolvers"),
+        from_stdin: matches.is_present("stdin"),
         dbpush_if_timeout: if matches.is_present("dbpush-if-timeout") {
             matches.is_present("dbpush-if-timeout")
         } else {

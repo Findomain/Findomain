@@ -54,6 +54,7 @@ pub struct Args {
     pub take_screenshots: bool,
     pub chrome_sandbox: bool,
     pub custom_resolvers: bool,
+    pub from_stdin: bool,
     pub files: Vec<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,

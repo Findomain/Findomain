@@ -2,6 +2,7 @@ use {
     crate::structs::Args,
     headless_chrome::{Browser, LaunchOptionsBuilder},
     reqwest::blocking::Client,
+    std::io::{self, Read},
 };
 
 pub fn return_reqwest_client(secs: u64, args: &Args) -> Client {
@@ -46,4 +47,16 @@ pub fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
     } else {
         timeout
     }
+}
+
+pub fn read_stdin() -> Vec<String> {
+    let mut buffer = String::new();
+    let mut stdin = io::stdin();
+    stdin
+        .read_to_string(&mut buffer)
+        .expect("Error getting input list.");
+    let mut targets: Vec<String> = buffer.lines().map(str::to_owned).collect();
+    targets.sort();
+    targets.dedup();
+    targets
 }

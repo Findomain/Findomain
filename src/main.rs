@@ -32,7 +32,7 @@ fn run() -> Result<()> {
     }
     if !arguments.target.is_empty() || arguments.query_jobname {
         get_subdomains(&mut arguments)
-    } else if !arguments.files.is_empty() || arguments.query_jobname {
+    } else if !arguments.files.is_empty() || arguments.from_stdin || arguments.query_jobname {
         read_from_file(&mut arguments)
     } else {
         eprintln!("Error: Target is empty or invalid!");
