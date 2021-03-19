@@ -184,7 +184,7 @@ pub fn get_args() -> Args {
                     .parse::<String>()
                     .unwrap()
             };
-            if Path::new(&file_name).exists() {
+            if !file_name.is_empty() && Path::new(&file_name).exists() {
                 match File::open(&file_name) {
                     Ok(file) => BufReader::new(file).lines().flatten().collect(),
                     Err(_) => {
@@ -192,8 +192,10 @@ pub fn get_args() -> Args {
                         std::process::exit(1)
                     }
                 }
+            } else if !file_name.is_empty() && !Path::new(&file_name).exists() {
+                eprintln!("Error reading the user agents file, please make sure that the path is correct. Leaving");
+                std::process::exit(1)
             } else {
-                eprintln!("Error reading the user agents file, please make sure that the path is correct. Using the default user agents list.");
                 vec![
                     "APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)".to_string(),
                     "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36".to_string(),
