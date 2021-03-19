@@ -4,7 +4,7 @@ use {
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
-    rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
+    rand::{distributions::Alphanumeric, seq::SliceRandom, thread_rng as rng, Rng},
     rayon::prelude::*,
     std::{
         collections::{HashMap, HashSet},
@@ -436,10 +436,12 @@ pub fn get_resolver(resolvers: Vec<String>, opts: &ResolverOpts) -> Resolver {
             vec![],
             NameServerConfigGroup::from_ips_clear(
                 &[IpAddr::V4(
-                    resolvers[rand::thread_rng().gen_range(0, resolvers.len())]
-                        .clone()
-                        .parse()
-                        .unwrap(),
+                    resolvers
+                        .choose(&mut rng())
+                        .expect("Failed to read ipv4 address")
+                        .parse::<Ipv4Addr>()
+                        .expect("Failed to parse ipv4 address")
+                        .to_owned(),
                 )],
                 53,
             ),
