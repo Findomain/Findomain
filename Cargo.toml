@@ -31,3 +31,9 @@ openssl = { version = "0.10.32", features = ["vendored"] }
 
 [target.armv7-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.32", features = ["vendored"] }
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
