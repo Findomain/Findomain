@@ -8,6 +8,8 @@ use {
     clap::{load_yaml, value_t, App},
     std::{
         collections::{HashMap, HashSet},
+        fs::File,
+        io::{BufRead, BufReader},
         path::Path,
         time::Instant,
     },
@@ -73,11 +75,7 @@ pub fn get_args() -> Args {
             "securitytrails_token",
             String::new(),
         ),
-        user_agent: return_value_or_default(
-            &settings,
-            "user_agent",
-            "APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)".to_string(),
-        ),
+        user_agent: String::new(),
         c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
         jobname: if matches.is_present("jobname") {
             value_t!(matches, "jobname", String).unwrap_or_else(|_| String::from("findomain"))
@@ -172,6 +170,33 @@ pub fn get_args() -> Args {
             return_matches_vec(&matches, "custom-resolvers")
         } else {
             resolvers::return_ipv4_resolvers()
+        },
+        user_agent_strings: {
+            let file_name = if matches.is_present("user-agents-file") {
+                value_t!(matches, "user-agents-file", String).unwrap_or_else(|_| "".to_string())
+            } else {
+                return_value_or_default(&settings, "user_agents_file", "".to_string())
+                    .parse::<String>()
+                    .unwrap()
+            };
+            if Path::new(&file_name).exists() {
+                match File::open(&file_name) {
+                    Ok(file) => BufReader::new(file).lines().flatten().collect(),
+                    Err(_) => {
+                        eprintln!("Error reading the user agents file, please make sure that the file format is correct.");
+                        std::process::exit(1)
+                    }
+                }
+            } else {
+                eprintln!("Error reading the user agents file, please make sure that the path is correct. Using the default user agents list.");
+                vec![
+                    "APIs-Google (+https://developers.google.com/webmasters/APIs-Google.html)".to_string(),
+                    "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36".to_string(),
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36".to_string(),
+                    "Mozilla/5.0 (X1s1; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2919.83 Safari/537.36".to_string(),
+                    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2919.83 Safari/537.36".to_string()
+                    ]
+            }
         },
         subdomains: HashSet::new(),
         wordlists_data: HashSet::new(),

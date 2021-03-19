@@ -59,6 +59,7 @@ pub struct Args {
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
     pub resolvers: Vec<String>,
+    pub user_agent_strings: Vec<String>,
     pub subdomains: HashSet<String>,
     pub wordlists_data: HashSet<String>,
     pub wilcard_ips: HashSet<String>,

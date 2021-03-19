@@ -51,7 +51,7 @@ fn push_data_to_webhooks(
     }
     for (webhook, webhooks_payload) in webhooks_data {
         if !webhook.is_empty() {
-            let response = utils::return_reqwest_client(15, &args)
+            let response = utils::return_reqwest_client(15)
                 .post(webhook)
                 .json(&webhooks_payload)
                 .send()?;

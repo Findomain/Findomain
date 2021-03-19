@@ -4,4 +4,4 @@ test.*
 *.txt
 domains
 *.csv
-*.json
+findomain.toml

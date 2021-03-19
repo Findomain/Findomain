@@ -1,5 +1,5 @@
 use {
-    crate::{args, errors::*, misc, networking, utils},
+    crate::{errors::*, misc, networking, utils::return_reqwest_client},
     postgres::NoTls,
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
@@ -186,16 +186,11 @@ impl IntoSubdomains for SubdomainsThreatminer {
     }
 }
 
-lazy_static! {
-    static ref CLIENT: reqwest::blocking::Client =
-        utils::return_reqwest_client(15, &args::get_args());
-}
-
 fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
     url: &str,
     name: &str,
 ) -> Option<HashSet<String>> {
-    match CLIENT.get(url).send() {
+    match return_reqwest_client(15).get(url).send() {
         Ok(data) => {
             if networking::check_http_response_code(&name, &data) {
                 match data.json::<T>() {
@@ -223,7 +218,8 @@ pub fn get_certspotter_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("CertSpotter")
     }
-    match CLIENT.get(url_api_certspotter).send() {
+
+    match return_reqwest_client(15).get(url_api_certspotter).send() {
         Ok(data_certspotter) => {
             if networking::check_http_response_code("CertSpotter", &data_certspotter) {
                 match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>() {
@@ -253,7 +249,7 @@ pub fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<Has
     if !quiet_flag {
         misc::show_searching_msg("Crtsh")
     }
-    match CLIENT.get(url_api_crtsh).send() {
+    match return_reqwest_client(15).get(url_api_crtsh).send() {
         Ok(data_crtsh) => {
             if networking::check_http_response_code("Crtsh", &data_crtsh) {
                 match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
@@ -288,7 +284,7 @@ pub fn get_securitytrails_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("SecurityTrails")
     }
-    match CLIENT.get(url_api_securitytrails).send() {
+    match return_reqwest_client(15).get(url_api_securitytrails).send() {
         Ok(data_securitytrails) => {
             if networking::check_http_response_code("SecurityTrails", &data_securitytrails) {
                 match data_securitytrails.json::<SubdomainsSecurityTrails>() {
@@ -476,7 +472,7 @@ pub fn get_ctsearch_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("Ctsearch")
     }
-    match CLIENT.get(url_api_ctsearch).send() {
+    match return_reqwest_client(15).get(url_api_ctsearch).send() {
         Ok(data_ctsearch) => {
             if networking::check_http_response_code("Ctsearch", &data_ctsearch) {
                 match data_ctsearch.json::<HashSet<SubdomainsCtsearch>>() {
@@ -518,10 +514,7 @@ pub fn get_archiveorg_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("Archive.org")
     }
-    match utils::return_reqwest_client(300, &args::get_args())
-        .get(url_api_archiveorg)
-        .send()
-    {
+    match return_reqwest_client(300).get(url_api_archiveorg).send() {
         Ok(data_archiveorg) => {
             if networking::check_http_response_code("Archive.org", &data_archiveorg) {
                 match data_archiveorg.json::<Vec<Vec<String>>>() {

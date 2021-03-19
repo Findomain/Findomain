@@ -147,7 +147,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
 }
 
 pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
-    let client = utils::return_reqwest_client(args.http_timeout, args);
+    let client = utils::return_reqwest_client(args.http_timeout);
     let mut data = HashMap::new();
     let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(&args);

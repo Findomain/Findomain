@@ -1,13 +1,22 @@
 use {
-    crate::structs::Args,
+    crate::{args, utils},
     headless_chrome::{Browser, LaunchOptionsBuilder},
+    rand::{seq::SliceRandom, thread_rng},
     reqwest::blocking::Client,
     std::io::{self, Read},
 };
 
-pub fn return_reqwest_client(secs: u64, args: &Args) -> Client {
+lazy_static! {
+    static ref USER_AGENTS: Vec<String> = {
+        let args = args::get_args();
+        args.user_agent_strings
+    };
+}
+
+pub fn return_reqwest_client(secs: u64) -> Client {
+    let user_agent = utils::return_random_string(USER_AGENTS.clone());
     Client::builder()
-        .user_agent(&args.user_agent)
+        .user_agent(user_agent)
         .timeout(std::time::Duration::from_secs(secs))
         .build()
         .unwrap()
@@ -59,4 +68,8 @@ pub fn read_stdin() -> Vec<String> {
     targets.sort();
     targets.dedup();
     targets
+}
+
+pub fn return_random_string(strings: Vec<String>) -> String {
+    strings.choose(&mut thread_rng()).unwrap().to_string()
 }

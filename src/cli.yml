@@ -320,3 +320,9 @@ args:
               conflicts_with:
                     - files
                     - target
+
+      - user-agents-file:
+              help: Path to file containing user agents strings.
+              long: ua
+              takes_value: true
+              multiple: false
