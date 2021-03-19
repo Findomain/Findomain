@@ -213,13 +213,20 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
 
 pub fn get_certspotter_subdomains(
     url_api_certspotter: &str,
+    certspotter_token: &str,
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
         misc::show_searching_msg("CertSpotter")
     }
 
-    match return_reqwest_client(15).get(url_api_certspotter).send() {
+    let mut request = return_reqwest_client(15).get(url_api_certspotter);
+
+    if !certspotter_token.is_empty() {
+        request = request.bearer_auth(certspotter_token);
+    }
+
+    match request.send() {
         Ok(data_certspotter) => {
             if networking::check_http_response_code("CertSpotter", &data_certspotter) {
                 match data_certspotter.json::<HashSet<SubdomainsCertSpotter>>() {

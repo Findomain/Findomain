@@ -75,6 +75,11 @@ pub fn get_args() -> Args {
             "securitytrails_token",
             String::new(),
         ),
+        certspotter_access_token: return_value_or_default(
+            &settings,
+            "certspotter_token",
+            String::new(),
+        ),
         user_agent: String::new(),
         c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
         jobname: if matches.is_present("jobname") {

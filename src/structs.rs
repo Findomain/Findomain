@@ -15,6 +15,7 @@ pub struct Args {
     pub facebook_access_token: String,
     pub virustotal_access_token: String,
     pub securitytrails_access_token: String,
+    pub certspotter_access_token: String,
     pub user_agent: String,
     pub c99_api_key: String,
     pub jobname: String,

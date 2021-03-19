@@ -47,6 +47,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
         &args.target
     );
+    let certspotter_token = args.certspotter_access_token.clone();
     let url_api_virustotal = format!(
         "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
         &args.target
@@ -79,7 +80,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     let url_api_ctsearch = format!("https://ctsearch.entrust.com/api/v1/certificates?fields=subjectDN&domain={}&includeExpired=true&exactMatch=false&limit=5000", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
         if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, quiet_flag)) },
+        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &certspotter_token,quiet_flag)) },
         if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)) },
         if args.excluded_sources.contains("virustotal") { thread::spawn(|| None) }
