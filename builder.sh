@@ -19,7 +19,7 @@ else
 fi
 
 # Linux x86 build
-echo "Building Linux artifact."
+echo "Building Linux x86 artifact."
 if cross build -q --release --target="$LINUX_X86_TARGET"; then
   echo "Linux x86 artifact build: SUCCESS"
   cp "target/$LINUX_X86_TARGET/release/findomain" "target/$LINUX_X86_TARGET/release/findomain-linux-i386"
