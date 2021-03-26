@@ -25,7 +25,7 @@ struct SubdomainsCertSpotter {
 struct SubdomainsCrtsh {
     name_value: String,
 }
-
+#[allow(clippy::upper_case_acronyms)]
 #[allow(non_snake_case)]
 struct SubdomainsDBCrtsh {
     NAME_VALUE: String,

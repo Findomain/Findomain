@@ -23,11 +23,11 @@ pub fn prepare_database(postgres_connection: &str) -> Result<()> {
               )",
         &[],
     )?;
-    update_database_schema(connection)?;
+    update_database_schema(connection);
     Ok(())
 }
 
-fn update_database_schema(mut connection: postgres::Client) -> Result<()> {
+fn update_database_schema(mut connection: postgres::Client) {
     let database_columns = vec!["ip", "http_status", "open_ports", "root_domain", "jobname"];
     for column in database_columns {
         let _ = connection
@@ -37,7 +37,6 @@ fn update_database_schema(mut connection: postgres::Client) -> Result<()> {
             )
             .is_ok();
     }
-    Ok(())
 }
 
 pub fn commit_to_db<S: ::std::hash::BuildHasher>(

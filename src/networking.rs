@@ -152,8 +152,10 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
     let mut data = HashMap::new();
     let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(&args);
-    let mut opts = ResolverOpts::default();
-    opts.timeout = Duration::from_secs(2);
+    let opts = ResolverOpts {
+        timeout: Duration::from_secs(2),
+        ..Default::default()
+    };
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
         println!(
@@ -452,8 +454,10 @@ pub fn get_resolver(resolvers: Vec<String>, opts: &ResolverOpts) -> Resolver {
 }
 
 pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
-    let mut opts = ResolverOpts::default();
-    opts.timeout = Duration::from_secs(2);
+    let opts = ResolverOpts {
+        timeout: Duration::from_secs(2),
+        ..Default::default()
+    };
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target)
     }

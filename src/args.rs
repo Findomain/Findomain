@@ -286,8 +286,5 @@ fn return_value_or_default(
     value: &str,
     default_value: String,
 ) -> String {
-    settings
-        .get(value)
-        .unwrap_or_else(|| &default_value)
-        .to_string()
+    settings.get(value).unwrap_or(&default_value).to_string()
 }
