@@ -13,7 +13,7 @@ echo "Building Linux artifact."
 if cargo build -q --release --target="$LINUX_TARGET"; then
   echo "Linux artifact build: SUCCESS"
   cp "target/$LINUX_TARGET/release/findomain" "target/$LINUX_TARGET/release/findomain-linux-amd64"
-  strip "target/$LINUX_TARGET/release/findomain-linux-amd64"
+  strip "target/$LINUX_TARGET/release/findomain-linux"
 else
   echo "Linux artifact build: FAILED"
 fi
@@ -79,10 +79,10 @@ else
   echo "Please install the help2man package."
 fi
 
-if command -v git >/dev/null; then
-  git add .
-  git commit -m "Bump version."
-  git push
-fi
+#if command -v git >/dev/null; then
+#  git add .
+#  git commit -m "Bump version."
+#  git push
+#fi
 
 echo "All builds have passed!"
