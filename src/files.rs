@@ -68,6 +68,10 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
         };
         file_targets.retain(|target| !target.is_empty() && logic::validate_target(target));
         let last_target = file_targets.last().unwrap().to_string();
+        if args.randomize {
+            let file_targets_hashet: HashSet<String> = HashSet::from_iter(file_targets.clone());
+            file_targets = file_targets_hashet.into_iter().collect()
+        }
         for domain in file_targets {
             if domain == last_target {
                 args.is_last_target = true

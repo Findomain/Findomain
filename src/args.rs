@@ -165,6 +165,13 @@ pub fn get_args() -> Args {
                 .parse::<bool>()
                 .unwrap()
         },
+        randomize: if matches.is_present("randomize") {
+            true
+        } else {
+            return_value_or_default(&settings, "randomize", false.to_string())
+                .parse::<bool>()
+                .unwrap()
+        },
         take_screenshots: matches.is_present("screenshots-path"),
         chrome_sandbox: matches.is_present("sandbox"),
         query_jobname: matches.is_present("query-jobname"),
