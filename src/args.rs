@@ -110,7 +110,7 @@ pub fn get_args() -> Args {
         threads: if matches.is_present("threads") {
             value_t!(matches, "threads", usize).unwrap_or_else(|_| 50)
         } else if matches.is_present("screenshots-path") {
-            return_value_or_default(&settings, "threads", 5.to_string())
+            return_value_or_default(&settings, "threads", 10.to_string())
                 .parse::<usize>()
                 .unwrap()
         } else {
