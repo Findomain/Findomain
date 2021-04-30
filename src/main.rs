@@ -41,40 +41,10 @@ fn run() -> Result<()> {
 }
 
 fn manage_threads(arguments: &mut Args) {
-    if arguments.discover_ip
-        || arguments.http_status
-        || arguments.enable_port_scan
-        || arguments.take_screenshots
-    {
-        if arguments.threads > 1000
-            && !arguments.enable_port_scan
-            && !arguments.unlock_threads
-            && !arguments.take_screenshots
-        {
-            if !arguments.quiet_flag {
-                println!("Number of threads too high, maximum allowed is 1000. Adjusting the number of threads from {} to 1000. Use the --unlock flag if you want to bypass this filter.", arguments.threads)
-            }
-            arguments.threads = 1000
-        } else if arguments.threads > 300
-            && arguments.enable_port_scan
-            && !arguments.unlock_threads
-            && !arguments.take_screenshots
-        {
-            if !arguments.quiet_flag {
-                println!("The maximum recommended number of threads for a good port scan process is 300. Adjusting the number of threads from {} to 300. Use the --unlock flag if you want to bypass this filter.", arguments.threads)
-            }
-            arguments.threads = 300
-        } else if arguments.threads > 5 && arguments.take_screenshots && !arguments.unlock_threads {
-            if !arguments.quiet_flag {
-                println!("The maximum recommended number of threads for a subdomains screenshots process is 5. Adjusting the number of threads from {} to 5. Use the --unlock flag if you want to bypass this filter.", arguments.threads)
-            }
-            arguments.threads = 5
-        }
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(arguments.threads)
-            .build_global()
-            .unwrap()
-    }
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(arguments.threads)
+        .build_global()
+        .unwrap()
 }
 
 fn main() {

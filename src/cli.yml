@@ -224,11 +224,6 @@ args:
                   multiple: false
                   requires:
                           - monitoring-flag
-        - unlock:
-                  help: Bypass Findomain threads limit (use with precaution).
-                  long: unlock
-                  takes_value: false
-                  multiple: false
         - no-monitor:
                   help: Disable monitoring mode while saving data to database.
                   long: no-monitor

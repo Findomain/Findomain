@@ -49,7 +49,6 @@ pub struct Args {
     pub custom_threads: bool,
     pub discover_ip: bool,
     pub verbose: bool,
-    pub unlock_threads: bool,
     pub dbpush_if_timeout: bool,
     pub no_monitor: bool,
     pub take_screenshots: bool,

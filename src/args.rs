@@ -107,17 +107,11 @@ pub fn get_args() -> Args {
         },
         screenshots_path: value_t!(matches, "screenshots-path", String)
             .unwrap_or_else(|_| String::from("screenshots")),
-        threads: if matches.is_present("threads") {
-            value_t!(matches, "threads", usize).unwrap_or_else(|_| 50)
-        } else if matches.is_present("screenshots-path") {
-            return_value_or_default(&settings, "threads", 10.to_string())
-                .parse::<usize>()
-                .unwrap()
-        } else {
+        threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| {
             return_value_or_default(&settings, "threads", 50.to_string())
                 .parse::<usize>()
                 .unwrap()
-        },
+        }),
         version: clap::crate_version!().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
@@ -166,7 +160,6 @@ pub fn get_args() -> Args {
             || matches.is_present("resolved")
             || matches.is_present("ipv6-only"),
         verbose: matches.is_present("verbose"),
-        unlock_threads: matches.is_present("unlock"),
         custom_resolvers: matches.is_present("custom-resolvers"),
         from_stdin: matches.is_present("stdin"),
         dbpush_if_timeout: if matches.is_present("dbpush-if-timeout") {
