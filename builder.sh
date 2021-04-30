@@ -41,7 +41,7 @@ fi
 # RPi 2-3 build
 echo "Building RPi artifact."
 if cross build -q --release --target="$RPI_TARGET"; then
-  echo "Windows artifact build: SUCCESS"
+  echo "RPi artifact build: SUCCESS"
   cp "target/$RPI_TARGET/release/findomain" "target/$RPI_TARGET/release/findomain-rpi"
   strip "target/$RPI_TARGET/release/findomain-rpi"
 else
