@@ -63,25 +63,43 @@ pub fn get_args() -> Args {
         telegram_bot_token: return_value_or_default(&settings, "telegrambot_token", String::new()),
         telegram_webhook: String::new(),
         telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
-        spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new()),
-        facebook_access_token: return_value_or_default(&settings, "fb_token", String::new()),
+        spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new())
+            .split(',')
+            .map(str::to_owned)
+            .collect(),
+        facebook_access_token: return_value_or_default(&settings, "fb_token", String::new())
+            .split(',')
+            .map(str::to_owned)
+            .collect(),
         virustotal_access_token: return_value_or_default(
             &settings,
             "virustotal_token",
             String::new(),
-        ),
+        )
+        .split(',')
+        .map(str::to_owned)
+        .collect(),
         securitytrails_access_token: return_value_or_default(
             &settings,
             "securitytrails_token",
             String::new(),
-        ),
+        )
+        .split(',')
+        .map(str::to_owned)
+        .collect(),
         certspotter_access_token: return_value_or_default(
             &settings,
             "certspotter_token",
             String::new(),
-        ),
+        )
+        .split(',')
+        .map(str::to_owned)
+        .collect(),
         user_agent: String::new(),
-        c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new()),
+        c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new())
+            .split(',')
+            .map(str::to_owned)
+            .collect(),
         jobname: if matches.is_present("jobname") {
             value_t!(matches, "jobname", String).unwrap_or_else(|_| String::from("findomain"))
         } else {

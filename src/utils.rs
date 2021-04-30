@@ -71,5 +71,9 @@ pub fn read_stdin() -> Vec<String> {
 }
 
 pub fn return_random_string(strings: Vec<String>) -> String {
-    strings.choose(&mut thread_rng()).unwrap().to_string()
+    if strings.is_empty() {
+        String::new()
+    } else {
+        strings.choose(&mut thread_rng()).unwrap().to_string()
+    }
 }

@@ -60,7 +60,8 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     );
     let url_api_spyse = format!(
         "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-        &args.target, &args.spyse_access_token
+        &args.target,
+        &utils::return_random_string(args.spyse_access_token.clone())
     );
     let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
@@ -80,7 +81,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     let url_api_ctsearch = format!("https://ctsearch.entrust.com/api/v1/certificates?fields=subjectDN&domain={}&includeExpired=true&exactMatch=false&limit=5000", &args.target);
     let mut all_subdomains: HashSet<String> = vec![
         if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &certspotter_token,quiet_flag)) },
+        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &utils::return_random_string(certspotter_token), quiet_flag)) },
         if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)) },
         if args.excluded_sources.contains("virustotal") { thread::spawn(|| None) }
@@ -92,7 +93,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
-                &args.facebook_access_token);
+                &utils::return_random_string(args.facebook_access_token.clone()));
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
         if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
@@ -106,7 +107,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         } else {
             let url_virustotal_apikey = format!(
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
-                &args.virustotal_access_token, &args.target
+                &utils::return_random_string(args.virustotal_access_token.clone()), &args.target
             );
             thread::spawn(move || {
                 sources::get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
@@ -121,7 +122,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         } else {
             let url_api_securitytrails = format!(
                 "https://api.securitytrails.com/v1/domain/{}/subdomains?apikey={}",
-                &args.target, &args.securitytrails_access_token
+                &args.target, &utils::return_random_string(args.securitytrails_access_token.clone())
             );
             let target = args.target.clone();
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
@@ -134,7 +135,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         else {
             let url_api_c99 = format!(
                 "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
-                &args.c99_api_key, &args.target
+                &utils::return_random_string(args.c99_api_key.clone()), &args.target
                 );
             thread::spawn(move || {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
