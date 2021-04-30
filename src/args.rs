@@ -239,7 +239,7 @@ pub fn get_args() -> Args {
             return_matches_hashset(&matches, "exclude-sources")
         } else {
             return_value_or_default(&settings, "exclude_sources", String::new())
-                .split_whitespace()
+                .split(',')
                 .map(str::to_owned)
                 .collect()
         },
