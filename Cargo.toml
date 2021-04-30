@@ -10,27 +10,27 @@ keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-su
 readme = "README.md"
 
 [dependencies]
-serde = { version = "1.0.123", features = ["derive"] }
-serde_derive = "1.0.123"
-reqwest = { version = "0.11.1", features = ["blocking", "json", "gzip"] }
-trust-dns-resolver = { version = "0.19.5", features = ["dns-over-rustls"] }
+serde = { version = "1.0.125", features = ["derive"] }
+serde_derive = "1.0.125"
+reqwest = { version = "0.11.3", features = ["blocking", "json", "gzip"] }
+trust-dns-resolver = { version = "0.20.2", features = ["dns-over-rustls"] }
 clap = { version = "2.33.3", features = ["yaml"] }
 lazy_static = "1.4.0"
-rand = "0.7.3"
-postgres = "0.19.0"
+rand = "0.8.3"
+postgres = "0.19.1"
 failure = "0.1.8"
 rayon = "1.5.0"
-config = { version = "0.10.1", features = ["yaml", "json", "toml", "hjson", "ini"] }
+config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.32", features = ["vendored"] }
+openssl = { version = "0.10.34", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.32", features = ["vendored"] }
+openssl = { version = "0.10.34", features = ["vendored"] }
 
 [target.armv7-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.32", features = ["vendored"] }
+openssl = { version = "0.10.34", features = ["vendored"] }
 
 [profile.release]
 opt-level = 'z'

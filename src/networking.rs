@@ -412,7 +412,7 @@ fn check_http_status(client: &reqwest::blocking::Client, target: &str) -> HttpSt
 
 fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
     if ipv6_only {
-        if let Ok(ip_address) = resolver.ipv6_lookup(&domain) {
+        if let Ok(ip_address) = resolver.ipv6_lookup(domain.to_string()) {
             ip_address
                 .iter()
                 .next()
@@ -421,7 +421,7 @@ fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
         } else {
             String::new()
         }
-    } else if let Ok(ip_address) = resolver.ipv4_lookup(&domain) {
+    } else if let Ok(ip_address) = resolver.ipv4_lookup(domain.to_string()) {
         ip_address
             .iter()
             .next()
@@ -447,6 +447,7 @@ pub fn get_resolver(resolvers: Vec<String>, opts: &ResolverOpts) -> Resolver {
                         .to_owned(),
                 )],
                 53,
+                false,
             ),
         ),
         *opts,
@@ -466,7 +467,11 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     for _ in 1..20 {
         generated_wilcards.insert(format!(
             "{}.{}",
-            rng().sample_iter(Alphanumeric).take(15).collect::<String>(),
+            rng()
+                .sample_iter(Alphanumeric)
+                .take(15)
+                .map(char::from)
+                .collect::<String>(),
             &args.target
         ));
     }
