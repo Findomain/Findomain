@@ -5,3 +5,4 @@ test.*
 domains
 *.csv
 findomain.toml
+configtest.toml
