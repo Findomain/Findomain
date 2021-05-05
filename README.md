@@ -23,7 +23,7 @@ When you finish your payment, you will receive an email with the server credenti
 
 ![Findomain](images/findomain.png)
 
-The fastest and cross-platform subdomain enumerator.
+The complete solution for domain recognition. Supports screenshoting, port scan, HTTP check, data import from other tools, subdomain monitoring, alerts via Discord, Slack and Telegram, multiple API Keys for sources and much more.
 
 ## Chat with us
 
