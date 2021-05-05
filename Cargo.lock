@@ -433,7 +433,7 @@ checksum = "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
 
 [[package]]
 name = "findomain"
-version = "4.1.0"
+version = "4.1.1"
 dependencies = [
  "clap",
  "config",
