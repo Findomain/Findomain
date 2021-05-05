@@ -95,8 +95,6 @@ args:
                   long: import-subdomains
                   takes_value: true
                   multiple: true
-                  requires:
-                          - monitoring-flag
         - enable-dot:
                   help: Enable DNS over TLS for resolving subdomains IPs.
                   long: enable-dot
@@ -126,8 +124,6 @@ args:
                   short: x
                   long: as-resolver
                   takes_value: false
-                  requires:
-                          - files
                   conflicts_with:
                           - query-database
                           - monitoring-flag
