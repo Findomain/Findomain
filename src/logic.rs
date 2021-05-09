@@ -53,18 +53,22 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
 }
 
 pub fn works_with_data(args: &mut Args) -> Result<()> {
-    if args.unique_output_flag && !args.from_file_flag && !args.monitoring_flag && !args.no_monitor
+    if !(!args.unique_output_flag
+        || args.from_file_flag
+        || args.from_stdin
+        || args.monitoring_flag
+        || args.no_monitor)
     {
         files::check_output_file_exists(&args.file_name)?;
         logic::manage_subdomains_data(args)?;
     } else if args.unique_output_flag
-        && args.from_file_flag
+        && (args.from_file_flag || args.from_stdin)
         && !args.monitoring_flag
         && !args.no_monitor
     {
         logic::manage_subdomains_data(args)?;
     } else if (args.monitoring_flag || args.no_monitor)
-        && !args.from_file_flag
+        && !(args.from_file_flag || args.from_stdin)
         && args.unique_output_flag
     {
         files::check_output_file_exists(&args.file_name)?;

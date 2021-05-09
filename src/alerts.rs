@@ -168,7 +168,11 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     } else if args.enable_empty_push || !new_subdomains.is_empty() {
         push_data_to_webhooks(args, &new_subdomains, resolv_data)?
     }
-    if !args.quiet_flag && args.rate_limit != 0 && args.from_file_flag && !args.is_last_target {
+    if !args.quiet_flag
+        && args.rate_limit != 0
+        && (args.from_file_flag || args.from_stdin)
+        && !args.is_last_target
+    {
         println!(
             "\nRate limit set to {} seconds, waiting to start next enumeration.",
             args.rate_limit

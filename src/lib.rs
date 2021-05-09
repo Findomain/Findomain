@@ -73,7 +73,7 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
         }
         if !args.quiet_flag
             && args.rate_limit != 0
-            && args.from_file_flag
+            && (args.from_file_flag || args.from_stdin)
             && !args.is_last_target
             && !args.monitoring_flag
             && !args.no_monitor
