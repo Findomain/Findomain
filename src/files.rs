@@ -66,14 +66,23 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
         } else {
             utils::read_stdin()
         };
+
         file_targets.retain(|target| !target.is_empty() && logic::validate_target(target));
-        let last_target = file_targets.last().unwrap().to_string();
+
+        if file_targets.is_empty() {
+            eprintln!("Could not find any valid target, please check that the file is not empty and the targets are in the format domain.tld");
+            std::process::exit(1)
+        }
+
         if args.randomize {
             let file_targets_hashet: HashSet<String> = HashSet::from_iter(file_targets.clone());
             file_targets = file_targets_hashet.into_iter().collect()
         }
-        for domain in file_targets {
-            if domain == last_target {
+
+        let mut iter = file_targets.into_iter().peekable();
+
+        while let Some(domain) = iter.next() {
+            if iter.peek().is_none() {
                 args.is_last_target = true
             }
             args.target = domain;
