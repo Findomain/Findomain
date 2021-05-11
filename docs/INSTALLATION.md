@@ -5,7 +5,8 @@ We offer binaries ready to use for the following platforms (all are for 64 bits 
 * [Linux](INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
 * [Windows](INSTALLATION.md#installation-windows)
 * [MacOS](INSTALLATION.md#installation-macos)
-* [Aarch64 (Raspberry Pi)](INSTALLATION.md#installation-aarch64-raspberry-pi)
+* [Aarch64](INSTALLATION.md#installation-aarch64)
+* [ARMv7](INSTALLATION.md#installation-armv7)
 * [NixOS](INSTALLATION.md#installation-nixos)
 * [Docker](INSTALLATION.md#installation-docker)
 
@@ -14,6 +15,17 @@ If you need to run Findomain in another platform, continue reading the documenta
 # Build for 32 bits or another platform
 
 If you want to build the tool for your 32 bits system or another platform, follow it steps:
+
+The only 32-bit platform with precompiled binaries is Linux since the 4.0.1 release, follow these steps for using the precompiled binaries:
+
+
+```
+$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386
+$ chmod +x findomain-linux-i386
+$ ./findomain-linux-i386
+```
+
+For other platforms:
 
 **Note:** You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
@@ -66,12 +78,20 @@ $ pacman -S findomain
 $ emerge -a findomain
 ```
 
-# Installation Aarch64 (Raspberry Pi)
+# Installation Aarch64
 
 ```
 $ wget https://github.com/findomain/findomain/releases/latest/download/findomain-aarch64
 $ chmod +x findomain-aarch64
 $ ./findomain-aarch64
+```
+
+# Installation ARMv7
+
+```
+$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-armv7
+$ chmod +x findomain-armv7
+$ ./findomain-armv7
 ```
 
 # Installation Windows
