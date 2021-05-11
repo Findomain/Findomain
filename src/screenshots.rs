@@ -23,7 +23,9 @@ pub fn take_screenshot(
             write(
                 Path::new(&format!(
                     "{}/{}/{}.jpeg",
-                    screenshots_dir, root_domain, output_image
+                    screenshots_dir,
+                    root_domain,
+                    output_image.replace(":", "_")
                 )),
                 &jpeg_data,
             )?

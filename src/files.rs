@@ -56,8 +56,7 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             } else {
                 HashSet::from_iter(utils::read_stdin())
             };
-            args.subdomains
-                .retain(|target| !target.is_empty() && logic::validate_target(target));
+            args.subdomains.retain(|target| !target.is_empty()); // && logic::validate_target(target));
             logic::manage_subdomains_data(args)?
         }
     } else {
