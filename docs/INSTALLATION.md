@@ -17,7 +17,7 @@ If you want to build the tool for your 32 bits system or another platform, follo
 
 **Note:** You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
-1. Clone the [repository](https://github.com/Edu4rdSHL/findomain) or download the [release source code](https://github.com/Edu4rdSHL/findomain/releases).
+1. Clone the [repository](https://github.com/findomain/findomain) or download the [release source code](https://github.com/findomain/findomain/releases).
 2. Extract the release source code (only needed if you downloaded the compressed file).
 3. Go to the folder where the source code is.
 4. Execute `cargo build --release`
@@ -41,7 +41,7 @@ If you want to install it, you can do that manually compiling the source or usin
 You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
 ```bash
-$ git clone https://github.com/Edu4rdSHL/findomain.git
+$ git clone https://github.com/findomain/findomain.git
 $ cd findomain
 $ cargo build --release
 $ sudo cp target/release/findomain /usr/bin/
@@ -51,7 +51,7 @@ $ findomain
 # Installation in Linux using compiled artifacts
 
 ```
-$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux
+$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux
 $ chmod +x findomain-linux
 $ ./findomain-linux
 ```
@@ -69,14 +69,14 @@ $ emerge -a findomain
 # Installation Aarch64 (Raspberry Pi)
 
 ```
-$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-aarch64
+$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-aarch64
 $ chmod +x findomain-aarch64
 $ ./findomain-aarch64
 ```
 
 # Installation Windows
 
-Download the binary from https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-windows.exe
+Download the binary from https://github.com/findomain/findomain/releases/latest/download/findomain-windows.exe
 
 Open a CMD shell and go to the dir where findomain-windows.exe was downloaded.
 
@@ -96,7 +96,7 @@ $ findomain
 **Manually from the repo:**
 
 ```
-$ wget https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-osx
+$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-osx
 $ chmod +x findomain-osx.dms
 $ ./findomain-osx.dms
 ```
@@ -142,9 +142,9 @@ In in section you can found the steps about how to configure APIs that need or c
 
 **History**
 
-When I added the [Facebook CT API](https://developers.facebook.com/docs/certificate-transparency-api) in the beginning I was providing a [Webhook token](https://developers.facebook.com/docs/certificate-transparency/certificates-webhook) to search in the API, as consequence when a lot of users were using the same token the limit was reached and user can't search in the Facebook API anymore until Facebook unlocked it again. Since Findomain version 0.2.2, users can set their own Facebook Access Token for the webook and pass it to findomain setting the `findomain_fb_token` system variable. The change was introduced [here](https://github.com/Edu4rdSHL/findomain/commit/1716e264e2b15c96c67b692b80b32c78fe9aaf9a). Also since 23/08/2019 I have removed the webhook that was providing that API token and it will not work anymore, if you're using findomain < 0.2.2 you are affected, please use a version >= 0.2.2.
+When I added the [Facebook CT API](https://developers.facebook.com/docs/certificate-transparency-api) in the beginning I was providing a [Webhook token](https://developers.facebook.com/docs/certificate-transparency/certificates-webhook) to search in the API, as consequence when a lot of users were using the same token the limit was reached and user can't search in the Facebook API anymore until Facebook unlocked it again. Since Findomain version 0.2.2, users can set their own Facebook Access Token for the webook and pass it to findomain setting the `findomain_fb_token` system variable. The change was introduced [here](https://github.com/findomain/findomain/commit/1716e264e2b15c96c67b692b80b32c78fe9aaf9a). Also since 23/08/2019 I have removed the webhook that was providing that API token and it will not work anymore, if you're using findomain < 0.2.2 you are affected, please use a version >= 0.2.2.
 
-Since Findomain 0.2.4 you don't need to explicity set the `findomain_fb_token` variable in your system, if you don't set that variable then Findomain will use one of our provided access tokens for the Facebook CT API, otherwise, if you set the environment variable then Findomain will use your token. See [it commit](https://github.com/Edu4rdSHL/findomain/commit/226575c370e32979a16fd377dfea1db10ca38f3b). **Please, if you can create your own token, do it. The usage limit of access tokens is reached when a lot of people use it and then the tool will fail.**
+Since Findomain 0.2.4 you don't need to explicity set the `findomain_fb_token` variable in your system, if you don't set that variable then Findomain will use one of our provided access tokens for the Facebook CT API, otherwise, if you set the environment variable then Findomain will use your token. See [it commit](https://github.com/findomain/findomain/commit/226575c370e32979a16fd377dfea1db10ca38f3b). **Please, if you can create your own token, do it. The usage limit of access tokens is reached when a lot of people use it and then the tool will fail.**
 
 **Getting the Webhook token**
 
@@ -365,7 +365,7 @@ $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX
 
 See `findomain -h/--help` to see all the options.
 
-For subdomains monitoring examples [Subdomains Monitoring](https://github.com/Edu4rdSHL/findomain/blob/master/README.md#subdomains-monitoring) for more information.
+For subdomains monitoring examples [Subdomains Monitoring](https://github.com/findomain/findomain/blob/master/README.md#subdomains-monitoring) for more information.
 
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
