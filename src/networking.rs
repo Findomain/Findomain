@@ -277,7 +277,7 @@ fn async_resolver_engine(
             Ok(_) => (),
             Err(_) => {
                 let mut counter = 0;
-                while counter <= 3 {
+                while counter <= 2 {
                     match screenshots::take_screenshot(
                         utils::return_headless_browser(args.chrome_sandbox),
                         &resolv_data.http_status.host_url,
@@ -390,8 +390,16 @@ fn async_resolver_engine(
 }
 
 fn check_http_status(client: &reqwest::blocking::Client, target: &str) -> HttpStatus {
-    let http_url = format!("http://{}", target);
-    let https_url = format!("https://{}", target);
+    let http_url = if target.starts_with("http://") {
+        target.to_string()
+    } else {
+        format!("http://{}", target)
+    };
+    let https_url = if target.starts_with("https://") {
+        target.to_string()
+    } else {
+        format!("https://{}", target)
+    };
     if client.get(&https_url).send().is_ok() {
         HttpStatus {
             http_status: String::from("ACTIVE"),
