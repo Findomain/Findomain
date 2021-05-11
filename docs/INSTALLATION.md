@@ -14,7 +14,7 @@ If you need to run Findomain in another platform, continue reading the documenta
 
 # Build for 32 bits or another platform
 
-If you want to build the tool for your 32 bits system or another platform, follow it steps:
+## Binaries
 
 The only 32-bit platform with precompiled binaries is Linux since the 4.0.1 release, follow these steps for using the precompiled binaries:
 
@@ -25,7 +25,7 @@ $ chmod +x findomain-linux-i386
 $ ./findomain-linux-i386
 ```
 
-For other platforms:
+If you want to build the tool for your 32 bits system or another platform, follow these steps:
 
 **Note:** You need to have [rust](https://rust-lang.org), [make](http://www.gnu.org/software/make) and [perl](https://www.perl.org/) installed in your system first.
 
