@@ -6,3 +6,4 @@ domains
 *.csv
 findomain.toml
 configtest.toml
+/screenshots

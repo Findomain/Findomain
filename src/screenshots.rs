@@ -25,7 +25,10 @@ pub fn take_screenshot(
                     "{}/{}/{}.jpeg",
                     screenshots_dir,
                     root_domain,
-                    output_image.replace(":", "_")
+                    output_image
+                        .replace("https://", "")
+                        .replace("http://", "")
+                        .replace(":", "_")
                 )),
                 &jpeg_data,
             )?
