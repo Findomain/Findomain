@@ -12,6 +12,7 @@ use {
         thread,
         time::Duration,
     },
+    trust_dns_resolver::Resolver,
 };
 
 fn push_data_to_webhooks(
@@ -83,7 +84,7 @@ fn push_data_to_webhooks(
     Ok(())
 }
 
-pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
+pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
     let mut new_subdomains = HashSet::new();
     if args.with_imported_subdomains {
         let mut imported_subdomains =
@@ -129,7 +130,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
         }
     };
 
-    let resolv_data = networking::async_resolver_all(&args);
+    let resolv_data = networking::async_resolver_all(&args, resolver);
 
     for (sub, resolv_data) in &resolv_data {
         new_subdomains.insert(format!(

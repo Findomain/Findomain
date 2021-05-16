@@ -4,16 +4,15 @@ use {
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
-    rand::{distributions::Alphanumeric, seq::SliceRandom, thread_rng as rng, Rng},
+    rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
     rayon::prelude::*,
     std::{
         collections::{HashMap, HashSet},
-        net::{IpAddr, Ipv4Addr},
+        net::{Ipv4Addr, SocketAddr},
         thread,
-        time::Duration,
     },
     trust_dns_resolver::{
-        config::{NameServerConfigGroup, ResolverConfig, ResolverOpts},
+        config::{NameServerConfig, NameServerConfigGroup, Protocol, ResolverConfig, ResolverOpts},
         Resolver,
     },
 };
@@ -148,15 +147,11 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     all_subdomains
 }
 
-pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
+pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, ResolvData> {
     let client = utils::return_reqwest_client(args.http_timeout);
     let mut data = HashMap::new();
     let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(&args);
-    let opts = ResolverOpts {
-        timeout: Duration::from_secs(2),
-        ..Default::default()
-    };
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
         println!(
@@ -172,13 +167,7 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
             async_resolver_engine(
                 &args,
                 sub.to_owned(),
-                if !args.no_resolve
-                    && (args.discover_ip || args.http_status || args.enable_port_scan)
-                {
-                    Some(get_resolver(RESOLVERS.clone(), &opts))
-                } else {
-                    None
-                },
+                &resolver,
                 &client,
                 &scannet_hosts,
                 &file_name,
@@ -189,13 +178,7 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
             let resolv_data = async_resolver_engine(
                 &args,
                 sub.to_owned(),
-                if !args.no_resolve
-                    && (args.discover_ip || args.http_status || args.enable_port_scan)
-                {
-                    Some(get_resolver(RESOLVERS.clone(), &opts))
-                } else {
-                    None
-                },
+                &resolver,
                 &client,
                 &scannet_hosts,
                 &file_name,
@@ -211,7 +194,7 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
 fn async_resolver_engine(
     args: &Args,
     sub: String,
-    domain_resolver: Option<trust_dns_resolver::Resolver>,
+    domain_resolver: &trust_dns_resolver::Resolver,
     client: &reqwest::blocking::Client,
     resolved_hosts: &HashMap<String, Vec<i32>>,
     file_name: &Option<std::fs::File>,
@@ -242,11 +225,7 @@ fn async_resolver_engine(
                 let ip = if args.no_resolve {
                     String::new()
                 } else {
-                    get_ip(
-                        &domain_resolver.unwrap(),
-                        &format!("{}.", sub),
-                        args.ipv6_only,
-                    )
+                    get_ip(&domain_resolver, &format!("{}.", sub), args.ipv6_only)
                 };
                 if args.enable_port_scan && !args.no_resolve {
                     timeout = utils::calculate_timeout(
@@ -461,34 +440,26 @@ fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
     }
 }
 
-pub fn get_resolver(resolvers: Vec<String>, opts: &ResolverOpts) -> Resolver {
-    Resolver::new(
-        ResolverConfig::from_parts(
-            None,
-            vec![],
-            NameServerConfigGroup::from_ips_clear(
-                &[IpAddr::V4(
-                    resolvers
-                        .choose(&mut rng())
-                        .expect("Failed to read ipv4 address")
-                        .parse::<Ipv4Addr>()
-                        .expect("Failed to parse ipv4 address")
-                        .to_owned(),
-                )],
-                53,
-                false,
-            ),
-        ),
-        *opts,
-    )
-    .unwrap()
+pub fn get_resolver(nameserver_ips: HashSet<SocketAddr>, opts: ResolverOpts) -> Resolver {
+    let mut name_servers = NameServerConfigGroup::with_capacity(nameserver_ips.len() * 2);
+    name_servers.extend(nameserver_ips.into_iter().flat_map(|socket_addr| {
+        std::iter::once(NameServerConfig {
+            socket_addr,
+            protocol: Protocol::Udp,
+            tls_dns_name: None,
+            trust_nx_responses: false,
+        })
+        .chain(std::iter::once(NameServerConfig {
+            socket_addr,
+            protocol: Protocol::Tcp,
+            tls_dns_name: None,
+            trust_nx_responses: false,
+        }))
+    }));
+    Resolver::new(ResolverConfig::from_parts(None, vec![], name_servers), opts).unwrap()
 }
 
-pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
-    let opts = ResolverOpts {
-        timeout: Duration::from_secs(2),
-        ..Default::default()
-    };
+pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> {
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target)
     }
@@ -506,13 +477,7 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     }
     generated_wilcards = generated_wilcards
         .par_iter()
-        .map(|sub| {
-            get_ip(
-                &get_resolver(RESOLVERS.clone(), &opts),
-                &format!("{}.", sub),
-                args.ipv6_only,
-            )
-        })
+        .map(|sub| get_ip(resolver, &format!("{}.", sub), args.ipv6_only))
         .collect();
     generated_wilcards.retain(|ip| !ip.is_empty());
     if !generated_wilcards.is_empty() && !args.quiet_flag {
@@ -541,4 +506,34 @@ pub fn check_http_response_code(api_name: &str, response: &reqwest::blocking::Re
         };
         false
     }
+}
+
+pub fn return_socket_address(args: &Args) -> HashSet<SocketAddr> {
+    let mut resolver_ips = HashSet::new();
+    if args.custom_resolvers {
+        for r in &files::return_file_targets(&args, args.resolvers.clone()) {
+            let server = r.to_owned() + ":53";
+            let socket_addr = SocketAddr::V4(match server.parse() {
+                Ok(a) => a,
+                Err(e) => unreachable!(
+                    "Error parsing the server {}, only IPv4 are allowed. Error: {}",
+                    r, e
+                ),
+            });
+            resolver_ips.insert(socket_addr);
+        }
+    } else {
+        for r in &args.resolvers {
+            let server = r.to_owned() + ":53";
+            let socket_addr = SocketAddr::V4(match server.parse() {
+                Ok(a) => a,
+                Err(e) => unreachable!(
+                    "Error parsing the server {}, only IPv4 are allowed. Error: {}",
+                    r, e
+                ),
+            });
+            resolver_ips.insert(socket_addr);
+        }
+    }
+    resolver_ips
 }
