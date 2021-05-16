@@ -282,3 +282,11 @@ args:
                   multiple: false
                   conflicts_with:
                           - target
+        - no-resolve:
+                  help: Disable pre-screenshotting jobs (http check and ip discover) when used as resolver to take screenshots.
+                  long: no-resolve
+                  takes_value: false
+                  multiple: false
+                  requires:
+                          - as-resolver
+                          - screenshots-path

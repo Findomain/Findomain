@@ -56,7 +56,22 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             } else {
                 HashSet::from_iter(utils::read_stdin())
             };
+            if args.no_resolve {
+                args.subdomains.retain(|target| {
+                    target.starts_with("https://") || target.starts_with("http://")
+                });
+                if args.subdomains.is_empty() {
+                    eprintln!("You have used the --no-resolve flag but targets doesn't contains a valid URL schema. Please make sure that they starts with https:// or http://, leaving.");
+                    std::process::exit(1)
+                }
+            }
             args.subdomains.retain(|target| !target.is_empty()); // && logic::validate_target(target));
+            if args.subdomains.is_empty() {
+                eprintln!(
+                    "Could not find any valid target, please check that the file is not empty."
+                );
+                std::process::exit(1)
+            }
             logic::manage_subdomains_data(args)?
         }
     } else {

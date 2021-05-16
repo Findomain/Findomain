@@ -172,7 +172,9 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
             async_resolver_engine(
                 &args,
                 sub.to_owned(),
-                if args.discover_ip || args.http_status || args.enable_port_scan {
+                if !args.no_resolve
+                    && (args.discover_ip || args.http_status || args.enable_port_scan)
+                {
                     Some(get_resolver(RESOLVERS.clone(), &opts))
                 } else {
                     None
@@ -187,7 +189,9 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
             let resolv_data = async_resolver_engine(
                 &args,
                 sub.to_owned(),
-                if args.discover_ip || args.http_status || args.enable_port_scan {
+                if !args.no_resolve
+                    && (args.discover_ip || args.http_status || args.enable_port_scan)
+                {
                     Some(get_resolver(RESOLVERS.clone(), &opts))
                 } else {
                     None
@@ -229,18 +233,22 @@ fn async_resolver_engine(
 
     let mut resolv_data = {
         ResolvData {
-            ip: if args.enable_port_scan || args.discover_ip {
+            ip: if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
                 let rtimeout = if args.enable_port_scan {
                     Some(std::time::Instant::now())
                 } else {
                     None
                 };
-                let ip = get_ip(
-                    &domain_resolver.unwrap(),
-                    &format!("{}.", sub),
-                    args.ipv6_only,
-                );
-                if args.enable_port_scan {
+                let ip = if args.no_resolve {
+                    String::new()
+                } else {
+                    get_ip(
+                        &domain_resolver.unwrap(),
+                        &format!("{}.", sub),
+                        args.ipv6_only,
+                    )
+                };
+                if args.enable_port_scan && !args.no_resolve {
                     timeout = utils::calculate_timeout(
                         args.threads,
                         rtimeout.unwrap().elapsed().as_millis() as u64,
@@ -258,15 +266,19 @@ fn async_resolver_engine(
         }
     };
 
-    if args.http_status && !resolv_data.ip.is_empty() {
+    if args.http_status && !resolv_data.ip.is_empty() && !args.no_resolve {
         resolv_data.http_status = check_http_status(client, &sub)
-    } else if args.http_status && resolv_data.ip.is_empty() {
+    } else if args.http_status && resolv_data.ip.is_empty() && !args.no_resolve {
         resolv_data.http_status.http_status = String::from("INACTIVE")
     } else {
         resolv_data.http_status.http_status = String::from("NOT CHECKED")
     }
 
-    if args.take_screenshots && !resolv_data.http_status.host_url.is_empty() {
+    if args.no_resolve {
+        resolv_data.http_status.host_url = sub.clone()
+    }
+
+    if args.take_screenshots && !resolv_data.http_status.host_url.is_empty() || args.no_resolve {
         match screenshots::take_screenshot(
             utils::return_headless_browser(args.chrome_sandbox),
             &resolv_data.http_status.host_url,
@@ -274,7 +286,11 @@ fn async_resolver_engine(
             &args.target,
             &sub,
         ) {
-            Ok(_) => (),
+            Ok(_) => {
+                if args.no_resolve {
+                    println!("{}", resolv_data.http_status.host_url)
+                }
+            }
             Err(_) => {
                 let mut counter = 0;
                 while counter <= 2 {
@@ -285,7 +301,12 @@ fn async_resolver_engine(
                         &args.target,
                         &sub,
                     ) {
-                        Ok(_) => break,
+                        Ok(_) => {
+                            if args.no_resolve {
+                                println!("{}", resolv_data.http_status.host_url)
+                            };
+                            break;
+                        }
                         Err(e) => {
                             if counter == 3 {
                                 eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, resolv_data.http_status.host_url, e)

@@ -186,6 +186,7 @@ pub fn get_args() -> Args {
         take_screenshots: matches.is_present("screenshots-path"),
         chrome_sandbox: matches.is_present("sandbox"),
         query_jobname: matches.is_present("query-jobname"),
+        no_resolve: matches.is_present("no-resolve"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
         wordlists: return_matches_vec(&matches, "wordlists"),

@@ -56,6 +56,7 @@ pub struct Args {
     pub custom_resolvers: bool,
     pub from_stdin: bool,
     pub randomize: bool,
+    pub no_resolve: bool,
     pub files: Vec<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
