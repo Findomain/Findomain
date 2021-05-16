@@ -13,7 +13,8 @@ readme = "README.md"
 serde = { version = "1.0.125", features = ["derive"] }
 serde_derive = "1.0.125"
 reqwest = { version = "0.11.3", features = ["blocking", "json", "gzip"] }
-trust-dns-resolver = { version = "0.20.2", features = ["dns-over-rustls"] }
+# trust-dns-resolver = { version = "0.20.2", features = ["dns-over-rustls"] }
+trust-dns-resolver = { git = "https://github.com/Edu4rdSHL/trust-dns", branch = "main" }
 clap = { version = "2.33.3", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.3"
