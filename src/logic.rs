@@ -6,7 +6,6 @@ use {
         structs::{Args, HttpStatus},
         utils,
     },
-    lazy_static,
     postgres::{Client, NoTls},
     std::time::{Duration, Instant},
     trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
