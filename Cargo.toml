@@ -20,7 +20,7 @@ lazy_static = "1.4.0"
 rand = "0.8.3"
 postgres = "0.19.1"
 failure = "0.1.8"
-rayon = "1.5.0"
+rayon = "1.5.1"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 
