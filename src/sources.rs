@@ -192,7 +192,7 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
 ) -> Option<HashSet<String>> {
     match return_reqwest_client(15).get(url).send() {
         Ok(data) => {
-            if networking::check_http_response_code(&name, &data) {
+            if networking::check_http_response_code(name, &data) {
                 match data.json::<T>() {
                     Ok(json) => Some(json.into_subdomains()),
                     Err(e) => {
@@ -356,7 +356,7 @@ pub fn get_crtsh_db_subdomains(
                     "❌ A error has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
                     e);
                 }
-                get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
+                get_crtsh_subdomains(url_api_crtsh, quiet_flag)
             }
         },
         Err(e) => {
@@ -366,7 +366,7 @@ pub fn get_crtsh_db_subdomains(
                 e
             );
             }
-            get_crtsh_subdomains(&url_api_crtsh, quiet_flag)
+            get_crtsh_subdomains(url_api_crtsh, quiet_flag)
         }
     }
 }

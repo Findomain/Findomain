@@ -28,7 +28,7 @@ fn push_data_to_webhooks(
     if !args.discord_webhook.is_empty() {
         discord_parameters.insert(
             "content",
-            misc::return_webhook_payload(&new_subdomains, "discord", &args.target),
+            misc::return_webhook_payload(new_subdomains, "discord", &args.target),
         );
         webhooks_data.insert(&args.discord_webhook, discord_parameters);
     }
@@ -36,7 +36,7 @@ fn push_data_to_webhooks(
     if !args.slack_webhook.is_empty() {
         slack_parameters.insert(
             "text",
-            misc::return_webhook_payload(&new_subdomains, "slack", &args.target),
+            misc::return_webhook_payload(new_subdomains, "slack", &args.target),
         );
         webhooks_data.insert(&args.slack_webhook, slack_parameters);
     }
@@ -44,7 +44,7 @@ fn push_data_to_webhooks(
     if !args.telegram_webhook.is_empty() {
         telegram_parameters.insert(
             "text",
-            misc::return_webhook_payload(&new_subdomains, "telegram", &args.target),
+            misc::return_webhook_payload(new_subdomains, "telegram", &args.target),
         );
         telegram_parameters.insert("chat_id", args.telegram_chat_id.clone());
         telegram_parameters.insert("parse_mode", "HTML".to_string());
@@ -66,7 +66,7 @@ fn push_data_to_webhooks(
                         Client::connect(&args.postgres_connection, NoTls)?,
                         &subdomains_data,
                         &args.target,
-                        &args,
+                        args,
                     )
                     .is_ok()
                 {
@@ -92,7 +92,7 @@ pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
         imported_subdomains.retain(|target| !target.is_empty() && logic::validate_target(target));
         let base_target = &format!(".{}", args.target);
         imported_subdomains.retain(|target| {
-            !target.is_empty() && logic::validate_subdomain(&base_target, &target, args)
+            !target.is_empty() && logic::validate_subdomain(base_target, target, args)
         });
         for subdomain in imported_subdomains {
             args.subdomains.insert(subdomain);
@@ -130,7 +130,7 @@ pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
         }
     };
 
-    let resolv_data = networking::async_resolver_all(&args, resolver);
+    let resolv_data = networking::async_resolver_all(args, resolver);
 
     for (sub, resolv_data) in &resolv_data {
         new_subdomains.insert(format!(
@@ -163,7 +163,7 @@ pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
                 Client::connect(&args.postgres_connection, NoTls)?,
                 &resolv_data,
                 &args.target,
-                &args,
+                args,
             )?
         }
     } else if args.enable_empty_push || !new_subdomains.is_empty() {

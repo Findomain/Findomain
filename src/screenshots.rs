@@ -12,7 +12,7 @@ pub fn take_screenshot(
     root_domain: &str,
     output_image: &str,
 ) -> Fallible<()> {
-    if files::check_image_path(&screenshots_dir, &root_domain) {
+    if files::check_image_path(screenshots_dir, root_domain) {
         if let Ok(jpeg_data) = browser
             .wait_for_initial_tab()?
             .set_default_timeout(std::time::Duration::from_secs(60))

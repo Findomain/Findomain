@@ -143,7 +143,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         if args.excluded_sources.contains("ctsearch") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_ctsearch_subdomains(&url_api_ctsearch, quiet_flag)) },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
-    all_subdomains.retain(|sub| logic::validate_subdomain(&base_target, &sub, args));
+    all_subdomains.retain(|sub| logic::validate_subdomain(base_target, sub, args));
     all_subdomains
 }
 
@@ -151,7 +151,7 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
     let client = utils::return_reqwest_client(args.http_timeout);
     let mut data = HashMap::new();
     let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
-    let file_name = files::return_output_file(&args);
+    let file_name = files::return_output_file(args);
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
         println!(
@@ -165,7 +165,7 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
     if !args.enable_port_scan {
         data.par_extend(args.subdomains.par_iter().map(|sub| {
             async_resolver_engine(
-                &args,
+                args,
                 sub.to_owned(),
                 &resolver,
                 &client,
@@ -176,7 +176,7 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
     } else {
         data.extend(args.subdomains.iter().map(|sub| {
             let resolv_data = async_resolver_engine(
-                &args,
+                args,
                 sub.to_owned(),
                 &resolver,
                 &client,
@@ -225,7 +225,7 @@ fn async_resolver_engine(
                 let ip = if args.no_resolve {
                     String::new()
                 } else {
-                    get_ip(&domain_resolver, &format!("{}.", sub), args.ipv6_only)
+                    get_ip(domain_resolver, &format!("{}.", sub), args.ipv6_only)
                 };
                 if args.enable_port_scan && !args.no_resolve {
                     timeout = utils::calculate_timeout(
@@ -322,9 +322,9 @@ fn async_resolver_engine(
                 sub,
                 &resolv_data.ip,
                 &logic::eval_http(&resolv_data.http_status),
-                logic::return_ports_string(&resolv_data.open_ports, &args)
+                logic::return_ports_string(&resolv_data.open_ports, args)
             );
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if http_with_ip {
         if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
@@ -336,7 +336,7 @@ fn async_resolver_engine(
                 &resolv_data.ip,
                 &logic::eval_http(&resolv_data.http_status)
             );
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if only_resolved_or_ip {
         if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
@@ -347,7 +347,7 @@ fn async_resolver_engine(
             } else {
                 data_to_write = format!("{},{}", sub, resolv_data.ip);
             }
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if http_without_ip_with_ports {
         if resolv_data.http_status.http_status == "ACTIVE" {
@@ -355,14 +355,14 @@ fn async_resolver_engine(
                 "{},{},{}",
                 sub,
                 &logic::eval_http(&resolv_data.http_status),
-                logic::return_ports_string(&resolv_data.open_ports, &args)
+                logic::return_ports_string(&resolv_data.open_ports, args)
             );
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if only_http {
         if resolv_data.http_status.http_status == "ACTIVE" {
             data_to_write = logic::eval_http(&resolv_data.http_status);
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if ports_with_ip {
         if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
@@ -372,19 +372,19 @@ fn async_resolver_engine(
                 "{},{},{}",
                 sub,
                 resolv_data.ip,
-                logic::return_ports_string(&resolv_data.open_ports, &args)
+                logic::return_ports_string(&resolv_data.open_ports, args)
             );
-            logic::print_and_write(data_to_write, args.with_output, &file_name)
+            logic::print_and_write(data_to_write, args.with_output, file_name)
         }
     } else if only_ports && !resolv_data.open_ports.is_empty() {
         data_to_write = format!(
             "{},{}",
             sub,
-            logic::return_ports_string(&resolv_data.open_ports, &args)
+            logic::return_ports_string(&resolv_data.open_ports, args)
         );
-        logic::print_and_write(data_to_write, args.with_output, &file_name)
+        logic::print_and_write(data_to_write, args.with_output, file_name)
     } else if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {
-        logic::print_and_write(sub.to_string(), args.with_output, &file_name)
+        logic::print_and_write(sub.to_string(), args.with_output, file_name)
     }
     (sub, resolv_data)
 }
@@ -511,7 +511,7 @@ pub fn check_http_response_code(api_name: &str, response: &reqwest::blocking::Re
 pub fn return_socket_address(args: &Args) -> HashSet<SocketAddr> {
     let mut resolver_ips = HashSet::new();
     if args.custom_resolvers {
-        for r in &files::return_file_targets(&args, args.resolvers.clone()) {
+        for r in &files::return_file_targets(args, args.resolvers.clone()) {
             let server = r.to_owned() + ":53";
             let socket_addr = SocketAddr::V4(match server.parse() {
                 Ok(a) => a,
