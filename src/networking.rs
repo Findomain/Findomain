@@ -1,6 +1,6 @@
 use {
     crate::{
-        args, files, logic, port_scanner, screenshots, sources,
+        args, external_subs, files, logic, port_scanner, screenshots, sources,
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
@@ -8,6 +8,7 @@ use {
     rayon::prelude::*,
     std::{
         collections::{HashMap, HashSet},
+        fs,
         net::{Ipv4Addr, SocketAddr},
         thread,
     },
@@ -78,7 +79,25 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     );
     let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
     let url_api_ctsearch = format!("https://ctsearch.entrust.com/api/v1/certificates?fields=subjectDN&domain={}&includeExpired=true&exactMatch=false&limit=5000", &args.target);
+    let amass_target = args.target.clone();
+    let subfinder_target = args.target.clone();
+    let external_subdomains_dir_amass = args.external_subdomains_dir_amass.clone();
+    let external_subdomains_dir_subfinder = args.external_subdomains_dir_subfinder.clone();
+
+    if args.external_subdomains {
+        fs::create_dir_all(&args.external_subdomains_dir_amass)
+            .expect("Failed to create amass output directory.");
+        fs::create_dir_all(&args.external_subdomains_dir_subfinder)
+            .expect("Failed to create subfinder output directory.");
+    }
+
     let mut all_subdomains: HashSet<String> = vec![
+        if args.external_subdomains {
+            thread::spawn(move || external_subs::get_amass_subdomains(&amass_target, external_subdomains_dir_amass, quiet_flag))
+        } else { thread::spawn(|| None) },
+        if args.external_subdomains {
+            thread::spawn(move || external_subs::get_subfinder_subdomains(&subfinder_target, external_subdomains_dir_subfinder, quiet_flag))
+        }  else { thread::spawn(|| None) },
         if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &utils::return_random_string(certspotter_token), quiet_flag)) },
         if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
@@ -155,8 +174,8 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
         println!(
-            "Performing asynchronous resolution for {} subdomains with {} threads, it will take a while. 🧐\n",
-            args.subdomains.len(), args.threads
+            "Performing asynchronous resolution for {} subdomains for the target {}, it will take a while. 🧐\n",
+            args.subdomains.len(), args.target
         )
     }
     if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {

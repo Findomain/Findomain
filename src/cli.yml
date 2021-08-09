@@ -290,3 +290,9 @@ args:
                   requires:
                           - as-resolver
                           - screenshots-path
+
+        - external-subdomains:
+                  help: Get external subdomains with amass and subfinder.
+                  long: external-subdomains
+                  takes_value: false
+                  multiple: false

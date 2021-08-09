@@ -11,6 +11,7 @@ pub mod structs;
 
 mod alerts;
 mod database;
+mod external_subs;
 mod logic;
 mod misc;
 mod networking;

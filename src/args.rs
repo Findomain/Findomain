@@ -107,6 +107,8 @@ pub fn get_args() -> Args {
         },
         screenshots_path: value_t!(matches, "screenshots-path", String)
             .unwrap_or_else(|_| String::from("screenshots")),
+        external_subdomains_dir_amass: String::from("external_subdomains/amass"),
+        external_subdomains_dir_subfinder: String::from("external_subdomains/subfinder"),
         threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| {
             return_value_or_default(&settings, "threads", 50.to_string())
                 .parse::<usize>()
@@ -187,6 +189,7 @@ pub fn get_args() -> Args {
         chrome_sandbox: matches.is_present("sandbox"),
         query_jobname: matches.is_present("query-jobname"),
         no_resolve: matches.is_present("no-resolve"),
+        external_subdomains: matches.is_present("external-subdomains"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
         wordlists: return_matches_vec(&matches, "wordlists"),

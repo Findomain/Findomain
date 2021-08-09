@@ -152,3 +152,17 @@ pub fn check_image_path(screenshots_dir: &str, target: &str) -> bool {
     (Path::new(&full_path).exists() && Path::new(&full_path).is_dir())
         || fs::create_dir_all(&full_path).is_ok()
 }
+
+pub fn check_no_empty(filename: &str) -> bool {
+    let mut lines: Vec<String> = BufReader::new(File::open(filename).unwrap())
+        .lines()
+        .map(|x| x.unwrap())
+        .collect();
+    lines.retain(|x| !x.is_empty());
+    !lines.is_empty()
+}
+
+pub fn check_full_path(full_path: &str) -> bool {
+    (Path::new(full_path).exists() && Path::new(full_path).is_dir())
+        || fs::create_dir_all(full_path).is_ok()
+}
