@@ -467,12 +467,14 @@ pub fn get_resolver(nameserver_ips: HashSet<SocketAddr>, opts: ResolverOpts) -> 
             protocol: Protocol::Udp,
             tls_dns_name: None,
             trust_nx_responses: false,
+            tls_config: None,
         })
         .chain(std::iter::once(NameServerConfig {
             socket_addr,
             protocol: Protocol::Tcp,
             tls_dns_name: None,
             trust_nx_responses: false,
+            tls_config: None,
         }))
     }));
     Resolver::new(ResolverConfig::from_parts(None, vec![], name_servers), opts).unwrap()
