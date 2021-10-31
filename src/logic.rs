@@ -24,7 +24,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
         println!()
     };
     let opts = ResolverOpts {
-        timeout: Duration::from_secs(2),
+        timeout: Duration::from_secs(5),
         ip_strategy: LookupIpStrategy::Ipv4Only,
         num_concurrent_reqs: 1,
         ..Default::default()
@@ -63,7 +63,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
 
 pub fn works_with_data(args: &mut Args) -> Result<()> {
     let opts = ResolverOpts {
-        timeout: Duration::from_secs(2),
+        timeout: Duration::from_secs(5),
         ip_strategy: LookupIpStrategy::Ipv4Only,
         num_concurrent_reqs: 1,
         ..Default::default()
@@ -130,19 +130,19 @@ pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut Args) -
         && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
         && subdomain.chars().all(|c| c.is_ascii())
-        && if args.filter_by_string.is_empty() {
+        && if args.filter_by_string.is_empty() && args.exclude_by_string.is_empty() {
             true
-        } else {
+        } else if !args.filter_by_string.is_empty() {
             args.filter_by_string
                 .iter()
                 .any(|key| subdomain.contains(key))
-        }
-        && if args.exclude_by_string.is_empty() {
-            true
-        } else {
-            args.exclude_by_string
+        } else if !args.exclude_by_string.is_empty() {
+            !args
+                .exclude_by_string
                 .iter()
-                .any(|key| !subdomain.contains(key))
+                .any(|key| subdomain.contains(key))
+        } else {
+            false
         }
 }
 
