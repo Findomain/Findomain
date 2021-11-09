@@ -8,6 +8,7 @@ repository = "https://github.com/edu4rdshl/findomain"
 license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
+rust-version = "1.56"
 
 [dependencies]
 serde = { version = "1.0.126", features = ["derive"] }
