@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "5.0.0"
+version = "5.0.1"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
@@ -9,6 +9,7 @@ license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
 rust-version = "1.56"
+resolver = "1"
 
 [dependencies]
 serde = { version = "1.0.126", features = ["derive"] }
