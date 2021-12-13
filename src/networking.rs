@@ -19,23 +19,19 @@ use {
 };
 
 lazy_static! {
-    static ref RESOLVERS: Vec<String> = {
+    pub static ref RESOLVERS: Vec<String> = {
         let args = args::get_args();
+        let mut resolver_ips = Vec::new();
         if args.custom_resolvers {
-            let resolverlist = files::return_file_targets(&args, args.resolvers.clone());
-            for r in &resolverlist {
-                match r.parse::<Ipv4Addr>() {
-                    Ok(_) => (),
-                    Err(e) => {
-                        eprintln!("Error parsing the {} IP from resolvers file to IP address. Please check and try again. Error: {}", r, e);
-                        std::process::exit(1)
-                    }
-                }
+            for r in files::return_file_targets(&args, args.resolvers.clone()) {
+                resolver_ips.push(r.to_string() + ":53");
             }
-            resolverlist
         } else {
-            args.resolvers
+            for r in args.resolvers {
+                resolver_ips.push(r.to_string() + ":53");
+            }
         }
+        resolver_ips
     };
 }
 
@@ -459,25 +455,41 @@ fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
     }
 }
 
-pub fn get_resolver(nameserver_ips: HashSet<SocketAddr>, opts: ResolverOpts) -> Resolver {
+pub fn get_resolver(nameserver_ips: &[String], opts: &ResolverOpts) -> Resolver {
     let mut name_servers = NameServerConfigGroup::with_capacity(nameserver_ips.len() * 2);
-    name_servers.extend(nameserver_ips.into_iter().flat_map(|socket_addr| {
+    name_servers.extend(nameserver_ips.iter().flat_map(|server| {
+        let socket_addr = SocketAddr::V4(match server.parse() {
+            Ok(a) => a,
+            Err(e) => unreachable!(
+                "Error parsing the server {}, only IPv4 are allowed. Error: {}",
+                server, e
+            ),
+        });
         std::iter::once(NameServerConfig {
             socket_addr,
             protocol: Protocol::Udp,
             tls_dns_name: None,
             trust_nx_responses: false,
-            tls_config: None,
         })
         .chain(std::iter::once(NameServerConfig {
             socket_addr,
             protocol: Protocol::Tcp,
             tls_dns_name: None,
             trust_nx_responses: false,
-            tls_config: None,
         }))
     }));
-    Resolver::new(ResolverConfig::from_parts(None, vec![], name_servers), opts).unwrap()
+
+    match Resolver::new(
+        ResolverConfig::from_parts(None, vec![], name_servers),
+        *opts,
+    ) {
+        Ok(resolver) => resolver,
+
+        Err(e) => {
+            eprintln!("Failed to create the resolver. Error: {}\n", e);
+            std::process::exit(1)
+        }
+    }
 }
 
 pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> {
@@ -527,34 +539,4 @@ pub fn check_http_response_code(api_name: &str, response: &reqwest::blocking::Re
         };
         false
     }
-}
-
-pub fn return_socket_address(args: &Args) -> HashSet<SocketAddr> {
-    let mut resolver_ips = HashSet::new();
-    if args.custom_resolvers {
-        for r in &files::return_file_targets(args, args.resolvers.clone()) {
-            let server = r.to_owned() + ":53";
-            let socket_addr = SocketAddr::V4(match server.parse() {
-                Ok(a) => a,
-                Err(e) => unreachable!(
-                    "Error parsing the server {}, only IPv4 are allowed. Error: {}",
-                    r, e
-                ),
-            });
-            resolver_ips.insert(socket_addr);
-        }
-    } else {
-        for r in &args.resolvers {
-            let server = r.to_owned() + ":53";
-            let socket_addr = SocketAddr::V4(match server.parse() {
-                Ok(a) => a,
-                Err(e) => unreachable!(
-                    "Error parsing the server {}, only IPv4 are allowed. Error: {}",
-                    r, e
-                ),
-            });
-            resolver_ips.insert(socket_addr);
-        }
-    }
-    resolver_ips
 }

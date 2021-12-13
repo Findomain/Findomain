@@ -7,6 +7,7 @@ use {
         utils,
     },
     addr::parse_domain_name,
+    networking::RESOLVERS,
     postgres::{Client, NoTls},
     std::time::{Duration, Instant},
     trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
@@ -25,13 +26,14 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
         println!()
     };
     let opts = ResolverOpts {
-        timeout: Duration::from_secs(5),
+        attempts: 0,
+        timeout: Duration::from_secs(3),
         ip_strategy: LookupIpStrategy::Ipv4Only,
         num_concurrent_reqs: 1,
         ..Default::default()
     };
 
-    let resolver = networking::get_resolver(networking::return_socket_address(args), opts);
+    let resolver = networking::get_resolver(&RESOLVERS, &opts);
 
     if (args.only_resolved || args.with_ip || args.ipv6_only)
         && !args.disable_wildcard_check
@@ -64,13 +66,14 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
 
 pub fn works_with_data(args: &mut Args) -> Result<()> {
     let opts = ResolverOpts {
-        timeout: Duration::from_secs(5),
+        attempts: 0,
+        timeout: Duration::from_secs(3),
         ip_strategy: LookupIpStrategy::Ipv4Only,
         num_concurrent_reqs: 1,
         ..Default::default()
     };
 
-    let resolver = networking::get_resolver(networking::return_socket_address(args), opts);
+    let resolver = networking::get_resolver(&RESOLVERS, &opts);
 
     if !(!args.unique_output_flag
         || args.from_file_flag

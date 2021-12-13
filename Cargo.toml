@@ -15,7 +15,7 @@ resolver = "1"
 serde = { version = "1.0.131", features = ["derive"] }
 serde_derive = "1.0.131"
 reqwest = { version = "0.11.7", features = ["blocking", "json", "gzip"] }
-trust-dns-resolver = { version = "0.20.3", features = ["dns-over-rustls"] }
+trust-dns-resolver = { version = "0.20.3" }
 clap = { version = "2.34.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.4"
