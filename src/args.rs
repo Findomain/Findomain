@@ -190,6 +190,7 @@ pub fn get_args() -> Args {
         query_jobname: matches.is_present("query-jobname"),
         no_resolve: matches.is_present("no-resolve"),
         external_subdomains: matches.is_present("external-subdomains"),
+        validate_subdomains: matches.is_present("validate-subdomains"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
         wordlists: return_matches_vec(&matches, "wordlists"),

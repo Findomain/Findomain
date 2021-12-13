@@ -1,9 +1,14 @@
 use {
     findomain::{
-        args, errors::*, files::read_from_file, files::return_file_targets, get_subdomains,
+        args,
+        errors::*,
+        files::{read_from_file, return_file_targets, string_to_file},
+        get_subdomains,
+        logic::validate_target,
         structs::Args,
+        utils,
     },
-    std::{collections::HashSet, iter::FromIterator},
+    std::{collections::HashSet, fs::OpenOptions, iter::FromIterator, path::Path},
 };
 
 fn run() -> Result<()> {
@@ -19,6 +24,38 @@ fn run() -> Result<()> {
         eprintln!("Wait, you are filtering and excluding exactly the same keywords? Please check and try again. \nFiltering keywords: {:?} \nExcluding keywords: {:?}", arguments.filter_by_string, arguments.exclude_by_string);
         std::process::exit(1)
     }
+
+    if arguments.validate_subdomains {
+        arguments.subdomains =
+            HashSet::from_iter(return_file_targets(&arguments, arguments.files.clone()));
+        arguments.subdomains.retain(|sub| validate_target(sub));
+        for subdomain in &arguments.subdomains {
+            println!("{}", subdomain)
+        }
+
+        if arguments.unique_output_flag {
+            let total_subs_file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(&arguments.file_name);
+
+            let total_subs_file_exists =
+                Path::new(&arguments.file_name).exists() && total_subs_file.is_ok();
+
+            if total_subs_file_exists {
+                string_to_file(
+                    utils::hashset_to_string("\n", arguments.subdomains.clone()),
+                    total_subs_file.unwrap(),
+                )?;
+                println!(
+                    "\nValidated subdomains were written to {}. Good luck!",
+                    arguments.file_name
+                )
+            }
+        }
+        std::process::exit(0)
+    }
+
     manage_threads(&mut arguments);
     if arguments.bruteforce {
         if !arguments.discover_ip && !arguments.http_status && !arguments.enable_port_scan {

@@ -60,6 +60,7 @@ pub struct Args {
     pub randomize: bool,
     pub no_resolve: bool,
     pub external_subdomains: bool,
+    pub validate_subdomains: bool,
     pub files: Vec<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,

@@ -7,19 +7,19 @@ extern crate lazy_static;
 pub mod args;
 pub mod errors;
 pub mod files;
+pub mod logic;
 pub mod structs;
+pub mod utils;
 
 mod alerts;
 mod database;
 mod external_subs;
-mod logic;
 mod misc;
 mod networking;
 mod port_scanner;
 mod resolvers;
 mod screenshots;
 mod sources;
-mod utils;
 
 use {
     crate::{errors::*, structs::Args},

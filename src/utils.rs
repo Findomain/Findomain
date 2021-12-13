@@ -3,7 +3,10 @@ use {
     headless_chrome::{Browser, LaunchOptionsBuilder},
     rand::{seq::SliceRandom, thread_rng},
     reqwest::blocking::Client,
-    std::io::{self, Read},
+    std::{
+        collections::HashSet,
+        io::{self, Read},
+    },
 };
 
 lazy_static! {
@@ -76,4 +79,8 @@ pub fn return_random_string(strings: Vec<String>) -> String {
     } else {
         strings.choose(&mut thread_rng()).unwrap().to_string()
     }
+}
+
+pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
+    hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }

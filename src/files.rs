@@ -166,3 +166,11 @@ pub fn check_full_path(full_path: &str) -> bool {
     (Path::new(full_path).exists() && Path::new(full_path).is_dir())
         || fs::create_dir_all(full_path).is_ok()
 }
+
+pub fn string_to_file(mut data: String, mut file: File) -> Result<()> {
+    if !data.ends_with('\n') && !data.ends_with("\r\n") {
+        data += "\n";
+    }
+    file.write_all(data.as_bytes())?;
+    Ok(())
+}

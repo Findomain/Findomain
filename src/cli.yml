@@ -296,3 +296,11 @@ args:
                   long: external-subdomains
                   takes_value: false
                   multiple: false
+
+        - validate-subdomains:
+                  help: Validate all the subdomains from the specified file.
+                  long: validate
+                  takes_value: false
+                  multiple: false
+                  requires:
+                          - files
