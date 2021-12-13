@@ -4,7 +4,7 @@ version = "5.0.1"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
-repository = "https://github.com/edu4rdshl/findomain"
+repository = "https://github.com/Findomain/Findomain"
 license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
@@ -24,6 +24,7 @@ failure = "0.1.8"
 rayon = "1.5.1"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
+addr = "0.15.2"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.38", features = ["vendored"] }

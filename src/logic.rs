@@ -6,6 +6,7 @@ use {
         structs::{Args, HttpStatus},
         utils,
     },
+    addr::parse_domain_name,
     postgres::{Client, NoTls},
     std::time::{Duration, Instant},
     trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
@@ -109,6 +110,7 @@ pub fn works_with_data(args: &mut Args) -> Result<()> {
 pub fn validate_target(target: &str) -> bool {
     !target.starts_with('.')
         && target.contains('.')
+        && parse_domain_name(target).is_ok()
         && !target.contains(&SPECIAL_CHARS[..])
         && target.chars().all(|c| c.is_ascii())
 }
@@ -130,6 +132,7 @@ pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut Args) -
         && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
         && subdomain.chars().all(|c| c.is_ascii())
+        && parse_domain_name(subdomain).is_ok()
         && if args.filter_by_string.is_empty() && args.exclude_by_string.is_empty() {
             true
         } else if !args.filter_by_string.is_empty() {
