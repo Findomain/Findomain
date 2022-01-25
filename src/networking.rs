@@ -59,7 +59,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         &args.target,
         &utils::return_random_string(args.spyse_access_token.clone())
     );
-    let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
+    //  let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
@@ -112,8 +112,8 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         },
         if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
-        if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
+        // if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
+        // else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
         if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)) },
         if args.excluded_sources.contains("virustotalapikey") || args.virustotal_access_token.is_empty() {

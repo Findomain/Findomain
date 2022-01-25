@@ -415,15 +415,15 @@ pub fn get_anubisdb_subdomains(
     get_from_http_api::<HashSet<String>>(url_api_anubisdb, "AnubisDB")
 }
 
-pub fn get_bufferover_subdomains(
-    url_api_bufferover: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("Bufferover")
-    }
-    get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover")
-}
+// pub fn get_bufferover_subdomains(
+//     url_api_bufferover: &str,
+//     quiet_flag: bool,
+// ) -> Option<HashSet<String>> {
+//     if !quiet_flag {
+//         misc::show_searching_msg("Bufferover")
+//     }
+//     get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover")
+// }
 
 pub fn get_threatcrowd_subdomains(
     url_api_threatcrowd: &str,

@@ -40,7 +40,7 @@ pub fn return_webhook_payload(
                     "**Findomain alert:** {} new subdomains found for {}\n```{}```",
                     &new_subdomains.len(),
                     &target,
-                    webhooks_payload.split_at(1900).0.to_string()
+                    webhooks_payload.split_at(1900).0
                 )
             } else {
                 format!(
@@ -56,7 +56,7 @@ pub fn return_webhook_payload(
                     "*Findomain alert:* {} new subdomains found for {}\n```{}```",
                     &new_subdomains.len(),
                     &target,
-                    webhooks_payload.split_at(15000).0.to_string()
+                    webhooks_payload.split_at(15000).0
                 )
             } else {
                 format!(
@@ -72,7 +72,7 @@ pub fn return_webhook_payload(
                     "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
                     &new_subdomains.len(),
                     &target,
-                    webhooks_payload.split_at(4000).0.to_string()
+                    webhooks_payload.split_at(4000).0
                 )
             } else {
                 format!(
