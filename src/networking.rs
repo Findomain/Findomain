@@ -336,7 +336,8 @@ fn async_resolver_engine(
             }
         }
         })
-    }).collect()
+        }).collect::<()>();
+        drop(screenshots_pool);
     }
 
     // if args.enable_port_scan && !resolv_data.ip.is_empty() {
@@ -536,10 +537,17 @@ pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> 
             &args.target
         ));
     }
-    generated_wilcards = generated_wilcards
-        .par_iter()
-        .map(|sub| get_ip(resolver, &format!("{}.", sub), args.ipv6_only))
-        .collect();
+    let wildcards_tasks_pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(20)
+        .build()
+        .unwrap();
+    generated_wilcards = wildcards_tasks_pool.install(|| {
+        generated_wilcards
+            .par_iter()
+            .map(|sub| get_ip(resolver, &format!("{}.", sub), args.ipv6_only))
+            .collect()
+    });
+    drop(wildcards_tasks_pool);
     generated_wilcards.retain(|ip| !ip.is_empty());
     if !generated_wilcards.is_empty() && !args.quiet_flag {
         println!(
