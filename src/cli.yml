@@ -107,8 +107,16 @@ args:
                           - ip
                           - resolved
         - threads:
-                  help: Number of threads to use to perform subdomains resolution.
+                  help: Number of threads to use for lightweight tasks such as IP discovery and HTTP checks. Deprecated option, use --lighweight-threads instead. This would be removed in the future.
                   long: threads
+                  takes_value: true
+        - lightweight-threads:
+                  help: Number of threads to use for lightweight tasks such as IP discovery and HTTP checks.
+                  long: lightweight-threads
+                  takes_value: true
+        - screenshots-threads:
+                  help: Number of threads to use to use for taking screenshots.
+                  long: screenshots-threads
                   takes_value: true
         - custom-resolvers:
                   help: Path to a file (or files) containing a list of DNS IP address. If no specified then Google, Cloudflare and Quad9 DNS servers are used.

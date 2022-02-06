@@ -125,14 +125,13 @@ pub fn get_args() -> Args {
             .unwrap_or_else(|_| String::from("screenshots")),
         external_subdomains_dir_amass: String::from("external_subdomains/amass"),
         external_subdomains_dir_subfinder: String::from("external_subdomains/subfinder"),
-        threads: value_t!(matches, "threads", usize).unwrap_or_else(|_| {
-            return_value_or_default(&settings, "threads", 50.to_string())
-                .parse::<usize>()
-                .unwrap()
-        }),
         version: clap::crate_version!().to_string(),
         database_checker_counter: 0,
         commit_to_db_counter: 0,
+        // let's keep compatibility with the deprecated --threads option, for now...
+        lightweight_threads: value_t!(matches, "lightweight-threads", usize)
+            .unwrap_or_else(|_| value_t!(matches, "threads", usize).unwrap_or(100)),
+        screenshots_threads: value_t!(matches, "screenshots-threads", usize).unwrap_or(10),
         rate_limit: if matches.is_present("rate-limit") {
             value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 5)
         } else {
