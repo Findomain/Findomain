@@ -191,7 +191,7 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
     url: &str,
     name: &str,
 ) -> Option<HashSet<String>> {
-    match return_reqwest_client(15).get(url).send() {
+    match return_reqwest_client(60).get(url).send() {
         Ok(data) => {
             if networking::check_http_response_code(name, &data) {
                 match data.json::<T>() {
@@ -221,7 +221,7 @@ pub fn get_certspotter_subdomains(
         misc::show_searching_msg("CertSpotter")
     }
 
-    let mut request = return_reqwest_client(15).get(url_api_certspotter);
+    let mut request = return_reqwest_client(60).get(url_api_certspotter);
 
     if !certspotter_token.is_empty() {
         request = request.bearer_auth(certspotter_token);
@@ -257,7 +257,7 @@ pub fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<Has
     if !quiet_flag {
         misc::show_searching_msg("Crtsh")
     }
-    match return_reqwest_client(15).get(url_api_crtsh).send() {
+    match return_reqwest_client(60).get(url_api_crtsh).send() {
         Ok(data_crtsh) => {
             if networking::check_http_response_code("Crtsh", &data_crtsh) {
                 match data_crtsh.json::<HashSet<SubdomainsCrtsh>>() {
@@ -292,7 +292,7 @@ pub fn get_securitytrails_subdomains(
     if !quiet_flag {
         misc::show_searching_msg("SecurityTrails")
     }
-    match return_reqwest_client(15).get(url_api_securitytrails).send() {
+    match return_reqwest_client(60).get(url_api_securitytrails).send() {
         Ok(data_securitytrails) => {
             if networking::check_http_response_code("SecurityTrails", &data_securitytrails) {
                 match data_securitytrails.json::<SubdomainsSecurityTrails>() {
@@ -416,7 +416,7 @@ pub fn get_spyse_subdomains(
     headers.insert(header::ACCEPT, "application/json".parse().unwrap());
     headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
 
-    let mut request_builder = return_reqwest_client(15).post(url);
+    let mut request_builder = return_reqwest_client(60).post(url);
     request_builder = request_builder.headers(headers);
     request_builder = request_builder.bearer_auth(api_key);
 
@@ -460,7 +460,7 @@ pub fn get_bufferover_subdomains(
     if !quiet_flag {
         misc::show_searching_msg(name)
     }
-    let mut request_builder = return_reqwest_client(15).get(url);
+    let mut request_builder = return_reqwest_client(60).get(url);
     request_builder = request_builder.header(
         HeaderName::from_lowercase(b"x-api-key").expect("Failed to set x-api-key for BufferOver"),
         api_key,
