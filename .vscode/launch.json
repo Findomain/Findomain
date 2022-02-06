@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceRoot}/target/debug/${workspaceRootFolderName}",
-            "args": "-f hosts.txt -s asus --no-resolve -x",
+            "args": "-t asus.com",
             "cwd": "${workspaceRoot}",
             "sourceLanguages": [
                 "rust"

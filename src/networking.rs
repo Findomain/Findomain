@@ -37,7 +37,7 @@ lazy_static! {
 
 pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     let quiet_flag = args.quiet_flag;
-    let base_target = &format!(".{}", args.target);
+    let base_target = format!(".{}", args.target);
 
     let url_api_certspotter = format!(
         "https://api.certspotter.com/v1/issuances?domain={}&include_subdomains=true&expand=dns_names",
@@ -49,11 +49,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     let url_api_sublist3r = format!(
         "https://api.sublist3r.com/search.php?domain={}",
         &args.target
-    );
-    let url_api_spyse = format!(
-        "https://api.spyse.com/v1/subdomains?domain={}&api_token={}",
-        &args.target,
-        &utils::return_random_string(args.spyse_access_token.clone())
     );
     let url_api_threatcrowd = format!(
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
@@ -103,7 +98,11 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
         if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
+        else {
+            let target = base_target.clone();
+            let spyse_api_key = utils::return_random_string(args.spyse_access_token.clone());
+            thread::spawn(move || sources::get_spyse_subdomains(&target, "Spyse", &spyse_api_key, quiet_flag))
+        },
         if args.excluded_sources.contains("bufferover_free") || args.bufferover_free_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_bufferover = format!("https://tls.bufferover.run/dns?q={}", &args.target);
@@ -158,7 +157,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
             })
         },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
-    all_subdomains.retain(|sub| logic::validate_subdomain(base_target, sub, args));
+    all_subdomains.retain(|sub| logic::validate_subdomain(&base_target, sub, args));
     all_subdomains
 }
 
