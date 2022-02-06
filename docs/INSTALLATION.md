@@ -171,12 +171,13 @@ Since Findomain 0.2.4 you don't need to explicity set the `findomain_fb_token` v
 The first step is get your Facebook application token. You need to create a Webhook, follow the next steps:
 
 1. Open https://developers.facebook.com/apps/
-2. Click in "Create App", put the name that you want and send the information.
-3. In the next screen, select "Configure" in the Webhooks option.
-4. Go to "Configuration" -> "Basic" and click on "Show" in the "App secret key" option.
-5. Now open in your browser the following URL: https://graph.facebook.com/oauth/access_token?client_id=your-app-id&client_secret=your-secret-key&grant_type=client_credentials
+2. Click in "Create App", select "None" and then "Next".
+3. Put the "Display name" that you want and click "Next".
+4. In the next screen, search for "Webhooks" and click on "Set up".
+5. Go to "Configuration" -> "Basic" and click on "Show" in the "App secret key" option.
+6. Now open in your browser the following URL: https://graph.facebook.com/oauth/access_token?client_id={your-app-id}&client_secret={your-secret-key}&grant_type=client_credentials
 
-**Note:** replace `your-app-id` by the number of your webhook identifier and `your-secret-key` for the key that you got in the 4th step.
+**Note:** replace `{your-app-id}` by the number of your webhook identifier and `{your-secret-key}` for the key that you got in the 4th step.
 
 6. You should have a JSON like:
 
