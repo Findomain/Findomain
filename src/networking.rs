@@ -238,10 +238,6 @@ fn async_resolver_engine(
         .num_threads(args.lightweight_threads)
         .build()
         .unwrap();
-    println!(
-        "Ligweigth threads used: {}",
-        lightweight_tasks_pool.current_num_threads()
-    );
     let resolv_data: HashMap<String, ResolvData> = lightweight_tasks_pool.install(|| {
         subdomains
             .par_iter()
@@ -298,10 +294,6 @@ fn async_resolver_engine(
             .num_threads(args.screenshots_threads)
             .build()
             .unwrap();
-        println!(
-            "Screenshots threads used: {}",
-            screenshots_pool.current_num_threads()
-        );
         screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, resolv_data)| {
         if !resolv_data.http_status.host_url.is_empty() || args.no_resolve {
             match screenshots::take_screenshot(
