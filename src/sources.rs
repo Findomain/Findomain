@@ -158,12 +158,6 @@ struct SubdomainsThreatminer {
 }
 
 #[derive(Deserialize, Eq, PartialEq, Hash)]
-pub struct SubdomainsCtsearch {
-    #[serde(rename = "subjectDN")]
-    pub subject_dn: String,
-}
-
-#[derive(Deserialize, Eq, PartialEq, Hash)]
 struct SubdomainsC99 {
     subdomain: String,
 }
@@ -494,48 +488,6 @@ pub fn get_c99_subdomains(url_api_c99: &str, quiet_flag: bool) -> Option<HashSet
         misc::show_searching_msg("C99")
     }
     get_from_http_api::<ResponseDataC99>(url_api_c99, "C99")
-}
-
-pub fn get_ctsearch_subdomains(
-    url_api_ctsearch: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("Ctsearch")
-    }
-    match return_reqwest_client(15).get(url_api_ctsearch).send() {
-        Ok(data_ctsearch) => {
-            if networking::check_http_response_code("Ctsearch", &data_ctsearch) {
-                match data_ctsearch.json::<HashSet<SubdomainsCtsearch>>() {
-                    Ok(domains_ctsearch) => Some(
-                        domains_ctsearch
-                            .iter()
-                            .map(|sub| {
-                                let str_vec =
-                                    sub.subject_dn.split(&['=', ','][..]).collect::<Vec<&str>>();
-                                if str_vec.len() > 1 {
-                                    str_vec[1]
-                                } else {
-                                    ""
-                                }
-                            })
-                            .map(str::to_owned)
-                            .collect(),
-                    ),
-                    Err(e) => {
-                        check_json_errors(e, "Ctsearch");
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        }
-        Err(e) => {
-            check_request_errors(e, "Ctsearch");
-            None
-        }
-    }
 }
 
 pub fn get_archiveorg_subdomains(

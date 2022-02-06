@@ -170,7 +170,6 @@ args:
                           - threatminer
                           - archiveorg
                           - c99
-                          - ctsearch
                           - bufferover_free
                           - bufferover_paid
         - http-status:

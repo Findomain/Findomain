@@ -69,7 +69,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         &args.target
     );
     let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
-    let url_api_ctsearch = format!("https://ctsearch.entrust.com/api/v1/certificates?fields=subjectDN&domain={}&includeExpired=true&exactMatch=false&limit=5000", &args.target);
     let amass_target = args.target.clone();
     let subfinder_target = args.target.clone();
     let external_subdomains_dir_amass = args.external_subdomains_dir_amass.clone();
@@ -158,8 +157,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
         },
-        if args.excluded_sources.contains("ctsearch") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_ctsearch_subdomains(&url_api_ctsearch, quiet_flag)) },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
     all_subdomains.retain(|sub| logic::validate_subdomain(base_target, sub, args));
     all_subdomains
