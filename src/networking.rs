@@ -1,6 +1,6 @@
 use {
     crate::{
-        args, external_subs, files, logic, port_scanner, screenshots, sources,
+        args, external_subs, files, logic, screenshots, sources,
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
@@ -9,7 +9,7 @@ use {
     std::{
         collections::{HashMap, HashSet},
         fs,
-        net::{Ipv4Addr, SocketAddr},
+        net::SocketAddr,
         thread,
     },
     trust_dns_resolver::{
@@ -164,7 +164,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
 pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, ResolvData> {
     let client = utils::return_reqwest_client(args.http_timeout);
     let mut data = HashMap::new();
-    let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
+    //  let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(args);
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
@@ -183,22 +183,21 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
                 sub.to_owned(),
                 &resolver,
                 &client,
-                &scannet_hosts,
+                //    &scannet_hosts,
                 &file_name,
             )
         }));
     } else {
         data.extend(args.subdomains.iter().map(|sub| {
-            let resolv_data = async_resolver_engine(
+            //  scannet_hosts.insert(resolv_data.1.ip.clone(), resolv_data.1.open_ports.clone());
+            async_resolver_engine(
                 args,
                 sub.to_owned(),
                 &resolver,
                 &client,
-                &scannet_hosts,
+                //       &scannet_hosts,
                 &file_name,
-            );
-            scannet_hosts.insert(resolv_data.1.ip.clone(), resolv_data.1.open_ports.clone());
-            resolv_data
+            )
         }))
     }
     data
@@ -210,7 +209,7 @@ fn async_resolver_engine(
     sub: String,
     domain_resolver: &trust_dns_resolver::Resolver,
     client: &reqwest::blocking::Client,
-    resolved_hosts: &HashMap<String, Vec<i32>>,
+    // resolved_hosts: &HashMap<String, Vec<i32>>,
     file_name: &Option<std::fs::File>,
 ) -> (String, ResolvData) {
     let ip_http_ports = args.discover_ip && args.http_status && args.enable_port_scan;
@@ -226,27 +225,27 @@ fn async_resolver_engine(
     }
     #[allow(unused_assignments)]
     let mut data_to_write = String::new();
-    let mut timeout: u64 = 0;
+    // let mut timeout: u64 = 0;
 
     let mut resolv_data = {
         ResolvData {
             ip: if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
-                let rtimeout = if args.enable_port_scan {
-                    Some(std::time::Instant::now())
-                } else {
-                    None
-                };
+                // let rtimeout = if args.enable_port_scan {
+                //     Some(std::time::Instant::now())
+                // } else {
+                //     None
+                // };
                 let ip = if args.no_resolve {
                     String::new()
                 } else {
                     get_ip(domain_resolver, &format!("{}.", sub), args.ipv6_only)
                 };
-                if args.enable_port_scan && !args.no_resolve {
-                    timeout = utils::calculate_timeout(
-                        args.threads,
-                        rtimeout.unwrap().elapsed().as_millis() as u64,
-                    );
-                }
+                // if args.enable_port_scan && !args.no_resolve {
+                //     timeout = utils::calculate_timeout(
+                //         args.threads,
+                //         rtimeout.unwrap().elapsed().as_millis() as u64,
+                //     );
+                // }
                 ip
             } else {
                 String::from("NOT CHECKED")
@@ -312,20 +311,20 @@ fn async_resolver_engine(
         }
     }
 
-    if args.enable_port_scan && !resolv_data.ip.is_empty() {
-        if !resolved_hosts.contains_key(&resolv_data.ip) {
-            resolv_data.open_ports = port_scanner::return_open_ports(
-                &ports,
-                resolv_data
-                    .ip
-                    .parse::<Ipv4Addr>()
-                    .expect("Error parsing IP address, please report the issue."),
-                timeout,
-            )
-        } else {
-            resolv_data.open_ports = resolved_hosts.get(&resolv_data.ip).unwrap().to_owned()
-        }
-    };
+    // if args.enable_port_scan && !resolv_data.ip.is_empty() {
+    //     if !resolved_hosts.contains_key(&resolv_data.ip) {
+    //         resolv_data.open_ports = port_scanner::return_open_ports(
+    //             &ports,
+    //             resolv_data
+    //                 .ip
+    //                 .parse::<Ipv4Addr>()
+    //                 .expect("Error parsing IP address, please report the issue."),
+    //             timeout,
+    //         )
+    //     } else {
+    //         resolv_data.open_ports = resolved_hosts.get(&resolv_data.ip).unwrap().to_owned()
+    //     }
+    // };
 
     if ip_http_ports {
         if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
