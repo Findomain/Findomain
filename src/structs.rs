@@ -18,6 +18,8 @@ pub struct Args {
     pub certspotter_access_token: Vec<String>,
     pub user_agent: String,
     pub c99_api_key: Vec<String>,
+    pub bufferover_free_api_key: Vec<String>,
+    pub bufferover_paid_api_key: Vec<String>,
     pub jobname: String,
     pub screenshots_path: String,
     pub external_subdomains_dir_amass: String,

@@ -1,6 +1,7 @@
 use {
     crate::{errors::*, misc, networking, utils::return_reqwest_client},
     postgres::NoTls,
+    reqwest::header::HeaderName,
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
 };
@@ -83,14 +84,15 @@ impl IntoSubdomains for ResponseDataSpyse {
 }
 
 #[derive(Deserialize)]
-#[allow(non_snake_case)]
+#[serde(rename_all = "camelCase")]
 struct SubdomainsBufferover {
-    FDNS_A: HashSet<String>,
+    #[serde(rename = "Results")]
+    results: HashSet<String>,
 }
 
 impl IntoSubdomains for SubdomainsBufferover {
     fn into_subdomains(self) -> HashSet<String> {
-        self.FDNS_A
+        self.results
             .iter()
             .map(|sub| sub.split(','))
             .flatten()
@@ -371,16 +373,6 @@ pub fn get_crtsh_db_subdomains(
     }
 }
 
-pub fn get_virustotal_subdomains(
-    url_api_virustotal: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg("Virustotal")
-    }
-    get_from_http_api::<ResponseDataVirusTotal>(url_api_virustotal, "Virustotal")
-}
-
 pub fn get_sublist3r_subdomains(
     url_api_sublist3r: &str,
     quiet_flag: bool,
@@ -415,15 +407,47 @@ pub fn get_anubisdb_subdomains(
     get_from_http_api::<HashSet<String>>(url_api_anubisdb, "AnubisDB")
 }
 
-// pub fn get_bufferover_subdomains(
-//     url_api_bufferover: &str,
-//     quiet_flag: bool,
-// ) -> Option<HashSet<String>> {
-//     if !quiet_flag {
-//         misc::show_searching_msg("Bufferover")
-//     }
-//     get_from_http_api::<SubdomainsBufferover>(url_api_bufferover, "Bufferover")
-// }
+pub fn get_bufferover_subdomains(
+    url: &str,
+    name: &str,
+    api_key: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg(name)
+    }
+    let mut request_builder = return_reqwest_client(15).get(url);
+    request_builder = request_builder.header(
+        HeaderName::from_lowercase(b"x-api-key").expect("Failed to set x-api-key for BufferOver"),
+        api_key,
+    );
+    if name == "BufferOver Paid" {
+        request_builder = request_builder.header(
+            HeaderName::from_lowercase(b"x-rapidapi-host")
+                .expect("Failed to set x-rapidapi-host for BufferOver"),
+            "bufferover-run-tls.p.rapidapi.com",
+        );
+    }
+    match request_builder.send() {
+        Ok(data) => {
+            if networking::check_http_response_code(name, &data) {
+                match data.json::<SubdomainsBufferover>() {
+                    Ok(json) => Some(json.into_subdomains()),
+                    Err(e) => {
+                        check_json_errors(e, name);
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        }
+        Err(e) => {
+            check_request_errors(e, name);
+            None
+        }
+    }
+}
 
 pub fn get_threatcrowd_subdomains(
     url_api_threatcrowd: &str,

@@ -44,10 +44,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         &args.target
     );
     let certspotter_token = args.certspotter_access_token.clone();
-    let url_api_virustotal = format!(
-        "https://www.virustotal.com/ui/domains/{}/subdomains?limit=40",
-        &args.target
-    );
     let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &args.target);
     let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &args.target);
     let url_api_sublist3r = format!(
@@ -59,7 +55,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         &args.target,
         &utils::return_random_string(args.spyse_access_token.clone())
     );
-    //  let url_api_bufferover = format!("http://dns.bufferover.run/dns?q={}", &args.target);
     let url_api_threatcrowd = format!(
         "https://threatcrowd.org/searchApi/v2/domain/report/?domain={}",
         &args.target
@@ -98,11 +93,9 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &utils::return_random_string(certspotter_token), quiet_flag)) },
         if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)) },
-        if args.excluded_sources.contains("virustotal") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_virustotal_subdomains(&url_api_virustotal, quiet_flag)) },
         if args.excluded_sources.contains("sublist3r") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_sublist3r_subdomains(&url_api_sublist3r, quiet_flag)) },
-        if args.excluded_sources.contains("facebook") || args.facebook_access_token.is_empty() { thread::spawn(|| None)
+        if args.facebook_access_token.is_empty() || args.excluded_sources.contains("facebook") { thread::spawn(|| None) 
         } else {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
@@ -112,8 +105,18 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         },
         if args.excluded_sources.contains("spyse") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_spyse_subdomains(&url_api_spyse, quiet_flag)) },
-        // if args.excluded_sources.contains("bufferover") { thread::spawn(|| None) }
-        // else { thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, quiet_flag)) },
+        if args.excluded_sources.contains("bufferover_free") || args.bufferover_free_api_key.is_empty() { thread::spawn(|| None) }
+        else {
+            let url_api_bufferover = format!("https://tls.bufferover.run/dns?q={}", &args.target);
+            let bufferover_free_api_key = utils::return_random_string(args.bufferover_free_api_key.clone());
+            thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, "Bufferover Free", &bufferover_free_api_key, quiet_flag))
+        },
+        if args.excluded_sources.contains("bufferover_paid")  || args.bufferover_paid_api_key.is_empty() {  thread::spawn(|| None) }
+        else {
+            let url_api_bufferover = format!("https://bufferover-run-tls.p.rapidapi.com/ipv4/dns?q={}", &args.target);
+            let bufferover_paid_api_key = utils::return_random_string(args.bufferover_paid_api_key.clone());
+            thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, "Bufferover Paid", &bufferover_paid_api_key, quiet_flag))
+        },
         if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_threatcrowd_subdomains(&url_api_threatcrowd, quiet_flag)) },
         if args.excluded_sources.contains("virustotalapikey") || args.virustotal_access_token.is_empty() {

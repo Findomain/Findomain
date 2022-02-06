@@ -64,11 +64,11 @@ pub fn get_args() -> Args {
         telegram_webhook: String::new(),
         telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
         spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new())
-            .split(',')
+            .split_terminator(',')
             .map(str::to_owned)
             .collect(),
         facebook_access_token: return_value_or_default(&settings, "fb_token", String::new())
-            .split(',')
+            .split_terminator(',')
             .map(str::to_owned)
             .collect(),
         virustotal_access_token: return_value_or_default(
@@ -76,7 +76,7 @@ pub fn get_args() -> Args {
             "virustotal_token",
             String::new(),
         )
-        .split(',')
+        .split_terminator(',')
         .map(str::to_owned)
         .collect(),
         securitytrails_access_token: return_value_or_default(
@@ -84,7 +84,7 @@ pub fn get_args() -> Args {
             "securitytrails_token",
             String::new(),
         )
-        .split(',')
+        .split_terminator(',')
         .map(str::to_owned)
         .collect(),
         certspotter_access_token: return_value_or_default(
@@ -92,14 +92,30 @@ pub fn get_args() -> Args {
             "certspotter_token",
             String::new(),
         )
-        .split(',')
+        .split_terminator(',')
         .map(str::to_owned)
         .collect(),
         user_agent: String::new(),
         c99_api_key: return_value_or_default(&settings, "c99_api_key", String::new())
-            .split(',')
+            .split_terminator(',')
             .map(str::to_owned)
             .collect(),
+        bufferover_free_api_key: return_value_or_default(
+            &settings,
+            "bufferover_free_api_key",
+            String::new(),
+        )
+        .split_terminator(',')
+        .map(str::to_owned)
+        .collect(),
+        bufferover_paid_api_key: return_value_or_default(
+            &settings,
+            "bufferover_paid_api_key",
+            String::new(),
+        )
+        .split_terminator(',')
+        .map(str::to_owned)
+        .collect(),
         jobname: if matches.is_present("jobname") {
             value_t!(matches, "jobname", String).unwrap_or_else(|_| String::from("findomain"))
         } else {
@@ -237,7 +253,7 @@ pub fn get_args() -> Args {
             return_matches_hashset(&matches, "exclude-sources")
         } else {
             return_value_or_default(&settings, "exclude_sources", String::new())
-                .split(',')
+                .split_terminator(',')
                 .map(str::to_owned)
                 .collect()
         },

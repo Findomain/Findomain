@@ -1,5 +1,7 @@
 # Findomain configuration file. The following listed values are all the possible values you can set at the moment.
 # IF YOU ARE NOT USING ONE OF THEM PLEASE LEAVE THIS EMPTY OR DELETE IT FROM THE FILE
+#
+# You can use multiple API keys per-provider using comma as separator.
 
 postgres_connection = "Your postgres connection URI here in the following format: postgresql://user:password@host:port/database"
 discord_webhook = "Your Discord webhook URL here"
@@ -12,6 +14,8 @@ virustotal_token = "Your VirusTotal bearer tokens here, please use comma to sepa
 securitytrails_token = "Your SecurityTrails bearer tokens here, please use comma to separate if multiple are added."
 certspotter_token = "Your CertSpotter bearer tokens here, please use comma to separate if multiple are added."
 c99_api_key = "Your C99.nl API keys here, please use comma to separate if multiple are added."
+bufferover_free_api_key = "Your free Bufferover API keys here, please use comma to separate if multiple are added. See https://tls.bufferover.run/"
+bufferover_paid_api_key = "Your paid Bufferover API keys here, please use comma to separate if multiple are added. See https://tls.bufferover.run/"
 threads = "Number of threads here"
 rate_limit = "Number of seconds for the rate limit here"
 http_timeout = "Value in seconds for the HTTP Status check of subdomains. Default 5."
