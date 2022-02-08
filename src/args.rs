@@ -264,10 +264,12 @@ fn return_settings(
     matches: &clap::ArgMatches,
     settings: &mut config::Config,
 ) -> HashMap<String, String> {
-    if matches.is_present("config-file") {
-        match settings.merge(config::File::with_name(
-            &value_t!(matches, "config-file", String).unwrap(),
-        )) {
+    if matches.is_present("config-file") || std::env::var("FINDOMAIN_CONFIG_FILE").is_ok() {
+        let config_filename = match std::env::var("FINDOMAIN_CONFIG_FILE") {
+            Ok(config) => config,
+            Err(_) => value_t!(matches, "config-file", String).unwrap(),
+        };
+        match settings.merge(config::File::with_name(&config_filename)) {
             Ok(settings) => match settings.merge(config::Environment::with_prefix("FINDOMAIN")) {
                 Ok(settings) => settings
                     .clone()
