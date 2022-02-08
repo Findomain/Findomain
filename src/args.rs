@@ -129,9 +129,22 @@ pub fn get_args() -> Args {
         database_checker_counter: 0,
         commit_to_db_counter: 0,
         // let's keep compatibility with the deprecated --threads option, for now...
-        lightweight_threads: value_t!(matches, "lightweight-threads", usize)
-            .unwrap_or_else(|_| value_t!(matches, "threads", usize).unwrap_or(100)),
-        screenshots_threads: value_t!(matches, "screenshots-threads", usize).unwrap_or(10),
+        lightweight_threads: value_t!(matches, "lightweight-threads", usize).unwrap_or_else(|_| {
+            value_t!(matches, "threads", usize).unwrap_or_else(|_| {
+                return_value_or_default(&settings, "lightweight_threads", 100.to_string())
+                    .parse::<usize>()
+                    .unwrap_or_else(|_| {
+                        return_value_or_default(&settings, "threads", 100.to_string())
+                            .parse::<usize>()
+                            .unwrap()
+                    })
+            })
+        }),
+        screenshots_threads: value_t!(matches, "screenshots-threads", usize).unwrap_or_else(|_| {
+            return_value_or_default(&settings, "screenshots_threads", 10.to_string())
+                .parse::<usize>()
+                .unwrap()
+        }),
         rate_limit: if matches.is_present("rate-limit") {
             value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 5)
         } else {
