@@ -158,6 +158,17 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
     all_subdomains.retain(|sub| logic::validate_subdomain(&base_target, sub, args));
+    if !args.import_subdomains_from.is_empty() {
+        let mut imported_subdomains =
+            files::return_file_targets(args, args.import_subdomains_from.clone());
+        imported_subdomains.retain(|target| !target.is_empty() && logic::validate_target(target));
+        imported_subdomains.retain(|target| {
+            !target.is_empty() && logic::validate_subdomain(&base_target, target, args)
+        });
+        for subdomain in imported_subdomains {
+            all_subdomains.insert(subdomain);
+        }
+    }
     all_subdomains
 }
 
