@@ -64,6 +64,10 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         &args.target
     );
     let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
+    let url_api_fullhunt = format!(
+        "https://fullhunt.io/api/v1/domain/{}/subdomains",
+        &args.target
+    );
     let amass_target = args.target.clone();
     let subfinder_target = args.target.clone();
     let external_subdomains_dir_amass = args.external_subdomains_dir_amass.clone();
@@ -155,6 +159,13 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
             thread::spawn(move || {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
+        },
+        // Seems that FullHunt can work for a few requests without API Key
+        // but they are like 5 requests ¿? so I decided to exclude it if no API key is present
+        if args.excluded_sources.contains("fullhunt") || args.fullhunt_api_key.is_empty() { thread::spawn(|| None) }
+        else {
+            let fullhunt_api_key = utils::return_random_string(args.fullhunt_api_key.clone());
+            thread::spawn(move || sources::get_fullhunt_subdomains(&url_api_fullhunt, &fullhunt_api_key, quiet_flag))
         },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
     all_subdomains.retain(|sub| logic::validate_subdomain(&base_target, sub, args));

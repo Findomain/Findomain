@@ -1,7 +1,7 @@
 use {
     crate::{errors::*, misc, networking, utils::return_reqwest_client},
     postgres::NoTls,
-    reqwest::header::{self, HeaderMap, HeaderName},
+    reqwest::header::{self, HeaderMap},
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
 };
@@ -179,6 +179,11 @@ impl IntoSubdomains for ResponseDataC99 {
             .map(|sub| sub.subdomain)
             .collect()
     }
+}
+
+#[derive(Deserialize, Eq, PartialEq)]
+struct SubdomainsFullHunt {
+    hosts: HashSet<String>,
 }
 
 impl IntoSubdomains for SubdomainsThreatminer {
@@ -389,6 +394,42 @@ pub fn get_facebook_subdomains(url_api_fb: &str, quiet_flag: bool) -> Option<Has
     get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook")
 }
 
+pub fn get_fullhunt_subdomains(
+    url_api_fullhunt: &str,
+    fullhunt_token: &str,
+    quiet_flag: bool,
+) -> Option<HashSet<String>> {
+    if !quiet_flag {
+        misc::show_searching_msg("FullHunt")
+    }
+
+    let mut request = return_reqwest_client(60).get(url_api_fullhunt);
+
+    if !fullhunt_token.is_empty() {
+        request = request.header("X-API-KEY", fullhunt_token);
+    }
+
+    match request.send() {
+        Ok(data_fullhunt) => {
+            if networking::check_http_response_code("FullHunt", &data_fullhunt) {
+                match data_fullhunt.json::<SubdomainsFullHunt>() {
+                    Ok(domains_fullhunt) => Some(domains_fullhunt.hosts.into_iter().collect()),
+                    Err(e) => {
+                        check_json_errors(e, "FullHunt");
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        }
+        Err(e) => {
+            check_request_errors(e, "FullHunt");
+            None
+        }
+    }
+}
+
 pub fn get_spyse_subdomains(
     target: &str,
     name: &str,
@@ -461,16 +502,10 @@ pub fn get_bufferover_subdomains(
         misc::show_searching_msg(name)
     }
     let mut request_builder = return_reqwest_client(60).get(url);
-    request_builder = request_builder.header(
-        HeaderName::from_lowercase(b"x-api-key").expect("Failed to set x-api-key for BufferOver"),
-        api_key,
-    );
+    request_builder = request_builder.header("x-api-key", api_key);
     if name == "BufferOver Paid" {
-        request_builder = request_builder.header(
-            HeaderName::from_lowercase(b"x-rapidapi-host")
-                .expect("Failed to set x-rapidapi-host for BufferOver"),
-            "bufferover-run-tls.p.rapidapi.com",
-        );
+        request_builder =
+            request_builder.header("x-rapidapi-host", "bufferover-run-tls.p.rapidapi.com");
     }
     match request_builder.send() {
         Ok(data) => {

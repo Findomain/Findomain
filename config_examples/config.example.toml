@@ -29,6 +29,8 @@ c99_api_key = ""
 bufferover_free_api_key = ""
 # Your paid Bufferover API keys here, please use comma to separate if multiple are added. See https://tls.bufferover.run/
 bufferover_paid_api_key = ""
+# Your FullHunt.io API keys here, please use comma to separate if multiple are added. See https://fullhunt.io/
+fullhunt_api_key = ""
 # Number of threads used for lightweight jobs such as IP discovery and HTTP status check
 lightweight_threads = ""
 # Number of threads used for taking website screenshots

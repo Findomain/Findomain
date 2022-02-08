@@ -116,6 +116,10 @@ pub fn get_args() -> Args {
         .split_terminator(',')
         .map(str::to_owned)
         .collect(),
+        fullhunt_api_key: return_value_or_default(&settings, "fullhunt_api_key", String::new())
+            .split_terminator(',')
+            .map(str::to_owned)
+            .collect(),
         jobname: if matches.is_present("jobname") {
             value_t!(matches, "jobname", String).unwrap_or_else(|_| String::from("findomain"))
         } else {
