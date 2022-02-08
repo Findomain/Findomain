@@ -86,18 +86,6 @@ fn push_data_to_webhooks(
 
 pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
     let mut new_subdomains = HashSet::new();
-    if args.with_imported_subdomains {
-        let mut imported_subdomains =
-            files::return_file_targets(args, args.import_subdomains_from.clone());
-        imported_subdomains.retain(|target| !target.is_empty() && logic::validate_target(target));
-        let base_target = &format!(".{}", args.target);
-        imported_subdomains.retain(|target| {
-            !target.is_empty() && logic::validate_subdomain(base_target, target, args)
-        });
-        for subdomain in imported_subdomains {
-            args.subdomains.insert(subdomain);
-        }
-    }
     let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
     database::prepare_database(&args.postgres_connection)?;
 
