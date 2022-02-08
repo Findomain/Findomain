@@ -46,5 +46,7 @@
     "": " Path to user agents file",
     "user_agents_file": "",
     "": " List of sources to exclude separated by comma",
-    "exclude_sources": ""
+    "exclude_sources": "",
+    "": "List of filename paths to import subdomains from, if there are multiple they need to be separated by comma",
+    "import_subdomains_from": ""
 }

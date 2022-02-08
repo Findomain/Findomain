@@ -41,7 +41,6 @@ pub struct Args {
     pub quiet_flag: bool,
     pub query_database: bool,
     pub query_jobname: bool,
-    pub with_imported_subdomains: bool,
     pub enable_dot: bool,
     pub ipv6_only: bool,
     pub enable_empty_push: bool,

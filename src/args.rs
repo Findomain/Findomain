@@ -168,7 +168,6 @@ pub fn get_args() -> Args {
         monitoring_flag: matches.is_present("monitoring-flag"),
         from_file_flag: matches.is_present("files"),
         quiet_flag: matches.is_present("quiet"),
-        with_imported_subdomains: matches.is_present("import-subdomains"),
         query_database: matches.is_present("query-database"),
         enable_dot: eval_resolved_or_ip_present(
             matches.is_present("enable-dot"),
@@ -220,7 +219,16 @@ pub fn get_args() -> Args {
         external_subdomains: matches.is_present("external-subdomains"),
         validate_subdomains: matches.is_present("validate-subdomains"),
         files: return_matches_vec(&matches, "files"),
-        import_subdomains_from: return_matches_vec(&matches, "import-subdomains"),
+        import_subdomains_from: {
+            let mut paths_from_config_file =
+                return_value_or_default(&settings, "import_subdomains_from", String::new())
+                    .split_terminator(',')
+                    .map(str::to_owned)
+                    .collect();
+            let mut import_subdomains_from = return_matches_vec(&matches, "import-subdomains");
+            import_subdomains_from.append(&mut paths_from_config_file);
+            import_subdomains_from
+        },
         wordlists: return_matches_vec(&matches, "wordlists"),
         resolvers: if matches.is_present("custom-resolvers") {
             return_matches_vec(&matches, "custom-resolvers")
