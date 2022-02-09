@@ -135,10 +135,10 @@ pub fn get_args() -> Args {
         // let's keep compatibility with the deprecated --threads option, for now...
         lightweight_threads: value_t!(matches, "lightweight-threads", usize).unwrap_or_else(|_| {
             value_t!(matches, "threads", usize).unwrap_or_else(|_| {
-                return_value_or_default(&settings, "lightweight_threads", 100.to_string())
+                return_value_or_default(&settings, "lightweight_threads", 50.to_string())
                     .parse::<usize>()
                     .unwrap_or_else(|_| {
-                        return_value_or_default(&settings, "threads", 100.to_string())
+                        return_value_or_default(&settings, "threads", 50.to_string())
                             .parse::<usize>()
                             .unwrap()
                     })

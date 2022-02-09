@@ -560,7 +560,7 @@ pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> 
         ));
     }
     let wildcards_tasks_pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(20)
+        .num_threads(5)
         .build()
         .unwrap();
     generated_wilcards = wildcards_tasks_pool.install(|| {
