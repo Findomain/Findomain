@@ -46,12 +46,12 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
         networking::async_resolver_all(args, resolver);
     } else if !args.discover_ip && !args.http_status && !args.enable_port_scan && args.with_output {
         for subdomain in &args.subdomains {
-            println!("{}", subdomain);
+            println!("{subdomain}");
             files::write_to_file(subdomain, &file_name)?
         }
     } else {
         for subdomain in &args.subdomains {
-            println!("{}", subdomain);
+            println!("{subdomain}");
         }
     }
     if !args.quiet_flag {
@@ -203,7 +203,7 @@ pub fn print_and_write(
     with_output: bool,
     file_name: &Option<std::fs::File>,
 ) {
-    println!("{}", data_to_write);
+    println!("{data_to_write}");
     if with_output {
         files::write_to_file(&data_to_write, file_name).unwrap()
     }

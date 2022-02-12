@@ -30,7 +30,7 @@ fn run() -> Result<()> {
             HashSet::from_iter(return_file_targets(&arguments, arguments.files.clone()));
         arguments.subdomains.retain(|sub| validate_target(sub));
         for subdomain in &arguments.subdomains {
-            println!("{}", subdomain)
+            println!("{subdomain}")
         }
 
         if arguments.unique_output_flag {

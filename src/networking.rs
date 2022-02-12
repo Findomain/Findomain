@@ -190,10 +190,16 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
     let file_name = files::return_output_file(args);
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
-        println!(
-            "Performing asynchronous resolution for {} subdomains for the target {}, it will take a while. 🧐\n",
-            args.subdomains.len(), args.target
-        )
+        let message = if args.as_resolver {
+            format!(
+                "Performing asynchronous resolution for {} subdomains, it will take a while...\n",
+                args.subdomains.len()
+            )
+        } else {
+            format!("Performing asynchronous resolution for {} subdomains for the target {}, it will take a while...\n",
+            args.subdomains.len(), args.target)
+        };
+        println!("{message}")
     }
     if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {
         println!()
