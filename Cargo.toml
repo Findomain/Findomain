@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "6.1.0"
+version = "7.0.0-beta.1"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
@@ -8,7 +8,7 @@ repository = "https://github.com/Findomain/Findomain"
 license = "GPL-3.0-or-later"
 keywords = ["discover-subdomains", "ct-logs", "search-subdomains", "enumerate-subdomains", "subdomain-scanner"]
 readme = "README.md"
-rust-version = "1.56"
+rust-version = "1.58"
 resolver = "1"
 
 [dependencies]
@@ -25,7 +25,7 @@ rayon = "1.5.1"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 addr = "0.15.3"
-serde_json = "1.0.78"
+serde_json = "1.0.79"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", branch = "master" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", branch = "main" } 
 tokio = "1.16.1"
