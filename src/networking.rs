@@ -280,6 +280,7 @@ fn async_resolver_engine(
             timeout: Duration::from_secs(args.resolver_timeout),
             ip_strategy: LookupIpStrategy::Ipv4Only,
             num_concurrent_reqs: 1,
+            shuffle_dns_servers: true,
             ..Default::default()
         };
 
@@ -613,6 +614,7 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
         timeout: Duration::from_secs(args.resolver_timeout),
         ip_strategy: LookupIpStrategy::Ipv4Only,
         num_concurrent_reqs: 1,
+        shuffle_dns_servers: true,
         ..Default::default()
     };
 

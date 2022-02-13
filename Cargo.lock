@@ -482,7 +482,7 @@ dependencies = [
 [[package]]
 name = "fhc"
 version = "0.6.0"
-source = "git+https://github.com/Edu4rdSHL/fhc?branch=main#243170a6338f6151ef441eb335da8f742c02b522"
+source = "git+https://github.com/Edu4rdSHL/fhc?branch=main#4e351402a4337c9590d5a36ab4330660f9e4359f"
 dependencies = [
  "clap",
  "futures",
@@ -494,7 +494,7 @@ dependencies = [
 
 [[package]]
 name = "findomain"
-version = "7.0.0-beta.1"
+version = "7.0.0-beta.2"
 dependencies = [
  "addr",
  "clap",
@@ -1727,7 +1727,7 @@ dependencies = [
 [[package]]
 name = "rusolver"
 version = "0.9.0"
-source = "git+https://github.com/Edu4rdSHL/rusolver?branch=master#ba828758d99da12b6ee5a902c226d18213088ecb"
+source = "git+https://github.com/Edu4rdSHL/rusolver?branch=master#e26ae062d6c7c8c65dfc43726d16963f7c80237f"
 dependencies = [
  "clap",
  "futures",
@@ -1750,9 +1750,9 @@ checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
 name = "rustls"
-version = "0.20.2"
+version = "0.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d37e5e2290f3e040b594b1a9e04377c2c671f1a1cfd9bfdef82106ac1c113f84"
+checksum = "b323592e3164322f5b193dc4302e4e36cd8d37158a712d664efae1a5c2791700"
 dependencies = [
  "log 0.4.14",
  "ring",
@@ -2228,8 +2228,7 @@ checksum = "efd1f82c56340fdf16f2a953d7bda4f8fdffba13d93b00844c25572110b26079"
 [[package]]
 name = "trust-dns-proto"
 version = "0.20.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca94d4e9feb6a181c690c4040d7a24ef34018d8313ac5044a61d21222ae24e31"
+source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#7c0d78bc671bd501aaca9793b675dcc1d27a29ac"
 dependencies = [
  "async-trait",
  "cfg-if",
@@ -2253,8 +2252,7 @@ dependencies = [
 [[package]]
 name = "trust-dns-resolver"
 version = "0.20.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecae383baad9995efaa34ce8e57d12c3f305e545887472a492b838f4b5cfb77a"
+source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#7c0d78bc671bd501aaca9793b675dcc1d27a29ac"
 dependencies = [
  "cfg-if",
  "futures-util",
@@ -2263,6 +2261,7 @@ dependencies = [
  "log 0.4.14",
  "lru-cache",
  "parking_lot",
+ "rand 0.8.4",
  "resolv-conf",
  "smallvec",
  "thiserror",

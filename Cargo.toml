@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "7.0.0-beta.1"
+version = "7.0.0-beta.2"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
@@ -30,6 +30,10 @@ rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", branch = "master" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", branch = "main" } 
 tokio = "1.16.1"
 crossbeam = "0.8.1"
+
+# https://github.com/bluejekyll/trust-dns/pull/1632
+[patch.crates-io]
+trust-dns-resolver = { git = "https://github.com/Findomain/trust-dns", package = "trust-dns-resolver", branch = "custombranch" }
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.38", features = ["vendored"] }
