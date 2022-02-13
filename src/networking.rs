@@ -296,6 +296,7 @@ fn async_resolver_engine(
         let (tx, rx) = channel::bounded(1);
 
         let subdomains_for_async_resolver = subdomains.clone();
+        let disable_double_check = args.disable_double_dns_check || args.custom_resolvers;
 
         handle.spawn(async move {
             let data = return_hosts_data(
@@ -303,7 +304,7 @@ fn async_resolver_engine(
                 resolvers,
                 trustable_resolver,
                 wildcard_ips,
-                false,
+                disable_double_check,
                 async_threads,
                 false,
                 true,

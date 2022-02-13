@@ -321,3 +321,11 @@ args:
                   help: Number of retries for the HTTP Status check of subdomains. Default 1.
                   long: http-retries
                   takes_value: true
+
+        - no-double-dns-check:
+                  help: Disable double DNS check. Currently the subdomains that report an IP address are checked again using a list of trustable resolvers to avoid false-positives. Only applies when using custom resolvers.
+                  long: no-double-dns-check
+                  takes_value: false
+                  multiple: false
+                  requires:
+                          - custom-resolvers

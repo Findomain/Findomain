@@ -232,6 +232,7 @@ pub fn get_args() -> Args {
         no_resolve: matches.is_present("no-resolve"),
         external_subdomains: matches.is_present("external-subdomains"),
         validate_subdomains: matches.is_present("validate-subdomains"),
+        disable_double_dns_check: matches.is_present("no-double-dns-check"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: {
             let mut paths_from_config_file =
