@@ -7,10 +7,8 @@ use {
         utils,
     },
     addr::parse_domain_name,
-    networking::RESOLVERS,
     postgres::{Client, NoTls},
-    std::time::{Duration, Instant},
-    trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
+    std::time::Instant,
 };
 
 lazy_static! {
@@ -25,25 +23,16 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
     if !args.quiet_flag {
         println!()
     };
-    let opts = ResolverOpts {
-        attempts: 0,
-        timeout: Duration::from_secs(3),
-        ip_strategy: LookupIpStrategy::Ipv4Only,
-        num_concurrent_reqs: 1,
-        ..Default::default()
-    };
-
-    let resolver = networking::get_resolver(&RESOLVERS, &opts);
 
     if (args.only_resolved || args.with_ip || args.ipv6_only)
         && !args.disable_wildcard_check
         && !args.as_resolver
     {
-        args.wilcard_ips = networking::detect_wildcard(args, &resolver);
+        args.wilcard_ips = networking::detect_wildcard(args);
     }
 
     if args.discover_ip || args.http_status || args.enable_port_scan {
-        networking::async_resolver_all(args, resolver);
+        networking::async_resolver_all(args);
     } else if !args.discover_ip && !args.http_status && !args.enable_port_scan && args.with_output {
         for subdomain in &args.subdomains {
             println!("{subdomain}");
@@ -65,16 +54,6 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
 }
 
 pub fn works_with_data(args: &mut Args) -> Result<()> {
-    let opts = ResolverOpts {
-        attempts: 0,
-        timeout: Duration::from_secs(3),
-        ip_strategy: LookupIpStrategy::Ipv4Only,
-        num_concurrent_reqs: 1,
-        ..Default::default()
-    };
-
-    let resolver = networking::get_resolver(&RESOLVERS, &opts);
-
     if !(!args.unique_output_flag
         || args.from_file_flag
         || args.from_stdin
@@ -94,9 +73,9 @@ pub fn works_with_data(args: &mut Args) -> Result<()> {
         && args.unique_output_flag
     {
         files::check_output_file_exists(&args.file_name)?;
-        alerts::subdomains_alerts(args, resolver)?
+        alerts::subdomains_alerts(args)?
     } else if args.monitoring_flag || args.no_monitor {
-        alerts::subdomains_alerts(args, resolver)?
+        alerts::subdomains_alerts(args)?
     } else {
         files::check_output_file_exists(&args.file_name)?;
         logic::manage_subdomains_data(args)?;

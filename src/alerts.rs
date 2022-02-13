@@ -12,7 +12,6 @@ use {
         thread,
         time::Duration,
     },
-    trust_dns_resolver::Resolver,
 };
 
 fn push_data_to_webhooks(
@@ -84,7 +83,7 @@ fn push_data_to_webhooks(
     Ok(())
 }
 
-pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
+pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     let mut new_subdomains = HashSet::new();
     let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
     database::prepare_database(&args.postgres_connection)?;
@@ -118,7 +117,7 @@ pub fn subdomains_alerts(args: &mut Args, resolver: Resolver) -> Result<()> {
         }
     };
 
-    let resolv_data = networking::async_resolver_all(args, resolver);
+    let resolv_data = networking::async_resolver_all(args);
 
     for (sub, resolv_data) in &resolv_data {
         new_subdomains.insert(format!(

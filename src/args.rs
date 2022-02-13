@@ -149,6 +149,16 @@ pub fn get_args() -> Args {
                 .parse::<usize>()
                 .unwrap()
         }),
+        resolver_timeout: value_t!(matches, "resolver-timeout", u64).unwrap_or_else(|_| {
+            return_value_or_default(&settings, "resolver_timeout", 3.to_string())
+                .parse::<u64>()
+                .unwrap()
+        }),
+        http_retries: value_t!(matches, "http-retries", usize).unwrap_or_else(|_| {
+            return_value_or_default(&settings, "http_retries", 2.to_string())
+                .parse::<usize>()
+                .unwrap()
+        }),
         rate_limit: if matches.is_present("rate-limit") {
             value_t!(matches, "rate-limit", u64).unwrap_or_else(|_| 5)
         } else {

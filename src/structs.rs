@@ -29,6 +29,8 @@ pub struct Args {
     pub commit_to_db_counter: usize,
     pub lightweight_threads: usize,
     pub screenshots_threads: usize,
+    pub resolver_timeout: u64,
+    pub http_retries: usize,
     pub rate_limit: u64,
     pub http_timeout: u64,
     pub initial_port: u16,
@@ -82,6 +84,7 @@ pub struct Subdomain {
     pub name: String,
 }
 
+#[derive(Clone, Default)]
 pub struct ResolvData {
     pub ip: String,
     pub http_status: HttpStatus,
@@ -92,6 +95,15 @@ pub struct ResolvData {
 pub struct HttpStatus {
     pub http_status: String,
     pub host_url: String,
+}
+
+impl Default for HttpStatus {
+    fn default() -> Self {
+        HttpStatus {
+            http_status: String::from(""),
+            host_url: String::from(""),
+        }
+    }
 }
 
 pub struct ResolverEngineData {

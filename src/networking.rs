@@ -1,21 +1,23 @@
 use {
     crate::{
-        args, external_subs, files, logic, screenshots, sources,
+        args, external_subs, files, logic, resolvers, screenshots, sources,
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
+    crossbeam::channel,
+    fhc::structs::HttpData,
     rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
     rayon::prelude::*,
+    rusolver::{
+        dnslib::{return_hosts_data, return_tokio_asyncresolver},
+        structs::DomainData,
+    },
     std::{
         collections::{HashMap, HashSet},
-        fs,
-        net::SocketAddr,
-        thread,
+        fs, thread,
+        time::Duration,
     },
-    trust_dns_resolver::{
-        config::{NameServerConfig, NameServerConfigGroup, Protocol, ResolverConfig, ResolverOpts},
-        Resolver,
-    },
+    trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
 };
 
 lazy_static! {
@@ -30,6 +32,16 @@ lazy_static! {
             for r in args.resolvers {
                 resolver_ips.push(r.to_string() + ":53");
             }
+        }
+        resolver_ips
+    };
+}
+
+lazy_static! {
+    pub static ref TRUSTABLE_RESOLVERS: Vec<String> = {
+        let mut resolver_ips = Vec::new();
+        for r in resolvers::return_ipv4_resolvers() {
+            resolver_ips.push(r.to_string() + ":53");
         }
         resolver_ips
     };
@@ -183,8 +195,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     all_subdomains
 }
 
-pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, ResolvData> {
-    let client = utils::return_reqwest_client(args.http_timeout);
+pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
     // let mut data = HashMap::new();
     //  let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(args);
@@ -205,13 +216,7 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
         println!()
     }
 
-    async_resolver_engine(
-        args,
-        args.subdomains.clone(),
-        &resolver,
-        &client,
-        &file_name,
-    )
+    async_resolver_engine(args, args.subdomains.clone(), &file_name)
     // if !args.enable_port_scan {
     //     data.par_extend(args.subdomains.par_iter().map(|sub| {
     //         async_resolver_engine(
@@ -242,8 +247,6 @@ pub fn async_resolver_all(args: &Args, resolver: Resolver) -> HashMap<String, Re
 fn async_resolver_engine(
     args: &Args,
     subdomains: HashSet<String>,
-    domain_resolver: &trust_dns_resolver::Resolver,
-    client: &reqwest::blocking::Client,
     // resolved_hosts: &HashMap<String, Vec<i32>>,
     file_name: &Option<std::fs::File>,
 ) -> HashMap<String, ResolvData> {
@@ -262,60 +265,162 @@ fn async_resolver_engine(
     let mut data_to_write = String::new();
     // let mut timeout: u64 = 0;
     //
-    let lightweight_tasks_pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(args.lightweight_threads)
-        .build()
-        .unwrap();
-    let resolv_data: HashMap<String, ResolvData> = lightweight_tasks_pool.install(|| {
-        subdomains
+
+    let mut resolv_data: HashMap<String, ResolvData> = HashMap::new();
+
+    let wildcard_ips = args.wilcard_ips.clone();
+
+    let async_threads = if args.lightweight_threads > args.subdomains.len() {
+        args.subdomains.len()
+    } else {
+        args.lightweight_threads
+    };
+
+    if !args.no_resolve {
+        let options = ResolverOpts {
+            attempts: 0,
+            timeout: Duration::from_secs(args.resolver_timeout),
+            ip_strategy: LookupIpStrategy::Ipv4Only,
+            num_concurrent_reqs: 1,
+            ..Default::default()
+        };
+
+        let resolvers =
+            return_tokio_asyncresolver(RESOLVERS.iter().map(|x| x.to_owned()).collect(), options);
+        let trustable_resolver = return_tokio_asyncresolver(
+            TRUSTABLE_RESOLVERS.iter().map(|x| x.to_owned()).collect(),
+            options,
+        );
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let handle = rt.handle().to_owned();
+        let (tx, rx) = channel::bounded(1);
+
+        let subdomains_for_async_resolver = subdomains.clone();
+        let empty_domain_data = DomainData::default();
+
+        handle.spawn(async move {
+            let data = return_hosts_data(
+                subdomains_for_async_resolver,
+                resolvers,
+                trustable_resolver,
+                wildcard_ips,
+                false,
+                async_threads,
+                false,
+                true,
+            )
+            .await;
+
+            let _ = tx.send(data);
+        });
+
+        let hosts_data = match rx.recv() {
+            Ok(data) => data,
+            Err(e) => {
+                println!("Error in the resolution process: {}", e);
+                std::process::exit(1);
+            }
+        };
+
+        resolv_data = subdomains
             .par_iter()
             .map(|sub| {
-                let mut resolv_data = ResolvData {
-                    ip: if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
+                let resolv_data = ResolvData {
+                    ip: if args.enable_port_scan || args.discover_ip {
                         // let rtimeout = if args.enable_port_scan {
                         //     Some(std::time::Instant::now())
                         // } else {
                         //     None
                         // };
-                        let ip = if args.no_resolve {
-                            String::new()
-                        } else {
-                            get_ip(domain_resolver, &format!("{}.", sub), args.ipv6_only)
-                        };
+
+                        return_ip(&hosts_data, sub, &empty_domain_data)
+
                         // if args.enable_port_scan && !args.no_resolve {
                         //     timeout = utils::calculate_timeout(
                         //         args.threads,
                         //         rtimeout.unwrap().elapsed().as_millis() as u64,
                         //     );
                         // }
-                        ip
                     } else {
                         String::from("NOT CHECKED")
                     },
-                    http_status: HttpStatus {
-                        http_status: String::new(),
-                        host_url: String::new(),
-                    },
+                    http_status: HttpStatus::default(),
                     open_ports: Vec::new(),
                 };
-                if args.http_status && !resolv_data.ip.is_empty() && !args.no_resolve {
-                    resolv_data.http_status = check_http_status(client, sub)
-                } else if args.http_status && resolv_data.ip.is_empty() && !args.no_resolve {
-                    resolv_data.http_status.http_status = String::from("INACTIVE")
+                (sub.to_owned(), resolv_data)
+            })
+            .collect();
+    };
+
+    if args.http_status {
+        let mut http_hosts = HashSet::new();
+        let empty_http_data = HttpData::default();
+
+        for (sub, resolv_data) in &resolv_data {
+            if resolv_data.ip != "NOT CHECKED" && !resolv_data.ip.is_empty() {
+                http_hosts.insert(sub.to_owned());
+            }
+        }
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let handle = rt.handle().to_owned();
+
+        let (tx, rx) = channel::bounded(1);
+
+        let client = fhc::httplib::return_http_client(args.http_timeout);
+        let user_agents_list = args.user_agent_strings.clone();
+        let http_retries = args.http_retries;
+
+        handle.spawn(async move {
+            let http_data = fhc::httplib::return_http_data(
+                http_hosts,
+                client,
+                user_agents_list,
+                http_retries,
+                async_threads,
+                0,
+                false,
+                true,
+            )
+            .await;
+
+            let _ = tx.send(http_data);
+        });
+
+        let http_data = match rx.recv() {
+            Ok(data) => data,
+            Err(e) => {
+                println!("Error in the resolution process: {}", e);
+                std::process::exit(1);
+            }
+        };
+
+        resolv_data = resolv_data
+            .par_iter()
+            .map(|(host, host_resolv_data)| {
+                let local_http_data = http_data.get(host).unwrap_or(&empty_http_data);
+                let mut local_resolv_data = host_resolv_data.clone();
+
+                if args.http_status && !local_resolv_data.ip.is_empty() && !args.no_resolve {
+                    local_resolv_data.http_status = HttpStatus {
+                        http_status: local_http_data.http_status.clone(),
+                        host_url: local_http_data.host_url.clone(),
+                    };
+                } else if args.http_status && local_resolv_data.ip.is_empty() && !args.no_resolve {
+                    local_resolv_data.http_status.http_status = String::from("INACTIVE")
                 } else {
-                    resolv_data.http_status.http_status = String::from("NOT CHECKED")
+                    local_resolv_data.http_status.http_status = String::from("NOT CHECKED")
                 }
 
                 if args.no_resolve {
-                    resolv_data.http_status.host_url = sub.clone()
-                }
+                    local_resolv_data.http_status.host_url = host.clone()
+                };
 
-                (sub.to_owned(), resolv_data)
+                (host.to_owned(), local_resolv_data)
             })
-            .collect()
-    });
-    drop(lightweight_tasks_pool);
-    //
+            .collect();
+    };
 
     if args.take_screenshots {
         let screenshots_pool = rayon::ThreadPoolBuilder::new()
@@ -461,101 +566,28 @@ fn async_resolver_engine(
     resolv_data
 }
 
-fn check_http_status(client: &reqwest::blocking::Client, target: &str) -> HttpStatus {
-    let http_url = if target.starts_with("http://") {
-        target.to_string()
-    } else {
-        format!("http://{}", target)
-    };
-    let https_url = if target.starts_with("https://") {
-        target.to_string()
-    } else {
-        format!("https://{}", target)
-    };
-    if client.get(&https_url).send().is_ok() {
-        HttpStatus {
-            http_status: String::from("ACTIVE"),
-            host_url: https_url,
-        }
-    } else if client.get(&http_url).send().is_ok() {
-        HttpStatus {
-            http_status: String::from("ACTIVE"),
-            host_url: http_url,
-        }
-    } else {
-        HttpStatus {
-            http_status: String::from("INACTIVE"),
-            host_url: String::new(),
-        }
-    }
+fn return_ip(
+    hosts_data: &HashMap<String, DomainData>,
+    sub: &str,
+    empty_domain_data: &DomainData,
+) -> String {
+    hosts_data
+        .get(sub)
+        .unwrap_or(empty_domain_data)
+        .ipv4_addresses
+        .iter()
+        .next()
+        .unwrap_or(&String::new())
+        .to_string()
 }
 
-fn get_ip(resolver: &Resolver, domain: &str, ipv6_only: bool) -> String {
-    if ipv6_only {
-        if let Ok(ip_address) = resolver.ipv6_lookup(domain.to_string()) {
-            ip_address
-                .iter()
-                .next()
-                .expect("An error as ocurred getting the IP address.")
-                .to_string()
-        } else {
-            String::new()
-        }
-    } else if let Ok(ip_address) = resolver.ipv4_lookup(domain.to_string()) {
-        ip_address
-            .iter()
-            .next()
-            .expect("An error as ocurred getting the IP address.")
-            .to_string()
-    } else {
-        String::new()
-    }
-}
-
-pub fn get_resolver(nameserver_ips: &[String], opts: &ResolverOpts) -> Resolver {
-    let mut name_servers = NameServerConfigGroup::with_capacity(nameserver_ips.len() * 2);
-    name_servers.extend(nameserver_ips.iter().flat_map(|server| {
-        let socket_addr = SocketAddr::V4(match server.parse() {
-            Ok(a) => a,
-            Err(e) => unreachable!(
-                "Error parsing the server {}, only IPv4 are allowed. Error: {}",
-                server, e
-            ),
-        });
-        std::iter::once(NameServerConfig {
-            socket_addr,
-            protocol: Protocol::Udp,
-            tls_dns_name: None,
-            trust_nx_responses: false,
-        })
-        .chain(std::iter::once(NameServerConfig {
-            socket_addr,
-            protocol: Protocol::Tcp,
-            tls_dns_name: None,
-            trust_nx_responses: false,
-        }))
-    }));
-
-    match Resolver::new(
-        ResolverConfig::from_parts(None, vec![], name_servers),
-        *opts,
-    ) {
-        Ok(resolver) => resolver,
-
-        Err(e) => {
-            eprintln!("Failed to create the resolver. Error: {}\n", e);
-            std::process::exit(1)
-        }
-    }
-}
-
-pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> {
+pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target)
     }
-    let mut generated_wilcards: HashSet<String> = HashSet::new();
+    let mut generated_wildcards: HashSet<String> = HashSet::new();
     for _ in 1..20 {
-        generated_wilcards.insert(format!(
+        generated_wildcards.insert(format!(
             "{}.{}",
             rng()
                 .sample_iter(Alphanumeric)
@@ -565,28 +597,68 @@ pub fn detect_wildcard(args: &mut Args, resolver: &Resolver) -> HashSet<String> 
             &args.target
         ));
     }
-    let wildcards_tasks_pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(5)
-        .build()
-        .unwrap();
-    generated_wilcards = wildcards_tasks_pool.install(|| {
-        generated_wilcards
-            .par_iter()
-            .map(|sub| get_ip(resolver, &format!("{}.", sub), args.ipv6_only))
-            .collect()
+
+    let options = ResolverOpts {
+        attempts: 0,
+        timeout: Duration::from_secs(args.resolver_timeout),
+        ip_strategy: LookupIpStrategy::Ipv4Only,
+        num_concurrent_reqs: 1,
+        ..Default::default()
+    };
+
+    let trustable_resolver = return_tokio_asyncresolver(
+        TRUSTABLE_RESOLVERS.iter().map(|x| x.to_owned()).collect(),
+        options,
+    );
+
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let handle = rt.handle().to_owned();
+
+    let (tx, rx) = channel::bounded(1);
+
+    handle.spawn(async move {
+        let data = return_hosts_data(
+            generated_wildcards,
+            trustable_resolver.clone(),
+            trustable_resolver,
+            HashSet::new(),
+            true,
+            20,
+            false,
+            true,
+        )
+        .await;
+
+        let _ = tx.send(data);
     });
-    drop(wildcards_tasks_pool);
-    generated_wilcards.retain(|ip| !ip.is_empty());
-    if !generated_wilcards.is_empty() && !args.quiet_flag {
+
+    let wildcards_data = match rx.recv() {
+        Ok(data) => data,
+        Err(e) => {
+            println!("Error in the resolution process: {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let mut wildcards = HashSet::new();
+
+    for (_, wildcard_data) in wildcards_data {
+        for ip in wildcard_data.ipv4_addresses {
+            wildcards.insert(ip);
+        }
+    }
+
+    wildcards.retain(|ip| !ip.is_empty());
+    if !wildcards.is_empty() && !args.quiet_flag {
         println!(
             "Wilcards detected for {} and wildcard's IP saved for furter work.",
             &args.target
         );
-        println!("Wilcard IPs: {:?}\n", generated_wilcards)
+        println!("Wilcard IPs: {:?}\n", wildcards)
     } else if !args.quiet_flag {
         println!("No wilcards detected for {}, nice!\n", &args.target)
     }
-    generated_wilcards
+    wildcards
 }
 
 pub fn check_http_response_code(api_name: &str, response: &reqwest::blocking::Response) -> bool {

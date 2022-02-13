@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceRoot}/target/debug/${workspaceRootFolderName}",
-            "args": "-t asus.com",
+            "args": "-t findomain.app -i",
             "cwd": "${workspaceRoot}",
             "sourceLanguages": [
                 "rust"

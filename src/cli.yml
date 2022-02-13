@@ -111,11 +111,11 @@ args:
                   long: threads
                   takes_value: true
         - lightweight-threads:
-                  help: Number of threads to use for lightweight tasks such as IP discovery and HTTP checks.
+                  help: Number of threads to use for lightweight tasks such as IP discovery and HTTP checks. Default is 50.
                   long: lightweight-threads
                   takes_value: true
         - screenshots-threads:
-                  help: Number of threads to use to use for taking screenshots.
+                  help: Number of threads to use to use for taking screenshots. Default is 10.
                   long: screenshots-threads
                   takes_value: true
         - custom-resolvers:
@@ -311,3 +311,13 @@ args:
                   multiple: false
                   requires:
                           - files
+
+        - resolver-timeout:
+                  help: Timeout in seconds for the resolver. Default 1.
+                  long: resolver-timeout
+                  takes_value: true
+
+        - http-retries:
+                  help: Number of retries for the HTTP Status check of subdomains. Default 1.
+                  long: http-retries
+                  takes_value: true

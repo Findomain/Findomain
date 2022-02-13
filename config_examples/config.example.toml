@@ -52,3 +52,7 @@ user_agents_file = ""
 exclude_sources = ""
 # List of filename paths to import subdomains from, if there are multiple they need to be separated by comma
 import_subdomains_from = ""
+# Number of http retries before giving up and marking the domain as HTTP inactive. Default 2
+http_retries = ""
+# Timeout in seconds before the DNS reolution is considered failed. Default 3
+resolver_timeout = ""
