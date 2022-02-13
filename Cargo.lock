@@ -481,8 +481,8 @@ dependencies = [
 
 [[package]]
 name = "fhc"
-version = "0.6.0"
-source = "git+https://github.com/Edu4rdSHL/fhc?branch=main#4e351402a4337c9590d5a36ab4330660f9e4359f"
+version = "0.6.1"
+source = "git+https://github.com/Edu4rdSHL/fhc?branch=main#85d5346e006e5299d0461b2e98a33e51d30e0d4d"
 dependencies = [
  "clap",
  "futures",
@@ -1726,8 +1726,8 @@ dependencies = [
 
 [[package]]
 name = "rusolver"
-version = "0.9.0"
-source = "git+https://github.com/Edu4rdSHL/rusolver?branch=master#e26ae062d6c7c8c65dfc43726d16963f7c80237f"
+version = "0.9.1"
+source = "git+https://github.com/Edu4rdSHL/rusolver?branch=master#42dbf01d763b4a66a687f56d5869cc7ea92a5b07"
 dependencies = [
  "clap",
  "futures",
@@ -2228,7 +2228,7 @@ checksum = "efd1f82c56340fdf16f2a953d7bda4f8fdffba13d93b00844c25572110b26079"
 [[package]]
 name = "trust-dns-proto"
 version = "0.20.4"
-source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#7c0d78bc671bd501aaca9793b675dcc1d27a29ac"
+source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#f339a5e806bed9109ad205d2143d8b18701d2ab0"
 dependencies = [
  "async-trait",
  "cfg-if",
@@ -2252,7 +2252,7 @@ dependencies = [
 [[package]]
 name = "trust-dns-resolver"
 version = "0.20.4"
-source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#7c0d78bc671bd501aaca9793b675dcc1d27a29ac"
+source = "git+https://github.com/Findomain/trust-dns?branch=custombranch#f339a5e806bed9109ad205d2143d8b18701d2ab0"
 dependencies = [
  "cfg-if",
  "futures-util",
