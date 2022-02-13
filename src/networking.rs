@@ -266,8 +266,6 @@ fn async_resolver_engine(
     // let mut timeout: u64 = 0;
     //
 
-    let mut resolv_data: HashMap<String, ResolvData> = HashMap::new();
-
     let wildcard_ips = args.wilcard_ips.clone();
 
     let async_threads = if args.lightweight_threads > args.subdomains.len() {
@@ -276,7 +274,7 @@ fn async_resolver_engine(
         args.lightweight_threads
     };
 
-    if !args.no_resolve {
+    let hosts_data = if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
         let options = ResolverOpts {
             attempts: 0,
             timeout: Duration::from_secs(args.resolver_timeout),
@@ -297,7 +295,6 @@ fn async_resolver_engine(
         let (tx, rx) = channel::bounded(1);
 
         let subdomains_for_async_resolver = subdomains.clone();
-        let empty_domain_data = DomainData::default();
 
         handle.spawn(async move {
             let data = return_hosts_data(
@@ -315,50 +312,58 @@ fn async_resolver_engine(
             let _ = tx.send(data);
         });
 
-        let hosts_data = match rx.recv() {
+        match rx.recv() {
             Ok(data) => data,
             Err(e) => {
                 println!("Error in the resolution process: {}", e);
                 std::process::exit(1);
             }
-        };
-
-        resolv_data = subdomains
+        }
+    } else {
+        subdomains
             .par_iter()
-            .map(|sub| {
-                let resolv_data = ResolvData {
-                    ip: if args.enable_port_scan || args.discover_ip {
-                        // let rtimeout = if args.enable_port_scan {
-                        //     Some(std::time::Instant::now())
-                        // } else {
-                        //     None
-                        // };
-
-                        return_ip(&hosts_data, sub, &empty_domain_data)
-
-                        // if args.enable_port_scan && !args.no_resolve {
-                        //     timeout = utils::calculate_timeout(
-                        //         args.threads,
-                        //         rtimeout.unwrap().elapsed().as_millis() as u64,
-                        //     );
-                        // }
-                    } else {
-                        String::from("NOT CHECKED")
-                    },
-                    http_status: HttpStatus::default(),
-                    open_ports: Vec::new(),
-                };
-                (sub.to_owned(), resolv_data)
-            })
-            .collect();
+            .map(|sub| (sub.to_owned(), DomainData::default()))
+            .collect()
     };
 
-    if args.http_status {
-        let mut http_hosts = HashSet::new();
-        let empty_http_data = HttpData::default();
+    let mut resolv_data: HashMap<String, ResolvData> = hosts_data
+        .par_iter()
+        .map(|(sub, hosts_data)| {
+            let local_resolv_data = ResolvData {
+                ip: if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
+                    // let rtimeout = if args.enable_port_scan {
+                    //     Some(std::time::Instant::now())
+                    // } else {
+                    //     None
+                    // };
 
-        for (sub, resolv_data) in &resolv_data {
-            if resolv_data.ip != "NOT CHECKED" && !resolv_data.ip.is_empty() {
+                    return_ip(hosts_data)
+
+                    // if args.enable_port_scan && !args.no_resolve {
+                    //     timeout = utils::calculate_timeout(
+                    //         args.threads,
+                    //         rtimeout.unwrap().elapsed().as_millis() as u64,
+                    //     );
+                    // }
+                } else {
+                    String::from("NOT CHECKED")
+                },
+                http_status: HttpStatus::default(),
+                open_ports: Vec::new(),
+            };
+            (sub.to_owned(), local_resolv_data)
+        })
+        .collect();
+
+    let http_data = if args.http_status && !args.no_resolve {
+        let mut http_hosts = HashSet::new();
+
+        for (sub, host_resolv_data) in &resolv_data {
+            if args.discover_ip {
+                if host_resolv_data.ip != "NOT CHECKED" && !host_resolv_data.ip.is_empty() {
+                    http_hosts.insert(sub.to_owned());
+                }
+            } else {
                 http_hosts.insert(sub.to_owned());
             }
         }
@@ -388,57 +393,64 @@ fn async_resolver_engine(
             let _ = tx.send(http_data);
         });
 
-        let http_data = match rx.recv() {
+        match rx.recv() {
             Ok(data) => data,
             Err(e) => {
                 println!("Error in the resolution process: {}", e);
                 std::process::exit(1);
             }
-        };
-
-        resolv_data = resolv_data
+        }
+    } else {
+        subdomains
             .par_iter()
-            .map(|(host, host_resolv_data)| {
-                let local_http_data = http_data.get(host).unwrap_or(&empty_http_data);
-                let mut local_resolv_data = host_resolv_data.clone();
-
-                if args.http_status && !local_resolv_data.ip.is_empty() && !args.no_resolve {
-                    local_resolv_data.http_status = HttpStatus {
-                        http_status: local_http_data.http_status.clone(),
-                        host_url: local_http_data.host_url.clone(),
-                    };
-                } else if args.http_status && local_resolv_data.ip.is_empty() && !args.no_resolve {
-                    local_resolv_data.http_status.http_status = String::from("INACTIVE")
-                } else {
-                    local_resolv_data.http_status.http_status = String::from("NOT CHECKED")
-                }
-
-                if args.no_resolve {
-                    local_resolv_data.http_status.host_url = host.clone()
-                };
-
-                (host.to_owned(), local_resolv_data)
-            })
-            .collect();
+            .map(|sub| (sub.to_owned(), HttpData::default()))
+            .collect()
     };
+
+    let empty_http_data = HttpData::default();
+
+    resolv_data = resolv_data
+        .par_iter()
+        .map(|(host, host_resolv_data)| {
+            let local_http_data = http_data.get(host).unwrap_or(&empty_http_data);
+            let mut local_resolv_data = host_resolv_data.clone();
+
+            if args.http_status && !local_resolv_data.ip.is_empty() && !args.no_resolve {
+                local_resolv_data.http_status = HttpStatus {
+                    http_status: local_http_data.http_status.clone(),
+                    host_url: local_http_data.host_url.clone(),
+                };
+            } else if args.http_status && local_resolv_data.ip.is_empty() && !args.no_resolve {
+                local_resolv_data.http_status.http_status = String::from("INACTIVE")
+            } else {
+                local_resolv_data.http_status.http_status = String::from("NOT CHECKED")
+            }
+
+            if args.no_resolve {
+                local_resolv_data.http_status.host_url = host.clone()
+            };
+
+            (host.to_owned(), local_resolv_data)
+        })
+        .collect();
 
     if args.take_screenshots {
         let screenshots_pool = rayon::ThreadPoolBuilder::new()
             .num_threads(args.screenshots_threads)
             .build()
             .unwrap();
-        screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, resolv_data)| {
-        if !resolv_data.http_status.host_url.is_empty() || args.no_resolve {
+        screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, host_resolv_data)| {
+        if !host_resolv_data.http_status.host_url.is_empty() || args.no_resolve {
             match screenshots::take_screenshot(
                 utils::return_headless_browser(args.chrome_sandbox),
-                &resolv_data.http_status.host_url,
+                &host_resolv_data.http_status.host_url,
                 &args.screenshots_path,
                 &args.target,
                 sub,
             ) {
                 Ok(_) => {
                     if args.no_resolve {
-                        println!("{}", resolv_data.http_status.host_url)
+                        println!("{}", host_resolv_data.http_status.host_url)
                     }
                 }
                 Err(_) => {
@@ -446,20 +458,20 @@ fn async_resolver_engine(
                     while counter <= 2 {
                         match screenshots::take_screenshot(
                             utils::return_headless_browser(args.chrome_sandbox),
-                            &resolv_data.http_status.host_url,
+                            &host_resolv_data.http_status.host_url,
                             &args.screenshots_path,
                             &args.target,
                             sub,
                         ) {
                             Ok(_) => {
                                 if args.no_resolve {
-                                    println!("{}", resolv_data.http_status.host_url)
+                                    println!("{}", host_resolv_data.http_status.host_url)
                                 };
                                 break;
                             }
                             Err(e) => {
                                 if counter == 3 {
-                                    eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, resolv_data.http_status.host_url, e)
+                                    eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, host_resolv_data.http_status.host_url, e)
                                 }
                                 counter += 1
                             }
@@ -488,75 +500,79 @@ fn async_resolver_engine(
     //     }
     // };
 
-    for (sub, resolv_data) in &resolv_data {
+    for (sub, host_resolv_data) in &resolv_data {
         if ip_http_ports {
-            if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
-                || (!resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip))
+            if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
+                || (!host_resolv_data.ip.is_empty()
+                    && !args.wilcard_ips.contains(&host_resolv_data.ip))
             {
                 data_to_write = format!(
                     "{},{},{},{}",
                     sub,
-                    &resolv_data.ip,
-                    &logic::eval_http(&resolv_data.http_status),
-                    logic::return_ports_string(&resolv_data.open_ports, args)
+                    &host_resolv_data.ip,
+                    &logic::eval_http(&host_resolv_data.http_status),
+                    logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if http_with_ip {
-            if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
-                || (!resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip))
+            if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
+                || (!host_resolv_data.ip.is_empty()
+                    && !args.wilcard_ips.contains(&host_resolv_data.ip))
             {
                 data_to_write = format!(
                     "{},{},{}",
                     sub,
-                    &resolv_data.ip,
-                    &logic::eval_http(&resolv_data.http_status)
+                    &host_resolv_data.ip,
+                    &logic::eval_http(&host_resolv_data.http_status)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if only_resolved_or_ip {
-            if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
-                || (!resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip))
+            if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
+                || (!host_resolv_data.ip.is_empty()
+                    && !args.wilcard_ips.contains(&host_resolv_data.ip))
             {
                 if args.only_resolved {
                     data_to_write = sub.to_string();
                 } else {
-                    data_to_write = format!("{},{}", sub, resolv_data.ip);
+                    data_to_write = format!("{},{}", sub, host_resolv_data.ip);
                 }
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if http_without_ip_with_ports {
-            if resolv_data.http_status.http_status == "ACTIVE" {
+            if host_resolv_data.http_status.http_status == "ACTIVE" {
                 data_to_write = format!(
                     "{},{},{}",
                     sub,
-                    &logic::eval_http(&resolv_data.http_status),
-                    logic::return_ports_string(&resolv_data.open_ports, args)
+                    &logic::eval_http(&host_resolv_data.http_status),
+                    logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if only_http {
-            if resolv_data.http_status.http_status == "ACTIVE" {
-                data_to_write = logic::eval_http(&resolv_data.http_status);
+            if host_resolv_data.http_status.http_status == "ACTIVE" {
+                data_to_write = logic::eval_http(&host_resolv_data.http_status);
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if ports_with_ip {
-            if (args.disable_wildcard_check && !resolv_data.ip.is_empty())
-                || (!resolv_data.ip.is_empty() && !args.wilcard_ips.contains(&resolv_data.ip))
+            if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
+                || (!host_resolv_data.ip.is_empty()
+                    && !args.wilcard_ips.contains(&host_resolv_data.ip))
             {
                 data_to_write = format!(
                     "{},{},{}",
                     sub,
-                    resolv_data.ip,
-                    logic::return_ports_string(&resolv_data.open_ports, args)
+                    host_resolv_data.ip,
+                    logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
-        } else if only_ports && !resolv_data.open_ports.is_empty() {
+        } else if only_ports && !host_resolv_data.open_ports.is_empty() {
             data_to_write = format!(
                 "{},{}",
                 sub,
-                logic::return_ports_string(&resolv_data.open_ports, args)
+                logic::return_ports_string(&host_resolv_data.open_ports, args)
             );
             logic::print_and_write(data_to_write, args.with_output, file_name)
         } else if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {
@@ -566,14 +582,8 @@ fn async_resolver_engine(
     resolv_data
 }
 
-fn return_ip(
-    hosts_data: &HashMap<String, DomainData>,
-    sub: &str,
-    empty_domain_data: &DomainData,
-) -> String {
-    hosts_data
-        .get(sub)
-        .unwrap_or(empty_domain_data)
+fn return_ip(host_data: &DomainData) -> String {
+    host_data
         .ipv4_addresses
         .iter()
         .next()
