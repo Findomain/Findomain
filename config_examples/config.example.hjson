@@ -57,4 +57,6 @@
   http_retries: ""
   # Timeout in seconds before the DNS reolution is considered failed. Default 3
   resolver_timeout: ""
+  # Number of IPs that will be port-scanned at the same time. Default is 10.
+  parallel_ip_ports_scan: ""
 }
