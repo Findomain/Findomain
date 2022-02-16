@@ -118,6 +118,10 @@ args:
                   help: Number of threads to use to use for taking screenshots. Default is 10.
                   long: screenshots-threads
                   takes_value: true
+        - parallel-ip-ports-scan:
+                  help: Number of IPs that will be port-scanned at the same time. Default is 10.
+                  long: parallel-ip-ports-scan
+                  takes_value: true
         - custom-resolvers:
                   help: Path to a file (or files) containing a list of DNS IP address. If no specified then Google, Cloudflare and Quad9 DNS servers are used.
                   long: resolvers
@@ -269,6 +273,11 @@ args:
                   multiple: false
                   requires:
                           - http-status
+        - tcp-connect-timeout:
+                  help: Value in milliseconds to wait for the TCP connection (ip:port) in the ports scanning function. Default 500.
+                  long: tcp-connect-timeout
+                  takes_value: true
+                  multiple: false
         - stdin:
                   help: Read from stdin instead of files or aguments.
                   long: stdin

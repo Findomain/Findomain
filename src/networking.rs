@@ -1,6 +1,6 @@
 use {
     crate::{
-        args, external_subs, files, logic, resolvers, screenshots, sources,
+        args, external_subs, files, logic, port_scanner, resolvers, screenshots, sources, structs,
         structs::{Args, HttpStatus, ResolvData},
         utils,
     },
@@ -196,8 +196,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
 }
 
 pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
-    // let mut data = HashMap::new();
-    //  let mut scannet_hosts: HashMap<String, Vec<i32>> = HashMap::new();
     let file_name = files::return_output_file(args);
 
     if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
@@ -217,37 +215,12 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
     }
 
     async_resolver_engine(args, args.subdomains.clone(), &file_name)
-    // if !args.enable_port_scan {
-    //     data.par_extend(args.subdomains.par_iter().map(|sub| {
-    //         async_resolver_engine(
-    //             args,
-    //             sub.to_owned(),
-    //             &resolver,
-    //             &client,
-    //             //    &scannet_hosts,
-    //             &file_name,
-    //         )
-    //     }));
-    // } else {
-    //     data.extend(args.subdomains.iter().map(|sub| {
-    //         //  scannet_hosts.insert(resolv_data.1.ip.clone(), resolv_data.1.open_ports.clone());
-    //         async_resolver_engine(
-    //             args,
-    //             sub.to_owned(),
-    //             &resolver,
-    //             &client,
-    //             //       &scannet_hosts,
-    //             &file_name,
-    //         )
-    //     }))
-    // }
 }
 
 #[allow(clippy::cognitive_complexity)]
 fn async_resolver_engine(
     args: &Args,
     subdomains: HashSet<String>,
-    // resolved_hosts: &HashMap<String, Vec<i32>>,
     file_name: &Option<std::fs::File>,
 ) -> HashMap<String, ResolvData> {
     let ip_http_ports = args.discover_ip && args.http_status && args.enable_port_scan;
@@ -258,13 +231,13 @@ fn async_resolver_engine(
     let ports_with_ip = args.enable_port_scan && args.discover_ip && !args.http_status;
     let only_ports = args.enable_port_scan && !args.discover_ip && !args.http_status;
     let mut ports: Vec<u16> = vec![];
-    if args.enable_port_scan {
+    if args.enable_port_scan && args.custom_ports_range {
         ports.extend(args.initial_port..=args.last_port)
+    } else if args.enable_port_scan {
+        ports = structs::top_1000_ports();
     }
     #[allow(unused_assignments)]
     let mut data_to_write = String::new();
-    // let mut timeout: u64 = 0;
-    //
 
     let wildcard_ips = args.wilcard_ips.clone();
 
@@ -333,20 +306,7 @@ fn async_resolver_engine(
         .map(|(sub, hosts_data)| {
             let local_resolv_data = ResolvData {
                 ip: if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
-                    // let rtimeout = if args.enable_port_scan {
-                    //     Some(std::time::Instant::now())
-                    // } else {
-                    //     None
-                    // };
-
                     return_ip(hosts_data)
-
-                    // if args.enable_port_scan && !args.no_resolve {
-                    //     timeout = utils::calculate_timeout(
-                    //         args.threads,
-                    //         rtimeout.unwrap().elapsed().as_millis() as u64,
-                    //     );
-                    // }
                 } else {
                     String::from("NOT CHECKED")
                 },
@@ -487,20 +447,61 @@ fn async_resolver_engine(
         drop(screenshots_pool);
     }
 
-    // if args.enable_port_scan && !resolv_data.ip.is_empty() {
-    //     if !resolved_hosts.contains_key(&resolv_data.ip) {
-    //         resolv_data.open_ports = port_scanner::return_open_ports(
-    //             &ports,
-    //             resolv_data
-    //                 .ip
-    //                 .parse::<Ipv4Addr>()
-    //                 .expect("Error parsing IP address, please report the issue."),
-    //             timeout,
-    //         )
-    //     } else {
-    //         resolv_data.open_ports = resolved_hosts.get(&resolv_data.ip).unwrap().to_owned()
-    //     }
-    // };
+    if args.enable_port_scan {
+        let ips_to_scan = resolv_data
+            .par_iter()
+            .filter(|(_, host_resolv_data)| {
+                host_resolv_data.ip != "NOT CHECKED" && !host_resolv_data.ip.is_empty()
+            })
+            .map(|(_, host_resolv_data)| host_resolv_data.ip.clone())
+            .collect::<HashSet<String>>();
+
+        if !ips_to_scan.is_empty() {
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            let handle = rt.handle().to_owned();
+
+            let tcp_connect_threads = args.lightweight_threads;
+            let parallel_ip_ports_scan = if ips_to_scan.len() < args.parallel_ip_ports_scan {
+                ips_to_scan.len()
+            } else {
+                args.parallel_ip_ports_scan
+            };
+            let tcp_connect_timeout = args.tcp_connect_timeout;
+
+            let (tx, rx) = channel::bounded(1);
+
+            handle.spawn(async move {
+                let ips_ports_data = port_scanner::return_open_ports_from_ips(
+                    ports,
+                    ips_to_scan,
+                    parallel_ip_ports_scan,
+                    tcp_connect_timeout,
+                    tcp_connect_threads,
+                )
+                .await;
+
+                let _ = tx.send(ips_ports_data);
+            });
+
+            if let Ok(ips_ports_data) = rx.recv() {
+                let empty_ports_data = vec![];
+
+                resolv_data = resolv_data
+                    .par_iter()
+                    .map(|(host, host_resolv_data)| {
+                        let local_ports_data = ips_ports_data
+                            .get(&host_resolv_data.ip)
+                            .unwrap_or(&empty_ports_data);
+                        let mut local_resolv_data = host_resolv_data.clone();
+
+                        local_resolv_data.open_ports = local_ports_data.clone();
+
+                        (host.to_owned(), local_resolv_data)
+                    })
+                    .collect();
+            }
+        }
+    };
 
     for (sub, host_resolv_data) in &resolv_data {
         if ip_http_ports {

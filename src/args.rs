@@ -149,6 +149,13 @@ pub fn get_args() -> Args {
                 .parse::<usize>()
                 .unwrap()
         }),
+        parallel_ip_ports_scan: value_t!(matches, "parallel-ip-ports-scan", usize).unwrap_or_else(
+            |_| {
+                return_value_or_default(&settings, "parallel_ip_ports_scan", 10.to_string())
+                    .parse::<usize>()
+                    .unwrap()
+            },
+        ),
         resolver_timeout: value_t!(matches, "resolver-timeout", u64).unwrap_or_else(|_| {
             return_value_or_default(&settings, "resolver_timeout", 3.to_string())
                 .parse::<u64>()
@@ -173,6 +180,7 @@ pub fn get_args() -> Args {
                 .parse::<u64>()
                 .unwrap()
         },
+        tcp_connect_timeout: value_t!(matches, "tcp-connect-timeout", u64).unwrap_or_else(|_| 500),
         initial_port: value_t!(matches, "initial-port", u16).unwrap_or_else(|_| 1),
         last_port: value_t!(matches, "last-port", u16).unwrap_or_else(|_| 1000),
         only_resolved: matches.is_present("resolved"),
@@ -233,6 +241,7 @@ pub fn get_args() -> Args {
         external_subdomains: matches.is_present("external-subdomains"),
         validate_subdomains: matches.is_present("validate-subdomains"),
         disable_double_dns_check: matches.is_present("no-double-dns-check"),
+        custom_ports_range: matches.is_present("initial-port") || matches.is_present("last-port"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: {
             let mut paths_from_config_file =

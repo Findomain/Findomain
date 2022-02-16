@@ -30,6 +30,7 @@ rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", branch = "master" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", branch = "main" } 
 tokio = "1.16.1"
 crossbeam = "0.8.1"
+futures = "0.3.21"
 
 # https://github.com/bluejekyll/trust-dns/pull/1632
 [patch.crates-io]

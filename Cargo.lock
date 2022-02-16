@@ -502,6 +502,7 @@ dependencies = [
  "crossbeam",
  "failure",
  "fhc",
+ "futures",
  "headless_chrome",
  "lazy_static",
  "openssl",
