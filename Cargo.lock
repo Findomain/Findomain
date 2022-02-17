@@ -494,7 +494,7 @@ dependencies = [
 
 [[package]]
 name = "findomain"
-version = "7.0.0-beta.3"
+version = "7.0.0"
 dependencies = [
  "addr",
  "clap",
