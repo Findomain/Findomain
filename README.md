@@ -5,8 +5,6 @@
 [![Appveyor CI Status](https://ci.appveyor.com/api/projects/status/github/edu4rdshl/findomain?branch=master&svg=true)](https://ci.appveyor.com/project/edu4rdshl/findomain)
 [![Build status](https://github.com/Edu4rdSHL/findomain/workflows/Github%20Actions/badge.svg)](https://github.com/Edu4rdSHL/findomain/actions)
 
-**Crates.io installation is now unsupported and all versions there have been yanked, DO NOT INSTALL using `cargo install` command. IF YOU ARE USING IT, RUN `cargo uninstall findomain` AND INSTALL AGAIN USING [THESE INSTRUCTIONS](https://github.com/Findomain/Findomain#installation).**
-
 # Findomain Monitoring Service
 
 If you don't want to deal with servers and complex configurations for doing recon but also have more features in an integrated solution, Findomain offers [a subdomains monitoring service that provides:](https://findomain.app/#Pricing) **directory fuzzing/ports scan/vulnerabilities discovery (with Nuclei) - and more** that allow you to **monitor your target domains with multiple top tools** (OWASP Amass, Sublist3r, Assetfinder and Subfinder) and send alerts to Discord, Slack, Telegram, Email or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. **The only you need to do is configure a file with your email address (if applicable) or/and webhooks/Telegram chat information and put your domains in another file**, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the HTTP websites, Open Ports, Subdomains CNAME and more. All your data is securely saved in a relational database and you can request a dump of your data whenever you want.
