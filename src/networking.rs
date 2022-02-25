@@ -198,7 +198,10 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
 pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
     let file_name = files::return_output_file(args);
 
-    if !args.quiet_flag && (args.discover_ip || args.http_status || args.enable_port_scan) {
+    if !args.quiet_flag
+        && !args.subdomains.is_empty()
+        && (args.discover_ip || args.http_status || args.enable_port_scan)
+    {
         let message = if args.as_resolver {
             format!(
                 "Performing asynchronous resolution for {} subdomains, it will take a while...\n",
@@ -210,11 +213,16 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
         };
         println!("{message}")
     }
-    if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {
+    if !args.subdomains.is_empty() && (args.monitoring_flag || args.no_monitor) && !args.quiet_flag
+    {
         println!()
     }
 
-    async_resolver_engine(args, args.subdomains.clone(), &file_name)
+    if !args.subdomains.is_empty() {
+        async_resolver_engine(args, args.subdomains.clone(), &file_name)
+    } else {
+        HashMap::new()
+    }
 }
 
 #[allow(clippy::cognitive_complexity)]
