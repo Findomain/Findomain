@@ -99,8 +99,7 @@ impl IntoSubdomains for SubdomainsBufferover {
     fn into_subdomains(self) -> HashSet<String> {
         self.results
             .iter()
-            .map(|sub| sub.split(','))
-            .flatten()
+            .flat_map(|sub| sub.split(','))
             .map(str::to_owned)
             .collect()
     }

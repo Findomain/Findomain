@@ -28,7 +28,7 @@ pub fn take_screenshot(
                     output_image
                         .replace("https://", "")
                         .replace("http://", "")
-                        .replace(":", "_")
+                        .replace(':', "_")
                 )),
                 &jpeg_data,
             )?

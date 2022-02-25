@@ -93,7 +93,7 @@ pub fn sanitize_target_string(target: String) -> String {
         .replace("www.", "")
         .replace("https://", "")
         .replace("http://", "")
-        .replace("/", "")
+        .replace('/', "")
 }
 
 pub fn return_matches_vec(matches: &clap::ArgMatches, value: &str) -> Vec<String> {
