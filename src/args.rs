@@ -240,7 +240,8 @@ pub fn get_args() -> Args {
         no_resolve: matches.is_present("no-resolve"),
         external_subdomains: matches.is_present("external-subdomains"),
         validate_subdomains: matches.is_present("validate-subdomains"),
-        disable_double_dns_check: matches.is_present("no-double-dns-check"),
+        disable_double_dns_check: matches.is_present("no-double-dns-check")
+            || !matches.is_present("custom-resolvers"),
         custom_ports_range: matches.is_present("initial-port") || matches.is_present("last-port"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: {
