@@ -386,7 +386,7 @@ $ findomain_discord_webhook='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXX
 
 See `findomain -h/--help` to see all the options.
 
-For subdomains monitoring examples [Subdomains Monitoring](https://github.com/findomain/findomain/blob/master/README.md#subdomains-monitoring) for more information.
+For subdomains monitoring examples [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) for more information.
 
 You can use the tool in two ways, only discovering the domain name or discovering the domain + the IP address.
 
@@ -420,14 +420,14 @@ You can use the tool in two ways, only discovering the domain name or discoverin
 
 `findomain -f file_with_domains.txt -r -u multiple_domains.txt`
 
-8. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring).
+8. Query the Findomain database created with [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring).
 
 `findomain -t example.com --query-database`
 
-9. Query the Findomain database created with [Subdomains Monitoring](README.md#subdomains-monitoring) and save results to a custom filename.
+9. Query the Findomain database created with [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) and save results to a custom filename.
 
 `findomain -t example.com --query-database -u subdomains.txt`
 
-10. Import subdomains from several files and work with them in the [Subdomains Monitoring](README.md#subdomains-monitoring) process:
+10. Import subdomains from several files and work with them in the [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) process:
 
 `findomain --import-subdomains file1.txt file2.txt file3.txt -m -t example.com`
