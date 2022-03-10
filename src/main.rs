@@ -5,7 +5,6 @@ use {
         files::{read_from_file, return_file_targets, string_to_file},
         get_subdomains,
         logic::validate_target,
-        // structs::Args,
         utils,
     },
     std::{collections::HashSet, fs::OpenOptions, iter::FromIterator, path::Path},
@@ -56,7 +55,6 @@ fn run() -> Result<()> {
         std::process::exit(0)
     }
 
-    // manage_threads(&mut arguments);
     if arguments.bruteforce {
         if !arguments.discover_ip && !arguments.http_status && !arguments.enable_port_scan {
             println!("To use Findomain bruteforce method, use one of the --resolved/-r, --ip/-i, --ipv6-only, --http-status or --pscan/--iport/--lport options.");
@@ -76,13 +74,6 @@ fn run() -> Result<()> {
         std::process::exit(1)
     }
 }
-
-// fn manage_threads(arguments: &mut Args) {
-//     rayon::ThreadPoolBuilder::new()
-//         .num_threads(arguments.threads)
-//         .build_global()
-//         .unwrap()
-// }
 
 fn main() {
     if let Err(err) = run() {
