@@ -2,7 +2,7 @@ name: ci-to-dockerhub
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
