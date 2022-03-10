@@ -95,19 +95,10 @@ pub struct ResolvData {
     pub open_ports: Vec<i32>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct HttpStatus {
     pub http_status: String,
     pub host_url: String,
-}
-
-impl Default for HttpStatus {
-    fn default() -> Self {
-        HttpStatus {
-            http_status: String::from(""),
-            host_url: String::from(""),
-        }
-    }
 }
 
 pub struct ResolverEngineData {
