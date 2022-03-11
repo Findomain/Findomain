@@ -8,6 +8,14 @@ AARCH_TARGET="aarch64-unknown-linux-gnu"
 OSX_TARGET="x86_64-apple-darwin"
 MANPAGE_DIR="./findomain.1"
 
+if ! systemctl is-active docker >/dev/null 2>&1; then
+  echo "Docker is not running. Starting docker."
+  if ! sudo systemctl start docker; then
+    echo "Failed to start docker."
+    exit 1
+  fi
+fi
+
 # Linux build
 echo "Building Linux artifact."
 if cargo build -q --release --target="$LINUX_TARGET"; then
@@ -85,10 +93,9 @@ else
   echo "Please install the help2man package."
 fi
 
-#if command -v git >/dev/null; then
-#  git add .
-#  git commit -m "Bump version."
-#  git push
-#fi
-
-echo "All builds have passed!"
+# Stop docker
+echo "Stopping docker."
+if ! sudo systemctl stop docker; then
+  echo "Failed to stop docker."
+  exit 1
+fi
