@@ -1,5 +1,5 @@
 use crate::{args, structs::Args};
-pub use failure::{Error, ResultExt};
+pub use anyhow::{Context, Error};
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 pub fn check_request_errors(error: reqwest::Error, api: &str) {

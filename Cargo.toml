@@ -20,17 +20,17 @@ clap = { version = "2.34.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.5"
 postgres = "0.19.2"
-failure = "0.1.8"
 rayon = "1.5.1"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 addr = "0.15.3"
 serde_json = "1.0.79"
-rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", branch = "master" }
-fhc = { git = "https://github.com/Edu4rdSHL/fhc", branch = "main" } 
+rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "06ea060de914b5d1f6c236c3e8c636f1faa95244" }
+fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "38efe67b5f0bda03c2058c834e56c72f7b1dee6a" } 
 tokio = "1.17.0"
 crossbeam = "0.8.1"
 futures = "0.3.21"
+anyhow = "1.0.56"
 
 # https://github.com/bluejekyll/trust-dns/pull/1632
 [patch.crates-io]
