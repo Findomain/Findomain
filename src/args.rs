@@ -243,6 +243,7 @@ pub fn get_args() -> Args {
         disable_double_dns_check: matches.is_present("no-double-dns-check")
             || !matches.is_present("custom-resolvers"),
         custom_ports_range: matches.is_present("initial-port") || matches.is_present("last-port"),
+        no_discover: matches.is_present("no-discover"),
         files: return_matches_vec(&matches, "files"),
         import_subdomains_from: {
             let mut paths_from_config_file =

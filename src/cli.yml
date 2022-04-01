@@ -338,3 +338,12 @@ args:
                   multiple: false
                   requires:
                           - custom-resolvers
+
+        - no-discover:
+                  help: Prevent findomain from searching subdomains itself. Useful when you are importing subdomains from other tools.
+                  short: n
+                  long: no-discover
+                  takes_value: false
+                  multiple: false
+                  requires:
+                          - import-subdomains

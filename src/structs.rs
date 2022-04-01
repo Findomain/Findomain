@@ -73,6 +73,7 @@ pub struct Args {
     pub validate_subdomains: bool,
     pub disable_double_dns_check: bool,
     pub custom_ports_range: bool,
+    pub no_discover: bool,
     pub files: Vec<String>,
     pub import_subdomains_from: Vec<String>,
     pub wordlists: Vec<String>,
