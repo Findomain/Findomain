@@ -1,13 +1,10 @@
 use {
     crate::{
-        alerts,
-        errors::*,
-        files, logic, misc, networking,
-        structs::{Args, HttpStatus},
-        utils,
+        alerts, database::return_database_connection, errors::*, files, logic, misc, networking,
+        structs::Args, utils,
     },
     addr::parse_domain_name,
-    postgres::{Client, NoTls},
+    fhc::structs::HttpData,
     std::time::Instant,
 };
 
@@ -135,20 +132,12 @@ pub fn test_database_connection(args: &mut Args) {
     if !args.quiet_flag {
         println!("Testing connection to database server...")
     }
-    match Client::connect(&args.postgres_connection, NoTls) {
-        Ok(_) => {
-            if !args.quiet_flag {
-                println!("Connected, performing enumeration!")
-            }
-        }
-        Err(e) => {
-            println!(
-                "The following error happened while connecting to the database: {}",
-                e
-            );
-            std::process::exit(1)
-        }
-    }
+
+    let connection = return_database_connection(&args.postgres_connection);
+
+    println!("Connection to database server successful, performing enumeration!");
+
+    let _ = connection.close().is_ok();
 }
 
 pub fn test_chrome_availability(args: &mut Args) {
@@ -188,7 +177,7 @@ pub fn print_and_write(
     }
 }
 
-pub fn eval_http(http_status: &HttpStatus) -> String {
+pub fn eval_http(http_status: &HttpData) -> String {
     if !http_status.host_url.is_empty() {
         http_status.host_url.clone()
     } else {

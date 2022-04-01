@@ -1,12 +1,11 @@
 use {
     crate::{
-        database,
+        database::{self, return_database_connection},
         errors::*,
         files, logic, misc, networking,
         structs::{Args, ResolvData, Subdomain},
         utils,
     },
-    postgres::{Client, NoTls},
     std::{
         collections::{HashMap, HashSet},
         thread,
@@ -62,7 +61,7 @@ fn push_data_to_webhooks(
                 if args.commit_to_db_counter == 0
                     && !new_subdomains.is_empty()
                     && database::commit_to_db(
-                        Client::connect(&args.postgres_connection, NoTls)?,
+                        return_database_connection(&args.postgres_connection),
                         &subdomains_data,
                         &args.target,
                         args,
@@ -85,7 +84,8 @@ fn push_data_to_webhooks(
 
 pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     let mut new_subdomains = HashSet::new();
-    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
+    let mut connection: postgres::Client = return_database_connection(&args.postgres_connection);
+
     database::prepare_database(&args.postgres_connection)?;
 
     let statement: &str = &format!(
@@ -124,7 +124,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
             "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
             sub,
             logic::null_ip_checker(&resolv_data.ip),
-            logic::eval_http(&resolv_data.http_status),
+            logic::eval_http(&resolv_data.http_data),
             logic::return_ports_string(&resolv_data.open_ports, args)
         ));
     }
@@ -147,7 +147,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     if args.no_monitor && !args.monitoring_flag {
         if !new_subdomains.is_empty() {
             database::commit_to_db(
-                Client::connect(&args.postgres_connection, NoTls)?,
+                return_database_connection(&args.postgres_connection),
                 &resolv_data,
                 &args.target,
                 args,

@@ -1,7 +1,7 @@
 use {
     crate::{
         args, external_subs, files, logic, port_scanner, resolvers, screenshots, sources, structs,
-        structs::{Args, HttpStatus, ResolvData},
+        structs::{Args, ResolvData},
         utils,
     },
     crossbeam::channel,
@@ -318,7 +318,7 @@ fn async_resolver_engine(
                 } else {
                     String::from("NOT CHECKED")
                 },
-                http_status: HttpStatus::default(),
+                http_data: HttpData::default(),
                 open_ports: Vec::new(),
             };
             (sub.to_owned(), local_resolv_data)
@@ -343,7 +343,7 @@ fn async_resolver_engine(
 
         let (tx, rx) = channel::bounded(1);
 
-        let client = fhc::httplib::return_http_client(args.http_timeout);
+        let client = fhc::httplib::return_http_client(args.http_timeout, 3);
         let user_agents_list = args.user_agent_strings.clone();
         let http_retries = args.http_retries;
 
@@ -354,6 +354,7 @@ fn async_resolver_engine(
                 user_agents_list,
                 http_retries,
                 async_threads,
+                false,
                 0,
                 false,
                 true,
@@ -382,22 +383,26 @@ fn async_resolver_engine(
     resolv_data = resolv_data
         .par_iter()
         .map(|(host, host_resolv_data)| {
-            let local_http_data = http_data.get(host).unwrap_or(&empty_http_data);
+            let local_fhc_data = http_data.get(host).unwrap_or(&empty_http_data).clone();
             let mut local_resolv_data = host_resolv_data.clone();
 
-            if args.http_status && !local_resolv_data.ip.is_empty() && !args.no_resolve {
-                local_resolv_data.http_status = HttpStatus {
-                    http_status: local_http_data.http_status.clone(),
-                    host_url: local_http_data.host_url.clone(),
-                };
-            } else if args.http_status && local_resolv_data.ip.is_empty() && !args.no_resolve {
-                local_resolv_data.http_status.http_status = String::from("INACTIVE")
+            if args.http_status
+                && !local_resolv_data.ip.is_empty()
+                && !local_fhc_data.host_url.is_empty()
+                && !args.no_resolve
+            {
+                local_resolv_data.http_data = local_fhc_data;
+            } else if (args.http_status && local_resolv_data.ip.is_empty()
+                || local_fhc_data.host_url.is_empty())
+                && !args.no_resolve
+            {
+                local_resolv_data.http_data.http_status = String::from("INACTIVE")
             } else {
-                local_resolv_data.http_status.http_status = String::from("NOT CHECKED")
+                local_resolv_data.http_data.http_status = String::from("NOT CHECKED")
             }
 
             if args.no_resolve {
-                local_resolv_data.http_status.host_url = host.clone()
+                local_resolv_data.http_data.host_url = host.clone()
             };
 
             (host.to_owned(), local_resolv_data)
@@ -410,17 +415,17 @@ fn async_resolver_engine(
             .build()
             .unwrap();
         screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, host_resolv_data)| {
-        if !host_resolv_data.http_status.host_url.is_empty() || args.no_resolve {
+        if !host_resolv_data.http_data.host_url.is_empty() || args.no_resolve {
             match screenshots::take_screenshot(
                 utils::return_headless_browser(args.chrome_sandbox),
-                &host_resolv_data.http_status.host_url,
+                &host_resolv_data.http_data.host_url,
                 &args.screenshots_path,
                 &args.target,
                 sub,
             ) {
                 Ok(_) => {
                     if args.no_resolve {
-                        println!("{}", host_resolv_data.http_status.host_url)
+                        println!("{}", host_resolv_data.http_data.host_url)
                     }
                 }
                 Err(_) => {
@@ -428,20 +433,20 @@ fn async_resolver_engine(
                     while counter <= 2 {
                         match screenshots::take_screenshot(
                             utils::return_headless_browser(args.chrome_sandbox),
-                            &host_resolv_data.http_status.host_url,
+                            &host_resolv_data.http_data.host_url,
                             &args.screenshots_path,
                             &args.target,
                             sub,
                         ) {
                             Ok(_) => {
                                 if args.no_resolve {
-                                    println!("{}", host_resolv_data.http_status.host_url)
+                                    println!("{}", host_resolv_data.http_data.host_url)
                                 };
                                 break;
                             }
                             Err(e) => {
                                 if counter == 3 {
-                                    eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, host_resolv_data.http_status.host_url, e)
+                                    eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, host_resolv_data.http_data.host_url, e)
                                 }
                                 counter += 1
                             }
@@ -521,7 +526,7 @@ fn async_resolver_engine(
                     "{},{},{},{}",
                     sub,
                     &host_resolv_data.ip,
-                    &logic::eval_http(&host_resolv_data.http_status),
+                    &logic::eval_http(&host_resolv_data.http_data),
                     logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
@@ -535,7 +540,7 @@ fn async_resolver_engine(
                     "{},{},{}",
                     sub,
                     &host_resolv_data.ip,
-                    &logic::eval_http(&host_resolv_data.http_status)
+                    &logic::eval_http(&host_resolv_data.http_data)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
@@ -552,18 +557,18 @@ fn async_resolver_engine(
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if http_without_ip_with_ports {
-            if host_resolv_data.http_status.http_status == "ACTIVE" {
+            if host_resolv_data.http_data.http_status == "ACTIVE" {
                 data_to_write = format!(
                     "{},{},{}",
                     sub,
-                    &logic::eval_http(&host_resolv_data.http_status),
+                    &logic::eval_http(&host_resolv_data.http_data),
                     logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if only_http {
-            if host_resolv_data.http_status.http_status == "ACTIVE" {
-                data_to_write = logic::eval_http(&host_resolv_data.http_status);
+            if host_resolv_data.http_data.http_status == "ACTIVE" {
+                data_to_write = logic::eval_http(&host_resolv_data.http_data);
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
         } else if ports_with_ip {

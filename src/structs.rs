@@ -1,4 +1,7 @@
-use std::{collections::HashSet, time::Instant};
+use {
+    fhc::structs::HttpData,
+    std::{collections::HashSet, time::Instant},
+};
 
 #[derive(Clone, Debug)]
 pub struct Args {
@@ -91,14 +94,8 @@ pub struct Subdomain {
 #[derive(Clone, Default)]
 pub struct ResolvData {
     pub ip: String,
-    pub http_status: HttpStatus,
+    pub http_data: HttpData,
     pub open_ports: Vec<i32>,
-}
-
-#[derive(Clone, Default)]
-pub struct HttpStatus {
-    pub http_status: String,
-    pub host_url: String,
 }
 
 pub struct ResolverEngineData {
