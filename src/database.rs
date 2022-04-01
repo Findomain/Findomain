@@ -1,15 +1,38 @@
+use native_tls::TlsConnector;
+use postgres_native_tls::MakeTlsConnector;
+
 use {
     crate::{
         errors::*,
         logic,
         structs::{Args, ResolvData, Subdomain},
     },
-    postgres::{Client, NoTls},
+    postgres::Client,
     std::collections::HashMap,
 };
 
+pub fn return_database_connection(postgres_connection: &str) -> Client {
+    // Lets accept self signed certificates
+    let connector = TlsConnector::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap();
+    let tls_connector = MakeTlsConnector::new(connector);
+
+    match Client::connect(postgres_connection, tls_connector) {
+        Ok(client) => client,
+        Err(e) => {
+            println!(
+                "The following error happened while connecting to the database: {}",
+                e
+            );
+            std::process::exit(1)
+        }
+    }
+}
+
 pub fn prepare_database(postgres_connection: &str) -> Result<()> {
-    let mut connection: postgres::Client = Client::connect(postgres_connection, NoTls)?;
+    let mut connection: postgres::Client = return_database_connection(postgres_connection);
     connection.execute(
         "CREATE TABLE IF NOT EXISTS subdomains (
                    id              SERIAL PRIMARY KEY,
@@ -37,6 +60,7 @@ fn update_database_schema(mut connection: postgres::Client) {
             )
             .is_ok();
     }
+    let _ = connection.close().is_ok();
 }
 
 pub fn commit_to_db<S: ::std::hash::BuildHasher>(
@@ -52,14 +76,17 @@ pub fn commit_to_db<S: ::std::hash::BuildHasher>(
             &[
                 &subdomain,
                 &logic::null_ip_checker(&resolv_data.ip),
-                &resolv_data.http_status.http_status,
+                &resolv_data.http_data.http_status,
                 &logic::return_ports_string(&resolv_data.open_ports, args),
                 &root_domain,
                 &args.jobname,
             ],
         )?;
     }
+
     prepared_transaction.commit()?;
+
+    let _ = conn.close().is_ok();
     Ok(())
 }
 
@@ -74,9 +101,10 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
             "Searching subdomains in the Findomain database for the job name {} 🔍",
             args.jobname
         )
-    }
+    };
 
-    let mut connection: postgres::Client = Client::connect(&args.postgres_connection, NoTls)?;
+    let mut connection: postgres::Client = return_database_connection(&args.postgres_connection);
+
     prepare_database(&args.postgres_connection)?;
 
     if args.query_database {
@@ -110,6 +138,7 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
             })
             .collect();
     }
+    let _ = connection.close().is_ok();
     logic::works_with_data(args)?;
     Ok(())
 }

@@ -26,11 +26,13 @@ headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 addr = "0.15.3"
 serde_json = "1.0.79"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "06ea060de914b5d1f6c236c3e8c636f1faa95244" }
-fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "38efe67b5f0bda03c2058c834e56c72f7b1dee6a" } 
+fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "0965d040878788b180759787a2c038207e76b6fe" } 
 tokio = "1.17.0"
 crossbeam = "0.8.1"
 futures = "0.3.21"
 anyhow = "1.0.56"
+postgres-native-tls = "0.5.0"
+native-tls = "0.2.10"
 
 # https://github.com/bluejekyll/trust-dns/pull/1632
 [patch.crates-io]
