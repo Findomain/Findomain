@@ -95,7 +95,7 @@ fi
 
 # Stop docker
 echo "Stopping docker."
-if ! sudo systemctl stop docker; then
+if ! sudo systemctl stop docker.service docker.socket; then
   echo "Failed to stop docker."
   exit 1
 fi
