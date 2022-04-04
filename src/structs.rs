@@ -32,6 +32,7 @@ pub struct Args {
     pub commit_to_db_counter: usize,
     pub lightweight_threads: usize,
     pub screenshots_threads: usize,
+    pub tcp_connect_threads: usize,
     pub parallel_ip_ports_scan: usize,
     pub resolver_timeout: u64,
     pub tcp_connect_timeout: u64,

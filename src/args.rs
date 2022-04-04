@@ -156,6 +156,11 @@ pub fn get_args() -> Args {
                     .unwrap()
             },
         ),
+        tcp_connect_threads: value_t!(matches, "tcp-connect-threads", usize).unwrap_or_else(|_| {
+            return_value_or_default(&settings, "screenshots_threads", 500.to_string())
+                .parse::<usize>()
+                .unwrap()
+        }),
         resolver_timeout: value_t!(matches, "resolver-timeout", u64).unwrap_or_else(|_| {
             return_value_or_default(&settings, "resolver_timeout", 3.to_string())
                 .parse::<u64>()

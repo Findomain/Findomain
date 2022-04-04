@@ -122,6 +122,10 @@ args:
                   help: Number of IPs that will be port-scanned at the same time. Default is 10.
                   long: parallel-ip-ports-scan
                   takes_value: true
+        - tcp-connect-threads:
+                  help: Number of threads to use for TCP connections - It's the equivalent of Nmap's --min-rate. Default is 500.
+                  long: tcp-connect-threads
+                  takes_value: true
         - custom-resolvers:
                   help: Path to a file (or files) containing a list of DNS IP address. If no specified then Google, Cloudflare and Quad9 DNS servers are used.
                   long: resolvers

@@ -465,7 +465,7 @@ fn async_resolver_engine(
             let rt = tokio::runtime::Runtime::new().unwrap();
             let handle = rt.handle().to_owned();
 
-            let tcp_connect_threads = args.lightweight_threads;
+            let tcp_connect_threads = args.tcp_connect_threads;
             let parallel_ip_ports_scan = if ips_to_scan.len() < args.parallel_ip_ports_scan {
                 ips_to_scan.len()
             } else {
