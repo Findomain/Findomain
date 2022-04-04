@@ -182,6 +182,8 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
     all_subdomains.retain(|sub| logic::validate_subdomain(&base_target, sub, args));
 
+    println!();
+
     all_subdomains
 }
 

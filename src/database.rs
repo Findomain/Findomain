@@ -140,5 +140,6 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
     }
     let _ = connection.close().is_ok();
     logic::works_with_data(args)?;
-    Ok(())
+
+    std::process::exit(0)
 }

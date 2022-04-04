@@ -56,14 +56,8 @@ fn run() -> Result<()> {
     }
 
     if arguments.bruteforce {
-        if !arguments.discover_ip && !arguments.http_status && !arguments.enable_port_scan {
-            println!("To use Findomain bruteforce method, use one of the --resolved/-r, --ip/-i, --ipv6-only, --http-status or --pscan/--iport/--lport options.");
-            std::process::exit(1)
-        } else {
-            let wordlists = arguments.wordlists.clone();
-            arguments.wordlists_data =
-                HashSet::from_iter(return_file_targets(&arguments, wordlists))
-        }
+        arguments.wordlists_data =
+            HashSet::from_iter(return_file_targets(&arguments, arguments.wordlists.clone()))
     }
     if !arguments.target.is_empty() || arguments.query_jobname {
         get_subdomains(&mut arguments)

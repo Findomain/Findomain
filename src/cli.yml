@@ -144,9 +144,6 @@ args:
                   short: w
                   long: wordlist
                   takes_value: true
-                  conflicts_with:
-                          - query-database
-                          - monitoring-flag
         - no-wildcards:
                   help: Disable wilcard detection when resolving subdomains.
                   long: no-wildcards
@@ -345,5 +342,3 @@ args:
                   long: no-discover
                   takes_value: false
                   multiple: false
-                  requires:
-                          - import-subdomains
