@@ -8,3 +8,5 @@ findomain.toml
 configtest.toml
 /screenshots
 /sshots
+# Right now ARM builds fails on the first attempt, so we need to retry...
+armbuilder.sh
