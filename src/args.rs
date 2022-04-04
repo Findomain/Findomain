@@ -185,7 +185,7 @@ pub fn get_args() -> Args {
                 .parse::<u64>()
                 .unwrap()
         },
-        tcp_connect_timeout: value_t!(matches, "tcp-connect-timeout", u64).unwrap_or_else(|_| 500),
+        tcp_connect_timeout: value_t!(matches, "tcp-connect-timeout", u64).unwrap_or_else(|_| 2000),
         initial_port: value_t!(matches, "initial-port", u16).unwrap_or_else(|_| 1),
         last_port: value_t!(matches, "last-port", u16).unwrap_or_else(|_| 1000),
         only_resolved: matches.is_present("resolved"),

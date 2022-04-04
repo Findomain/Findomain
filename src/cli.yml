@@ -275,7 +275,7 @@ args:
                   requires:
                           - http-status
         - tcp-connect-timeout:
-                  help: Value in milliseconds to wait for the TCP connection (ip:port) in the ports scanning function. Default 500.
+                  help: Value in milliseconds to wait for the TCP connection (ip:port) in the ports scanning function. Default 2000.
                   long: tcp-connect-timeout
                   takes_value: true
                   multiple: false
