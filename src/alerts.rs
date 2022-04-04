@@ -8,6 +8,7 @@ use {
     },
     std::{
         collections::{HashMap, HashSet},
+        net::Ipv4Addr,
         thread,
         time::Duration,
     },
@@ -120,13 +121,25 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     let resolv_data = networking::async_resolver_all(args);
 
     for (sub, resolv_data) in &resolv_data {
-        new_subdomains.insert(format!(
-            "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
-            sub,
-            logic::null_ip_checker(&resolv_data.ip),
-            logic::eval_http(&resolv_data.http_data),
-            logic::return_ports_string(&resolv_data.open_ports, args)
-        ));
+        if args.enable_port_scan || args.discover_ip || args.http_status {
+            if resolv_data.ip.parse::<Ipv4Addr>().is_ok() {
+                new_subdomains.insert(format!(
+                    "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
+                    sub,
+                    &resolv_data.ip,
+                    logic::eval_http(&resolv_data.http_data),
+                    logic::return_ports_string(&resolv_data.open_ports, args)
+                ));
+            }
+        } else {
+            new_subdomains.insert(format!(
+                "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
+                sub,
+                logic::null_ip_checker(&resolv_data.ip),
+                logic::eval_http(&resolv_data.http_data),
+                logic::return_ports_string(&resolv_data.open_ports, args)
+            ));
+        }
     }
 
     if args.with_output && !new_subdomains.is_empty() {
