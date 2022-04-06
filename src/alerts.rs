@@ -158,7 +158,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     }
 
     if (args.no_monitor && !args.monitoring_flag)
-        || (new_subdomains.is_empty() && !resolv_data.is_empty())
+        || (new_subdomains.is_empty() && !resolv_data.is_empty() && !args.enable_empty_push)
     {
         database::commit_to_db(
             return_database_connection(&args.postgres_connection),
