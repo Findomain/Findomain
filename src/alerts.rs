@@ -157,18 +157,19 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
         }
     }
 
-    if args.no_monitor && !args.monitoring_flag {
-        if !new_subdomains.is_empty() {
-            database::commit_to_db(
-                return_database_connection(&args.postgres_connection),
-                &resolv_data,
-                &args.target,
-                args,
-            )?
-        }
+    if (args.no_monitor && !args.monitoring_flag)
+        || (new_subdomains.is_empty() && !resolv_data.is_empty())
+    {
+        database::commit_to_db(
+            return_database_connection(&args.postgres_connection),
+            &resolv_data,
+            &args.target,
+            args,
+        )?
     } else if args.enable_empty_push || !new_subdomains.is_empty() {
         push_data_to_webhooks(args, &new_subdomains, resolv_data)?
     }
+
     if !args.quiet_flag
         && args.rate_limit != 0
         && (args.from_file_flag || args.from_stdin)
