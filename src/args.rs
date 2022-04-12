@@ -156,6 +156,11 @@ pub fn get_args() -> Args {
                     .unwrap()
             },
         ),
+        max_http_redirects: value_t!(matches, "max-http-redirects", usize).unwrap_or_else(|_| {
+            return_value_or_default(&settings, "max_http_redirects", 0.to_string())
+                .parse::<usize>()
+                .unwrap()
+        }),
         tcp_connect_threads: value_t!(matches, "tcp-connect-threads", usize).unwrap_or_else(|_| {
             return_value_or_default(&settings, "screenshots_threads", 500.to_string())
                 .parse::<usize>()
