@@ -346,8 +346,3 @@ args:
                   long: no-discover
                   takes_value: false
                   multiple: false
-
-        - max-http-redirects:
-                  help: Maximum number of HTTP redirects to follow. Default 0.
-                  long: max-http-redirects
-                  takes_value: true
