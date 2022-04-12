@@ -5,7 +5,7 @@ use {
         utils,
     },
     crossbeam::channel,
-    fhc::structs::HttpData,
+    fhc::structs::{HttpData, LibOptions},
     rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
     rayon::prelude::*,
     rusolver::{
@@ -335,23 +335,21 @@ fn async_resolver_engine(
 
         let (tx, rx) = channel::bounded(1);
 
-        let client = fhc::httplib::return_http_client(args.http_timeout, 3);
-        let user_agents_list = args.user_agent_strings.clone();
-        let http_retries = args.http_retries;
+        let client = fhc::httplib::return_http_client(args.http_timeout, args.max_http_redirects);
+
+        let lib_options = LibOptions {
+            hosts: http_hosts.clone(),
+            client,
+            user_agents: args.user_agent_strings.clone(),
+            retries: args.http_retries,
+            threads: async_threads,
+            assign_response_data: true,
+            quiet_flag: true,
+            ..Default::default()
+        };
 
         handle.spawn(async move {
-            let http_data = fhc::httplib::return_http_data(
-                http_hosts,
-                client,
-                user_agents_list,
-                http_retries,
-                async_threads,
-                false,
-                0,
-                false,
-                true,
-            )
-            .await;
+            let http_data = fhc::httplib::return_http_data(&lib_options).await;
 
             let _ = tx.send(http_data);
         });
