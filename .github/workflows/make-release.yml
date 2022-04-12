@@ -1,0 +1,130 @@
+name: Create and upload artifacts
+
+on: [push]
+
+jobs:
+  build-nix:
+    env:
+      IN_PIPELINE: true
+    runs-on: ${{ matrix.os }}
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        type: [ubuntu-x64, ubuntu-x86, armv7, aarch64]
+        include:
+          - type: ubuntu-x64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            name: findomain-linux
+            path: target/x86_64-unknown-linux-musl/release/findomain
+            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
+          - type: ubuntu-x86
+            os: ubuntu-latest
+            target: i686-unknown-linux-musl
+            name: findomain-linux-i386
+            path: target/i686-unknown-linux-musl/release/findomain
+            pkg_config_path: /usr/lib/i686-linux-gnu/pkgconfig
+          - type: armv7
+            os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            name: findomain-armv7
+            path: target/armv7-unknown-linux-gnueabihf/release/findomain
+            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
+          - type: aarch64
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            name: findomain-aarch64
+            path: target/aarch64-unknown-linux-gnu/release/findomain
+            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install System Dependencies
+        run: |
+          env
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libssl-dev pkg-config gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        env:
+          PKG_CONFIG_PATH: ${{ matrix.pkg_config_path }}
+          OPENSSL_DIR: /usr/lib/ssl
+        with:
+          use-cross: true
+          command: build
+          args: --release --target=${{ matrix.target }}
+      - name: Strip symbols from binary
+        run: |
+          strip -s ${{ matrix.path }} || arm-linux-gnueabihf-strip -s ${{ matrix.path }} || aarch64-linux-gnu-strip -s ${{ matrix.path }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}
+
+  build-macos:
+    env:
+      IN_PIPELINE: true
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-apple-darwin
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target=x86_64-apple-darwin
+      - name: Strip symbols from binary
+        run: |
+          strip -u -r target/x86_64-apple-darwin/release/findomain
+      - uses: actions/upload-artifact@v2
+        with:
+          name: findomain-osx
+          path: target/x86_64-apple-darwin/release/findomain
+      - uses: actions/upload-artifact@v2
+        with:
+          name: findomain-osx
+          path: findomain-osx
+
+  build-windows:
+    env:
+      IN_PIPELINE: true
+    runs-on: ${{ matrix.os }}
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        type: [windows-x64, windows-x86]
+        include:
+          - type: windows-x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            name: findomain-windows.exe
+            path: target\x86_64-pc-windows-msvc\release\findomain.exe
+          - type: windows-x86
+            os: windows-latest
+            target: i686-pc-windows-msvc
+            name: findomain-windows-i686.exe
+            path: target\i686-pc-windows-msvc\release\findomain.exe
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target=${{ matrix.target }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}
