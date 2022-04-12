@@ -14,9 +14,9 @@ resolver = "1"
 [dependencies]
 serde = { version = "1.0.136", features = ["derive"] }
 serde_derive = "1.0.136"
-reqwest = { version = "0.11.10", features = ["blocking", "json", "gzip"] }
+reqwest = { version = "0.11.9", features = ["blocking", "json", "gzip"] }
 trust-dns-resolver = "0.20.4"
-clap = { version = "2.33.4", features = ["yaml"] }
+clap = { version = "2.34.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.5"
 postgres = "0.19.2"
@@ -25,8 +25,8 @@ config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
 addr = "0.15.3"
 serde_json = "1.0.79"
-rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "88ee0f9b58ea89e6affb02f81c11b75983f1a497" }
-fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "728b8c078d5dcc6192fc8a607b9beeb66a7c1296" } 
+rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "06ea060de914b5d1f6c236c3e8c636f1faa95244" }
+fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "0965d040878788b180759787a2c038207e76b6fe" } 
 tokio = "1.17.0"
 crossbeam = "0.8.1"
 futures = "0.3.21"
