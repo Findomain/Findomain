@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "8.1.0"
+version = "8.0.0"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
@@ -48,7 +48,7 @@ openssl = { version = "0.10.38", features = ["vendored"] }
 openssl = { version = "0.10.38", features = ["vendored"] }
 
 [profile.release]
-lto = 'thin'
+lto = true
 codegen-units = 1
 panic = 'abort'
 incremental = false
