@@ -104,5 +104,7 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
         thread::sleep(Duration::from_secs(args.rate_limit))
     }
 
+    args.subdomains.clear();
+
     Ok(())
 }
