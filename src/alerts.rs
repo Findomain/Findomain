@@ -3,7 +3,7 @@ use {
         database::{self, return_database_connection},
         errors::*,
         files, logic, misc, networking,
-        structs::{Args, ResolvData, Subdomain},
+        structs::{Args, ResolvData},
         utils,
     },
     std::{
@@ -85,38 +85,14 @@ fn push_data_to_webhooks(
 
 pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
     let mut new_subdomains = HashSet::new();
-    let mut connection: postgres::Client = return_database_connection(&args.postgres_connection);
 
-    database::prepare_database(&args.postgres_connection)?;
+    let existing_subdomains = database::return_existing_subdomains(args)?;
 
-    let statement: &str = &format!(
-        "SELECT name FROM subdomains WHERE name LIKE '%{}'",
-        &args.target
-    );
-    let existing_subdomains = connection.query(statement, &[])?;
-
-    let existing_subdomains: HashSet<String> = existing_subdomains
-        .iter()
-        .map(|row| {
-            let subdomain = Subdomain {
-                name: row.get("name"),
-            };
-            subdomain.name
-        })
+    args.subdomains = args
+        .subdomains
+        .difference(&existing_subdomains)
+        .map(ToString::to_string)
         .collect();
-
-    args.subdomains = {
-        let newsubs: HashSet<String> = args
-            .subdomains
-            .difference(&existing_subdomains)
-            .map(|sub| sub.to_string())
-            .collect();
-        if !newsubs.is_empty() {
-            newsubs
-        } else {
-            HashSet::new()
-        }
-    };
 
     let resolv_data = networking::async_resolver_all(args);
 

@@ -8,7 +8,7 @@ use {
         structs::{Args, ResolvData, Subdomain},
     },
     postgres::Client,
-    std::collections::HashMap,
+    std::collections::{HashMap, HashSet},
 };
 
 pub fn return_database_connection(postgres_connection: &str) -> Client {
@@ -142,4 +142,30 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
     logic::works_with_data(args)?;
 
     std::process::exit(0)
+}
+
+pub fn return_existing_subdomains(args: &Args) -> Result<HashSet<String>> {
+    let mut connection = return_database_connection(&args.postgres_connection);
+
+    prepare_database(&args.postgres_connection)?;
+
+    let statement = format!(
+        "SELECT name FROM subdomains_fdplus WHERE root_domain = '{}' OR name LIKE '%.{}'",
+        args.target, args.target
+    );
+
+    let existing_subdomains: HashSet<String> = connection
+        .query(&statement, &[])?
+        .iter()
+        .map(|row| {
+            let subdomain = Subdomain {
+                name: row.get("name"),
+            };
+            subdomain.name
+        })
+        .collect();
+
+    connection.close()?;
+
+    Ok(existing_subdomains)
 }
