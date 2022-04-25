@@ -135,7 +135,9 @@ pub fn test_database_connection(args: &mut Args) {
 
     let connection = return_database_connection(&args.postgres_connection);
 
-    println!("Connection to database server successful, performing enumeration!");
+    if !args.quiet_flag {
+        println!("Connection to database server successful, performing enumeration!");
+    }
 
     let _ = connection.close().is_ok();
 }
