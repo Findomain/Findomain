@@ -569,7 +569,7 @@ dependencies = [
 [[package]]
 name = "fhc"
 version = "0.7.1"
-source = "git+https://github.com/Edu4rdSHL/fhc?rev=728b8c078d5dcc6192fc8a607b9beeb66a7c1296#728b8c078d5dcc6192fc8a607b9beeb66a7c1296"
+source = "git+https://github.com/Edu4rdSHL/fhc?rev=c6ea4c6ad810061312f4b380d0ab7d51775950b1#c6ea4c6ad810061312f4b380d0ab7d51775950b1"
 dependencies = [
  "async-recursion",
  "clap",
@@ -2021,7 +2021,7 @@ dependencies = [
 [[package]]
 name = "rusolver"
 version = "0.9.1"
-source = "git+https://github.com/Edu4rdSHL/rusolver?rev=88ee0f9b58ea89e6affb02f81c11b75983f1a497#88ee0f9b58ea89e6affb02f81c11b75983f1a497"
+source = "git+https://github.com/Edu4rdSHL/rusolver?rev=cf75cafee7c9d0c257c0b5a361441efc4e247e9c#cf75cafee7c9d0c257c0b5a361441efc4e247e9c"
 dependencies = [
  "clap",
  "futures",

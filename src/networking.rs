@@ -5,12 +5,12 @@ use {
         utils,
     },
     crossbeam::channel,
-    fhc::structs::{HttpData, LibOptions},
+    fhc::structs::{HttpData, LibOptions as FhcLibOptions},
     rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
     rayon::prelude::*,
     rusolver::{
         dnslib::{return_hosts_data, return_tokio_asyncresolver},
-        structs::DomainData,
+        structs::{DomainData, LibOptions as RusolverLibOptions},
     },
     std::{
         collections::{HashMap, HashSet},
@@ -271,18 +271,19 @@ fn async_resolver_engine(
         let subdomains_for_async_resolver = subdomains.clone();
         let disable_double_check = args.disable_double_dns_check;
 
+        let rusolver_liboptions = RusolverLibOptions {
+            hosts: subdomains_for_async_resolver,
+            resolvers,
+            trustable_resolver,
+            wildcard_ips,
+            disable_double_check,
+            threads: async_threads,
+            show_ip_address: false,
+            quiet_flag: true,
+        };
+
         handle.spawn(async move {
-            let data = return_hosts_data(
-                subdomains_for_async_resolver,
-                resolvers,
-                trustable_resolver,
-                wildcard_ips,
-                disable_double_check,
-                async_threads,
-                false,
-                true,
-            )
-            .await;
+            let data = return_hosts_data(&rusolver_liboptions).await;
 
             let _ = tx.send(data);
         });
@@ -337,7 +338,7 @@ fn async_resolver_engine(
 
         let client = fhc::httplib::return_http_client(args.http_timeout, args.max_http_redirects);
 
-        let lib_options = LibOptions {
+        let lib_options = FhcLibOptions {
             hosts: http_hosts.clone(),
             client,
             user_agents: args.user_agent_strings.clone(),
@@ -633,18 +634,19 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
 
     let (tx, rx) = channel::bounded(1);
 
+    let rusolver_liboptions = RusolverLibOptions {
+        hosts: generated_wildcards,
+        resolvers: trustable_resolver.clone(),
+        trustable_resolver,
+        wildcard_ips: HashSet::new(),
+        disable_double_check: true,
+        threads: 10,
+        show_ip_address: false,
+        quiet_flag: true,
+    };
+
     handle.spawn(async move {
-        let data = return_hosts_data(
-            generated_wildcards,
-            trustable_resolver.clone(),
-            trustable_resolver,
-            HashSet::new(),
-            true,
-            20,
-            false,
-            true,
-        )
-        .await;
+        let data = return_hosts_data(&rusolver_liboptions).await;
 
         let _ = tx.send(data);
     });
