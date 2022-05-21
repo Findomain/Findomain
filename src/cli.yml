@@ -42,7 +42,7 @@ args:
         - output:
                   short: o
                   long: output
-                  help: Write to an output file. The name of the output file will be the target string with TXT format.
+                  help: "Write to an automatically generated output file. The name of the output file is generated using the format: target.txt. If you want a custom output file name, use the -u/--unique-output option."
                   takes_value: false
         - unique-output:
                   short: u
