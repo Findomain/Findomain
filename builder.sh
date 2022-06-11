@@ -8,13 +8,13 @@ AARCH_TARGET="aarch64-unknown-linux-gnu"
 OSX_TARGET="x86_64-apple-darwin"
 MANPAGE_DIR="./findomain.1"
 
-if ! systemctl is-active docker >/dev/null 2>&1; then
-  echo "Docker is not running. Starting docker."
-  if ! sudo systemctl start docker; then
-    echo "Failed to start docker."
-    exit 1
-  fi
-fi
+#if ! systemctl is-active docker >/dev/null 2>&1; then
+#  echo "Docker is not running. Starting docker."
+#  if ! sudo systemctl start docker; then
+#    echo "Failed to start docker."
+#    exit 1
+#  fi
+#fi
 
 # Linux build
 echo "Building Linux artifact."
