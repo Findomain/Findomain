@@ -1,0 +1,14 @@
+# Rustfmt configuration file.
+
+# How imports should be grouped into use statements. Imports will be merged or split to the configured level of granularity.
+imports_granularity = "One"
+# Unix or Windows line endings
+newline_style = "Unix"
+# Convert /* */ comments to // comments where possible
+normalize_comments = true
+# Convert #![doc] and #[doc] attributes to //! and /// doc comments.
+normalize_doc_attributes = true
+# Remove nested parens.
+remove_nested_parens = true
+# Reorder impl items. type and const are put first, then macros and methods.
+reorder_impl_items = true

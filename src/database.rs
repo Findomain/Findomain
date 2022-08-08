@@ -1,13 +1,12 @@
-use native_tls::TlsConnector;
-use postgres_native_tls::MakeTlsConnector;
-
 use {
     crate::{
         errors::*,
         logic,
         structs::{Args, ResolvData, Subdomain},
     },
+    native_tls::TlsConnector,
     postgres::Client,
+    postgres_native_tls::MakeTlsConnector,
     std::collections::{HashMap, HashSet},
 };
 

@@ -1,8 +1,7 @@
-use std::collections::{HashMap, HashSet};
-
 use {
     futures::stream::{self, StreamExt},
     tokio::{net::TcpStream, time::timeout},
+    std::collections::{HashMap, HashSet}
 };
 
 pub async fn return_open_ports_from_ips(
