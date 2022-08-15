@@ -1,5 +1,6 @@
 use {
     crate::{errors::*, logic, misc, structs::Args, utils},
+    anyhow::Context,
     std::{
         collections::HashSet,
         fs::{self, File, OpenOptions},

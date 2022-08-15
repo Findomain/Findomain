@@ -1,6 +1,5 @@
 use crate::{args, structs::Args};
-pub use anyhow::{Context, Error};
-pub type Result<T> = ::std::result::Result<T, Error>;
+pub use anyhow::Result;
 
 pub fn check_request_errors(error: reqwest::Error, api: &str) {
     let args = args::get_args();
