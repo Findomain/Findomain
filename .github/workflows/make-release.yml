@@ -1,4 +1,4 @@
-name: Create and upload artifacts
+name: Create release artifacts
 
 on:
   workflow_dispatch:
@@ -87,10 +87,6 @@ jobs:
         with:
           name: findomain-osx
           path: target/x86_64-apple-darwin/release/findomain
-      - uses: actions/upload-artifact@v2
-        with:
-          name: findomain-osx
-          path: findomain-osx
 
   build-windows:
     env:
