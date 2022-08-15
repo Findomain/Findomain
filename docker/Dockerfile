@@ -1,7 +1,9 @@
 # docker run -it findomain -t example.com
 FROM alpine:latest
-LABEL maintainer="wfnintr@null.net"
+LABEL maintainers="wfnintr@null.net,edu4rdshl@protonmail.com"
 WORKDIR /opt/findomain
-RUN wget -qO /usr/bin/findomain https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux && \
-	chmod +x /usr/bin/findomain
+RUN apk --no-cache add unzip curl --quiet
+RUN curl -sLO https://github.com/Edu4rdSHL/findomain/releases/latest/download/findomain-linux.zip && \
+	unzip findomain-linux.zip && rm findomain-linux.zip && mv findomain /usr/bin/&& chmod +x /usr/bin/findomain
+RUN apk del unzip curl --quiet
 ENTRYPOINT ["findomain"]
