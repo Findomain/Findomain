@@ -12,25 +12,25 @@ rust-version = "1.58"
 resolver = "1"
 
 [dependencies]
-serde = { version = "1.0.137", features = ["derive"] }
-serde_derive = "1.0.137"
-reqwest = { version = "0.11.10", features = ["blocking", "json", "gzip"] }
+serde = { version = "1.0.143", features = ["derive"] }
+serde_derive = "1.0.143"
+reqwest = { version = "0.11.11", features = ["blocking", "json", "gzip"] }
 trust-dns-resolver = "0.20.4"
-clap = { version = "2.33.4", features = ["yaml"] }
+clap = { version = "2.34.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.5"
 postgres = "0.19.3"
 rayon = "1.5.3"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/Edu4rdSHL/rust-headless-chrome" }
-addr = "0.15.3"
-serde_json = "1.0.81"
+addr = "0.15.4"
+serde_json = "1.0.83"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "cf75cafee7c9d0c257c0b5a361441efc4e247e9c" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "c6ea4c6ad810061312f4b380d0ab7d51775950b1" } 
-tokio = "1.19.2"
-crossbeam = "0.8.1"
-futures = "0.3.21"
-anyhow = "1.0.57"
+tokio = "1.20.1"
+crossbeam = "0.8.2"
+futures = "0.3.23"
+anyhow = "1.0.61"
 postgres-native-tls = "0.5.0"
 native-tls = "0.2.10"
 
@@ -39,13 +39,13 @@ native-tls = "0.2.10"
 trust-dns-resolver = { git = "https://github.com/Findomain/trust-dns", package = "trust-dns-resolver", branch = "custombranch" }
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.41", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.41", features = ["vendored"] }
 
 [target.armv7-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.41", features = ["vendored"] }
 
 [profile.release]
 lto = 'thin'
