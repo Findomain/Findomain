@@ -1,7 +1,7 @@
 use {
     futures::stream::{self, StreamExt},
+    std::collections::{HashMap, HashSet},
     tokio::{net::TcpStream, time::timeout},
-    std::collections::{HashMap, HashSet}
 };
 
 pub async fn return_open_ports_from_ips(
@@ -11,7 +11,7 @@ pub async fn return_open_ports_from_ips(
     tcp_connect_timeout: u64,
     tcp_connect_threads: usize,
 ) -> HashMap<String, Vec<i32>> {
-    let data = stream::iter(ips)
+    stream::iter(ips)
         .map(|ip| {
             let ports = ports.clone();
             async move {
@@ -23,8 +23,7 @@ pub async fn return_open_ports_from_ips(
         })
         .buffer_unordered(parallel_ip_ports_scan)
         .collect::<HashMap<String, Vec<i32>>>()
-        .await;
-    data
+        .await
 }
 
 pub async fn return_open_ports(

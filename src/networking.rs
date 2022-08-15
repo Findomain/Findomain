@@ -1,7 +1,7 @@
 use {
     crate::{
-        args, external_subs, files, logic, port_scanner, resolvers, screenshots, sources, structs,
-        structs::{Args, ResolvData},
+        args, external_subs, files, logic, port_scanner, resolvers, screenshots, sources,
+        structs::{self, Args, ResolvData},
         utils,
     },
     crossbeam::channel,
