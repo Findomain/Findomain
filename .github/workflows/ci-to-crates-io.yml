@@ -5,11 +5,11 @@ on:
       - '*'           # Push events to every tag not containing /
   workflow_dispatch:
 
-name: Publish
+name: Publish releases to crates.io
 
 jobs:
   publish:
-    name: Publish
+    name: Publish to crates.io
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
