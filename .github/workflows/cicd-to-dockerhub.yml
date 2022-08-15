@@ -3,7 +3,8 @@ name: ci-to-dockerhub
 on:
   release:
     types: [published]
-
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: ubuntu-latest
