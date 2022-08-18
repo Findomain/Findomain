@@ -12,6 +12,15 @@ We offer binaries ready to use for the following platforms (all are for 64 bits 
 
 If you need to run Findomain in another platform, continue reading the documentation.
 
+Note: You need a utility to unpack the ZIP downloaded artifacts, in Linux you can use [unzip](http://infozip.sourceforge.net/UnZip.html), in Windows you can use [7zip](https://www.7-zip.org/download.html).
+
+## Prerequisites
+
+Findomain requires the following software to be installed:
+
+* Google Chrome or Chromium (for the screenshoting functionality).
+* PostgreSQL (for the subdomains monitoring functionality). See [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) for more details.
+
 # Build for 32 bits or another platform
 
 ## Binaries
@@ -20,9 +29,11 @@ The only 32-bit platform with precompiled binaries is Linux since the 4.0.1 rele
 
 
 ```
-$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386
-$ chmod +x findomain-linux-i386
-$ ./findomain-linux-i386
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
+$ unzip findomain-linux-i386.zip
+$ chmod +x findomain
+$ sudo mv findomain /usr/bin/findomain
+$ findomain --help
 ```
 
 If you want to build the tool for your 32 bits system or another platform, follow these steps:
@@ -60,48 +71,68 @@ $ sudo cp target/release/findomain /usr/bin/
 $ findomain
 ```
 
-# Installation in Linux using compiled artifacts
+# Installation in Linux using precompiled artifacts
 
-```
-$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux
-$ chmod +x findomain-linux
-$ ./findomain-linux
-```
-**If you are using the [ArchLinux](https://archlinux.org) distribution or any ArchLinux-based distro, you just need to use:**
+**If you are using [ArchLinux](https://archlinux.org) or any ArchLinux-based distro, you can use the following command:**
 
 ```
 $ pacman -S findomain
 ```
-**If you are using the [Pentoo](https://pentoo.ch) distribution, you just need to use:**
+**If you are using [Pentoo](https://pentoo.ch), you can use the following command:**
 
 ```
 $ emerge -a findomain
 ```
 
+**If you are using [NixOs](https://nixos.org/), you can use the following command:**
+
+```
+$ nix-env -iA findomain
+```
+
+**If you are using [Homebrew](https://brew.sh/) on your OS, you can use the following command:**
+
+```
+$ brew install findomain
+```
+
+Otherwise, you can use the following commands:
+
+```
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux.zip}
+$ unzip findomain-linux.zip
+$ chmod +x findomain
+$ sudo mv findomain /usr/bin/findomain
+$ findomain --help
+```
+
 # Installation Aarch64
 
 ```
-$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-aarch64
-$ chmod +x findomain-aarch64
-$ ./findomain-aarch64
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-aarch64.zip
+$ unzip findomain-aarch64.zip
+$ chmod +x findomain
+$ sudo mv findomain /usr/bin/findomain
+$ findomain --help
 ```
 
 # Installation ARMv7
 
 ```
-$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-armv7
-$ chmod +x findomain-armv7
-$ ./findomain-armv7
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-armv7.zip
+$ unzip findomain-armv7.zip
+$ chmod +x findomain
+$ sudo mv findomain /usr/bin/findomain
+$ findomain --help
 ```
 
 # Installation Windows
 
-Download the binary from https://github.com/findomain/findomain/releases/latest/download/findomain-windows.exe
+Download the binary from https://github.com/findomain/findomain/releases/latest/download/findomain-windows.exe.zip and extract it.
 
-Open a CMD shell and go to the dir where findomain-windows.exe was downloaded.
+Open a CMD shell and go to the dir where findomain.exe was downloaded.
 
-Exec: `findomain-windows` in the CMD shell.
-
+Exec: `findomain.exe --help` in the CMD shell.
 
 # Installation MacOS
 
@@ -116,16 +147,10 @@ $ findomain
 **Manually from the repo:**
 
 ```
-$ wget https://github.com/findomain/findomain/releases/latest/download/findomain-osx
-$ chmod +x findomain-osx.dms
-$ ./findomain-osx.dms
-```
-
-# Installation NixOS
-
-```
-$ nix-env -i findomain
-$ findomain
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-osx.zip
+# Extract the ZIP file.
+$ chmod +x findomain.dms
+$ ./findomain.dms --help
 ```
 
 # Installation Docker
