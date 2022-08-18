@@ -1,7 +1,7 @@
 use {
     crate::{
-        alerts, database::return_database_connection, errors::*, files, logic, misc, networking,
-        structs::Args, utils,
+        alerts, database::return_database_connection, errors::Result, files, logic, misc,
+        networking, structs::Args, utils,
     },
     addr::parse_domain_name,
     fhc::structs::HttpData,
@@ -86,6 +86,7 @@ pub fn works_with_data(args: &mut Args) -> Result<()> {
     Ok(())
 }
 
+#[must_use]
 pub fn validate_target(target: &str) -> bool {
     !target.starts_with('.')
         && target.contains('.')
@@ -94,6 +95,7 @@ pub fn validate_target(target: &str) -> bool {
         && target.chars().all(|c| c.is_ascii())
 }
 
+#[must_use]
 pub fn eval_resolved_or_ip_present(value: bool, with_ip: bool, resolved: bool) -> bool {
     if value && (with_ip || resolved) {
         true
@@ -146,10 +148,11 @@ pub fn test_chrome_availability(args: &mut Args) {
     if !args.quiet_flag {
         println!("Testing Chromium/Chrome availability...")
     }
-    utils::return_headless_browser(args.chrome_sandbox);
+    let _ = utils::return_headless_browser(args.chrome_sandbox);
     println!("Chromium/Chrome is correctly installed, performing enumeration!")
 }
 
+#[must_use]
 pub fn null_ip_checker(ip: &str) -> String {
     if ip.is_empty() {
         String::from("NULL")
@@ -158,6 +161,7 @@ pub fn null_ip_checker(ip: &str) -> String {
     }
 }
 
+#[must_use]
 pub fn return_ports_string(ports: &[i32], args: &Args) -> String {
     if ports.is_empty() && args.enable_port_scan {
         String::from("NULL")
@@ -179,6 +183,7 @@ pub fn print_and_write(
     }
 }
 
+#[must_use]
 pub fn eval_http(http_status: &HttpData) -> String {
     if !http_status.host_url.is_empty() {
         http_status.host_url.clone()

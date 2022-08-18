@@ -16,6 +16,7 @@ lazy_static! {
     };
 }
 
+#[must_use]
 pub fn return_reqwest_client(secs: u64) -> Client {
     let user_agent = utils::return_random_string(USER_AGENTS.clone());
     Client::builder()
@@ -25,6 +26,7 @@ pub fn return_reqwest_client(secs: u64) -> Client {
         .unwrap()
 }
 
+#[must_use]
 pub fn return_headless_browser(sandbox: bool) -> Browser {
     match Browser::new(
         LaunchOptionsBuilder::default()
@@ -43,6 +45,7 @@ please uninstall it and reinstall without using Snap. Error: {}", e);
     }
 }
 
+#[must_use]
 pub fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
     if timeout <= 500 {
         if threads >= 50 {
@@ -61,6 +64,7 @@ pub fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
     }
 }
 
+#[must_use]
 pub fn read_stdin() -> Vec<String> {
     let mut buffer = String::new();
     let mut stdin = io::stdin();
@@ -73,6 +77,7 @@ pub fn read_stdin() -> Vec<String> {
     targets
 }
 
+#[must_use]
 pub fn return_random_string(strings: Vec<String>) -> String {
     if strings.is_empty() {
         String::new()
@@ -81,6 +86,7 @@ pub fn return_random_string(strings: Vec<String>) -> String {
     }
 }
 
+#[must_use]
 pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
     hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }

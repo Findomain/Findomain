@@ -1,5 +1,5 @@
 use {
-    crate::{errors::*, logic, misc, structs::Args, utils},
+    crate::{errors::Result, logic, misc, structs::Args, utils},
     anyhow::Context,
     std::{
         collections::HashSet,
@@ -10,6 +10,7 @@ use {
     },
 };
 
+#[must_use]
 pub fn return_file_targets(args: &Args, files: Vec<String>) -> Vec<String> {
     let mut targets: Vec<String> = Vec::new();
     files.clone().dedup();
@@ -120,6 +121,7 @@ pub fn write_to_file(data: &str, file_name: &Option<std::fs::File>) -> Result<()
     Ok(())
 }
 
+#[must_use]
 pub fn return_output_file(args: &Args) -> Option<File> {
     if args.file_name.is_empty() || !args.with_output {
         None
@@ -148,21 +150,24 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     Ok(())
 }
 
+#[must_use]
 pub fn check_image_path(screenshots_dir: &str, target: &str) -> bool {
     let full_path = format!("{}/{}/", screenshots_dir, target);
     (Path::new(&full_path).exists() && Path::new(&full_path).is_dir())
         || fs::create_dir_all(&full_path).is_ok()
 }
 
+#[must_use]
 pub fn check_no_empty(filename: &str) -> bool {
     let mut lines: Vec<String> = BufReader::new(File::open(filename).unwrap())
         .lines()
-        .map(|x| x.unwrap())
+        .map(std::result::Result::unwrap)
         .collect();
     lines.retain(|x| !x.is_empty());
     !lines.is_empty()
 }
 
+#[must_use]
 pub fn check_full_path(full_path: &str) -> bool {
     (Path::new(full_path).exists() && Path::new(full_path).is_dir())
         || fs::create_dir_all(full_path).is_ok()

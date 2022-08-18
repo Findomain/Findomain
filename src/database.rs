@@ -1,6 +1,6 @@
 use {
     crate::{
-        errors::*,
+        errors::Result,
         logic,
         structs::{Args, ResolvData, Subdomain},
     },

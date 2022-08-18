@@ -1,5 +1,9 @@
 use {
-    crate::{errors::*, misc, networking, utils::return_reqwest_client},
+    crate::{
+        errors::{check_json_errors, check_request_errors},
+        misc, networking,
+        utils::return_reqwest_client,
+    },
     postgres::NoTls,
     reqwest::header::{self, HeaderMap},
     serde::de::DeserializeOwned,

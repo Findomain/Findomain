@@ -1,7 +1,7 @@
 use {
     crate::{
         database::{self, return_database_connection},
-        errors::*,
+        errors::Result,
         files, logic, misc, networking,
         structs::{Args, ResolvData},
         utils,

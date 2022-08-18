@@ -1,7 +1,7 @@
 use {
     findomain::{
         args,
-        errors::*,
+        errors::Result,
         files::{read_from_file, return_file_targets, string_to_file},
         get_subdomains,
         logic::validate_target,

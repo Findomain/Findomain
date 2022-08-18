@@ -257,15 +257,20 @@ fn async_resolver_engine(
             ..Default::default()
         };
 
-        let resolvers =
-            return_tokio_asyncresolver(RESOLVERS.iter().map(|x| x.to_owned()).collect(), options);
+        let resolvers = return_tokio_asyncresolver(
+            RESOLVERS.iter().map(std::clone::Clone::clone).collect(),
+            options,
+        );
         let trustable_resolver = return_tokio_asyncresolver(
-            TRUSTABLE_RESOLVERS.iter().map(|x| x.to_owned()).collect(),
+            TRUSTABLE_RESOLVERS
+                .iter()
+                .map(std::clone::Clone::clone)
+                .collect(),
             options,
         );
 
         let rt = tokio::runtime::Runtime::new().unwrap();
-        let handle = rt.handle().to_owned();
+        let handle = rt.handle().clone();
         let (tx, rx) = channel::bounded(1);
 
         let subdomains_for_async_resolver = subdomains.clone();
@@ -298,7 +303,7 @@ fn async_resolver_engine(
     } else {
         subdomains
             .par_iter()
-            .map(|sub| (sub.to_owned(), DomainData::default()))
+            .map(|sub| (sub.clone(), DomainData::default()))
             .collect()
     };
 
@@ -314,7 +319,7 @@ fn async_resolver_engine(
                 http_data: HttpData::default(),
                 open_ports: Vec::new(),
             };
-            (sub.to_owned(), local_resolv_data)
+            (sub.clone(), local_resolv_data)
         })
         .collect();
 
@@ -324,15 +329,15 @@ fn async_resolver_engine(
         for (sub, host_resolv_data) in &resolv_data {
             if args.discover_ip {
                 if host_resolv_data.ip != "NOT CHECKED" && !host_resolv_data.ip.is_empty() {
-                    http_hosts.insert(sub.to_owned());
+                    http_hosts.insert(sub.clone());
                 }
             } else {
-                http_hosts.insert(sub.to_owned());
+                http_hosts.insert(sub.clone());
             }
         }
 
         let rt = tokio::runtime::Runtime::new().unwrap();
-        let handle = rt.handle().to_owned();
+        let handle = rt.handle().clone();
 
         let (tx, rx) = channel::bounded(1);
 
@@ -365,7 +370,7 @@ fn async_resolver_engine(
     } else {
         subdomains
             .par_iter()
-            .map(|sub| (sub.to_owned(), HttpData::default()))
+            .map(|sub| (sub.clone(), HttpData::default()))
             .collect()
     };
 
@@ -396,7 +401,7 @@ fn async_resolver_engine(
                 local_resolv_data.http_data.host_url = host.clone()
             };
 
-            (host.to_owned(), local_resolv_data)
+            (host.clone(), local_resolv_data)
         })
         .collect();
 
@@ -462,7 +467,7 @@ fn async_resolver_engine(
 
         if !ips_to_scan.is_empty() {
             let rt = tokio::runtime::Runtime::new().unwrap();
-            let handle = rt.handle().to_owned();
+            let handle = rt.handle().clone();
 
             let tcp_connect_threads = args.tcp_connect_threads;
             let parallel_ip_ports_scan = if ips_to_scan.len() < args.parallel_ip_ports_scan {
@@ -500,7 +505,7 @@ fn async_resolver_engine(
 
                         local_resolv_data.open_ports = local_ports_data.clone();
 
-                        (host.to_owned(), local_resolv_data)
+                        (host.clone(), local_resolv_data)
                     })
                     .collect();
             }
@@ -625,12 +630,15 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     };
 
     let trustable_resolver = return_tokio_asyncresolver(
-        TRUSTABLE_RESOLVERS.iter().map(|x| x.to_owned()).collect(),
+        TRUSTABLE_RESOLVERS
+            .iter()
+            .map(std::clone::Clone::clone)
+            .collect(),
         options,
     );
 
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let handle = rt.handle().to_owned();
+    let handle = rt.handle().clone();
 
     let (tx, rx) = channel::bounded(1);
 

@@ -22,7 +22,10 @@ mod screenshots;
 mod sources;
 
 use {
-    crate::{errors::*, structs::Args},
+    crate::{
+        errors::{check_monitoring_parameters, Result},
+        structs::Args,
+    },
     std::{thread, time::Duration},
 };
 

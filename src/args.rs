@@ -16,6 +16,7 @@ use {
 };
 
 #[allow(clippy::cognitive_complexity)]
+#[must_use]
 pub fn get_args() -> Args {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml)
