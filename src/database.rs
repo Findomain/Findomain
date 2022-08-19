@@ -149,7 +149,7 @@ pub fn return_existing_subdomains(args: &Args) -> Result<HashSet<String>> {
     prepare_database(&args.postgres_connection)?;
 
     let statement = format!(
-        "SELECT name FROM subdomains_fdplus WHERE root_domain = '{}' OR name LIKE '%.{}'",
+        "SELECT name FROM subdomains WHERE root_domain = '{}' OR name LIKE '%.{}'",
         args.target, args.target
     );
 
