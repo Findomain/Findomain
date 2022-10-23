@@ -66,7 +66,7 @@ pub fn get_subfinder_subdomains(
     let mut subdomains = HashSet::new();
     if !(File::create(output_filename).is_ok()
         && Command::new("subfinder")
-            .args(&mut vec!["-silent","-all", "-d", target, "-o", output_filename])
+            .args(&mut vec!["-silent", "-all", "-d", target, "-o", output_filename])
             .output()
             .is_ok()
         && files::check_no_empty(output_filename))
