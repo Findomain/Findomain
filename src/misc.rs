@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 pub fn show_searching_msg(api: &str) {
-    println!("Searching in the {} API... 🔍", api)
+    println!("Searching in the {api} API... 🔍")
 }
 
 pub fn show_file_location(target: &str, file_name: &str) {

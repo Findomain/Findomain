@@ -274,9 +274,9 @@ pub fn get_args() -> Args {
         },
         user_agent_strings: {
             let file_name = if matches.is_present("user-agents-file") {
-                value_t!(matches, "user-agents-file", String).unwrap_or_else(|_| "".to_string())
+                value_t!(matches, "user-agents-file", String).unwrap_or_else(|_| String::new())
             } else {
-                return_value_or_default(&settings, "user_agents_file", "".to_string())
+                return_value_or_default(&settings, "user_agents_file", String::new())
                     .parse::<String>()
                     .unwrap()
             };
@@ -334,12 +334,12 @@ fn return_settings(
                     .try_into::<HashMap<String, String>>()
                     .unwrap(),
                 Err(e) => {
-                    eprintln!("Error merging environment variables into settings: {}", e);
+                    eprintln!("Error merging environment variables into settings: {e}");
                     std::process::exit(1)
                 }
             },
             Err(e) => {
-                eprintln!("Error reading config file: {}", e);
+                eprintln!("Error reading config file: {e}");
                 std::process::exit(1)
             }
         }
@@ -356,12 +356,12 @@ fn return_settings(
                     .try_into::<HashMap<String, String>>()
                     .unwrap(),
                 Err(e) => {
-                    eprintln!("Error merging environment variables into settings: {}", e);
+                    eprintln!("Error merging environment variables into settings: {e}");
                     std::process::exit(1)
                 }
             },
             Err(e) => {
-                eprintln!("Error reading config file: {}", e);
+                eprintln!("Error reading config file: {e}");
                 std::process::exit(1)
             }
         }
@@ -372,7 +372,7 @@ fn return_settings(
                 .try_into::<HashMap<String, String>>()
                 .unwrap(),
             Err(e) => {
-                eprintln!("Error merging environment variables into settings: {}", e);
+                eprintln!("Error merging environment variables into settings: {e}");
                 std::process::exit(1)
             }
         }

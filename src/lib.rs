@@ -61,7 +61,7 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
         args.subdomains.extend(
             args.wordlists_data
                 .iter()
-                .map(|target| format!("{}.{}", target, &args.target)),
+                .map(|target| format!("{target}.{}", &args.target)),
         );
     }
 

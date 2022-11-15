@@ -296,7 +296,7 @@ fn async_resolver_engine(
         match rx.recv() {
             Ok(data) => data,
             Err(e) => {
-                println!("Error in the resolution process: {}", e);
+                println!("Error in the resolution process: {e}");
                 std::process::exit(1);
             }
         }
@@ -363,7 +363,7 @@ fn async_resolver_engine(
         match rx.recv() {
             Ok(data) => data,
             Err(e) => {
-                println!("Error in the resolution process: {}", e);
+                println!("Error in the resolution process: {e}");
                 std::process::exit(1);
             }
         }
@@ -442,7 +442,7 @@ fn async_resolver_engine(
                             }
                             Err(e) => {
                                 if counter == 3 {
-                                    eprintln!("The subdomain {} has an active HTTP server running at {} but the screenshot was not taken. Error description: {}", sub, host_resolv_data.http_data.host_url, e)
+                                    eprintln!("The subdomain {sub} has an active HTTP server running at {} but the screenshot was not taken. Error description: {e}", host_resolv_data.http_data.host_url)
                                 }
                                 counter += 1
                             }
@@ -548,7 +548,7 @@ fn async_resolver_engine(
                 if args.only_resolved {
                     data_to_write = sub.to_string();
                 } else {
-                    data_to_write = format!("{},{}", sub, host_resolv_data.ip);
+                    data_to_write = format!("{sub},{}", host_resolv_data.ip);
                 }
                 logic::print_and_write(data_to_write, args.with_output, file_name)
             }
@@ -662,7 +662,7 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     let wildcards_data = match rx.recv() {
         Ok(data) => data,
         Err(e) => {
-            println!("Error in the resolution process: {}", e);
+            println!("Error in the resolution process: {e}");
             std::process::exit(1);
         }
     };
@@ -681,7 +681,7 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
             "Wilcards detected for {} and wildcard's IP saved for furter work.",
             &args.target
         );
-        println!("Wilcard IPs: {:?}\n", wildcards)
+        println!("Wilcard IPs: {wildcards:?}\n")
     } else if !args.quiet_flag {
         println!("No wilcards detected for {}, nice!\n", &args.target)
     }

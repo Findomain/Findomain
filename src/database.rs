@@ -54,7 +54,7 @@ fn update_database_schema(mut connection: postgres::Client) {
     for column in database_columns {
         let _ = connection
             .execute(
-                format!("ALTER TABLE subdomains ADD COLUMN {} TEXT", column).as_str(),
+                format!("ALTER TABLE subdomains ADD COLUMN {column} TEXT").as_str(),
                 &[],
             )
             .is_ok();

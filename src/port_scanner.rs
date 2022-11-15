@@ -36,7 +36,7 @@ pub async fn return_open_ports(
         .map(|port| async move {
             if timeout(
                 std::time::Duration::from_millis(timeout_duration),
-                TcpStream::connect(format!("{}:{}", ip_address, port)),
+                TcpStream::connect(format!("{ip_address}:{port}")),
             )
             .await
             .is_ok()

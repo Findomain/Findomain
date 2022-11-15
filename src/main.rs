@@ -71,9 +71,9 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(err) = run() {
-        eprintln!("\nError: {}", err);
+        eprintln!("\nError: {err}");
         for cause in err.chain().skip(1) {
-            eprintln!("Error description: {}", cause);
+            eprintln!("Error description: {cause}");
         }
         std::process::exit(1);
     }

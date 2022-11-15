@@ -14,7 +14,7 @@ pub fn get_amass_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        println!("Getting amass subdomains for {}", target);
+        println!("Getting amass subdomains for {target}");
     }
     let output_filename = &format!(
         "{}/amass_subdomains_{}.txt",
@@ -38,7 +38,7 @@ pub fn get_amass_subdomains(
             .is_ok()
         && files::check_no_empty(output_filename))
     {
-        eprintln!("Error getting amass subdomains for {}\n", target);
+        eprintln!("Error getting amass subdomains for {target}\n");
     }
     match File::open(output_filename) {
         Ok(file) => {
@@ -48,7 +48,7 @@ pub fn get_amass_subdomains(
             Some(subdomains)
         }
         Err(e) => {
-            eprintln!("Can not open file {}. Error: {}\n", output_filename, e);
+            eprintln!("Can not open file {output_filename}. Error: {e}\n");
             None
         }
     }
@@ -60,7 +60,7 @@ pub fn get_subfinder_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        println!("Getting subfinder subdomains for {}", target);
+        println!("Getting subfinder subdomains for {target}");
     }
     let output_filename = &format!(
         "{}/subfinder_subdomains_{}.txt",
@@ -74,7 +74,7 @@ pub fn get_subfinder_subdomains(
             .is_ok()
         && files::check_no_empty(output_filename))
     {
-        eprintln!("Error getting subfinder subdomains for {}\n", target);
+        eprintln!("Error getting subfinder subdomains for {target}\n");
     }
     match File::open(output_filename) {
         Ok(file) => {
@@ -84,7 +84,7 @@ pub fn get_subfinder_subdomains(
             Some(subdomains)
         }
         Err(e) => {
-            eprintln!("Can not open file {}. Error: {}\n", output_filename, e);
+            eprintln!("Can not open file {output_filename}. Error: {e}\n");
             None
         }
     }

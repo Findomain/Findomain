@@ -30,7 +30,7 @@ pub fn take_screenshot(
                         .replace("http://", "")
                         .replace(':', "_")
                 )),
-                &jpeg_data,
+                jpeg_data,
             )?
         }
     }

@@ -168,7 +168,7 @@ pub fn return_ports_string(ports: &[i32], args: &Args) -> String {
     } else if ports.is_empty() && !args.enable_port_scan {
         String::from("NOT CHECKED")
     } else {
-        format!("{:?}", ports)
+        format!("{ports:?}")
     }
 }
 

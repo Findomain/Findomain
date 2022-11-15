@@ -27,7 +27,7 @@ pub fn return_file_targets(args: &Args, files: Vec<String>) -> Vec<String> {
             }
             Err(e) => {
                 if args.files.len() == 1 {
-                    println!("Can not open file {}. Error: {}", f, e);
+                    println!("Can not open file {f}. Error: {e}");
                     std::process::exit(1)
                 } else if !args.quiet_flag {
                     println!(
@@ -139,8 +139,8 @@ pub fn return_output_file(args: &Args) -> Option<File> {
 
 pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        let backup_file_name = file_name.replace(&file_name.split('.').last().unwrap(), "old.txt");
-        fs::rename(&file_name, &backup_file_name).with_context(|| {
+        let backup_file_name = file_name.replace(file_name.split('.').last().unwrap(), "old.txt");
+        fs::rename(file_name, &backup_file_name).with_context(|| {
             format!(
                 "The file {} already exists but Findomain can't backup the file to {}. Please run the tool with a more privileged user or try in a different directory.",
                 &file_name, &backup_file_name,
@@ -152,7 +152,7 @@ pub fn check_output_file_exists(file_name: &str) -> Result<()> {
 
 #[must_use]
 pub fn check_image_path(screenshots_dir: &str, target: &str) -> bool {
-    let full_path = format!("{}/{}/", screenshots_dir, target);
+    let full_path = format!("{screenshots_dir}/{target}/");
     (Path::new(&full_path).exists() && Path::new(&full_path).is_dir())
         || fs::create_dir_all(&full_path).is_ok()
 }

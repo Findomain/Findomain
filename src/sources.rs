@@ -308,7 +308,7 @@ pub fn get_securitytrails_subdomains(
                         domains_securitytrails
                             .subdomains
                             .into_iter()
-                            .map(|sub| format!("{}.{}", sub, target))
+                            .map(|sub| format!("{sub}.{target}"))
                             .collect(),
                     ),
                     Err(e) => {

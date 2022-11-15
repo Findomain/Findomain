@@ -11,7 +11,7 @@ pub fn check_request_errors(error: reqwest::Error, api: &str) {
 pub fn check_json_errors(error: reqwest::Error, api: &str) {
     let args = args::get_args();
     if !args.quiet_flag && args.verbose {
-        eprintln!("❌ An error occurred while parsing the JSON obtained from the {} API. Error description: {:?}.", &api, error)
+        eprintln!("❌ An error occurred while parsing the JSON obtained from the {api} API. Error description: {error:?}.")
     }
 }
 
