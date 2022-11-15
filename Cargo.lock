@@ -105,9 +105,9 @@ dependencies = [
 
 [[package]]
 name = "auto_generate_cdp"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c784e363772b68d4a52cd18ac3aa6bb1c268421f0916be916461c965f269c09"
+checksum = "aa9b16ecbc65a4f4b9445db2075bfa19ca13d8602b7c39d680c8295334f29c66"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -851,7 +851,7 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 [[package]]
 name = "headless_chrome"
 version = "0.9.0"
-source = "git+https://github.com/Edu4rdSHL/rust-headless-chrome#e1c7aa0e25855bae214dcc50312c8f48c95f4684"
+source = "git+https://github.com/atroche/rust-headless-chrome?rev=61ce783806e5d75a03f731330edae6156bb0a2e0#61ce783806e5d75a03f731330edae6156bb0a2e0"
 dependencies = [
  "anyhow",
  "auto_generate_cdp",

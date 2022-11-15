@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use {
     crate::{args, utils},
     headless_chrome::{Browser, LaunchOptionsBuilder},
@@ -31,7 +33,10 @@ pub fn return_headless_browser(sandbox: bool) -> Browser {
     match Browser::new(
         LaunchOptionsBuilder::default()
             .sandbox(sandbox)
+            // Emulate a high res window size to avoid pages being incomplete
             .window_size(Some((1920, 2500)))
+            .ignore_certificate_errors(true)
+            .args(vec![OsStr::new("--disable-crash-reporter")])
             .build()
             .expect("Could not find appropriate Chrome binary."),
     ) {
