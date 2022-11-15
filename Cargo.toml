@@ -32,7 +32,7 @@ crossbeam = "0.8.2"
 futures = "0.3.23"
 anyhow = "1.0.61"
 postgres-native-tls = "0.5.0"
-native-tls = "0.2.10"
+native-tls = "0.2.11"
 
 # https://github.com/bluejekyll/trust-dns/pull/1632
 [patch.crates-io]
