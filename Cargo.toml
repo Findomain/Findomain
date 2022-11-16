@@ -19,7 +19,7 @@ trust-dns-resolver = "0.20.4"
 clap = { version = "2.34.0", features = ["yaml"] }
 lazy_static = "1.4.0"
 rand = "0.8.5"
-postgres = "0.19.3"
+postgres = "0.19.4"
 rayon = "1.5.3"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/atroche/rust-headless-chrome", rev = "61ce783806e5d75a03f731330edae6156bb0a2e0" }
