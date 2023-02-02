@@ -22,8 +22,7 @@ pub fn return_database_connection(postgres_connection: &str) -> Client {
         Ok(client) => client,
         Err(e) => {
             println!(
-                "The following error happened while connecting to the database: {}",
-                e
+                "The following error happened while connecting to the database: {e}"
             );
             std::process::exit(1)
         }

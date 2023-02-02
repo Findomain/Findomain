@@ -16,10 +16,7 @@ pub fn get_amass_subdomains(
     if !quiet_flag {
         println!("Getting amass subdomains for {target}");
     }
-    let output_filename = &format!(
-        "{}/amass_subdomains_{}.txt",
-        external_subdomains_dir, target
-    );
+    let output_filename = &format!("{external_subdomains_dir}/amass_subdomains_{target}.txt");
     let mut subdomains = HashSet::new();
     if !(File::create(output_filename).is_ok()
         && Command::new("amass")
@@ -62,14 +59,18 @@ pub fn get_subfinder_subdomains(
     if !quiet_flag {
         println!("Getting subfinder subdomains for {target}");
     }
-    let output_filename = &format!(
-        "{}/subfinder_subdomains_{}.txt",
-        external_subdomains_dir, target
-    );
+    let output_filename = &format!("{external_subdomains_dir}/subfinder_subdomains_{target}.txt");
     let mut subdomains = HashSet::new();
     if !(File::create(output_filename).is_ok()
         && Command::new("subfinder")
-            .args(&mut vec!["-silent", "-all", "-d", target, "-o", output_filename])
+            .args(&mut vec![
+                "-silent",
+                "-all",
+                "-d",
+                target,
+                "-o",
+                output_filename,
+            ])
             .output()
             .is_ok()
         && files::check_no_empty(output_filename))

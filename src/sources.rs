@@ -362,8 +362,7 @@ pub fn get_crtsh_db_subdomains(
             Err(e) => {
                 if !quiet_flag {
                     println!(
-                    "❌ A error has occurred while querying the Crtsh database. Error: {}. Trying the API method...",
-                    e);
+                    "❌ A error has occurred while querying the Crtsh database. Error: {e}. Trying the API method...");
                 }
                 get_crtsh_subdomains(url_api_crtsh, quiet_flag)
             }
@@ -371,8 +370,7 @@ pub fn get_crtsh_db_subdomains(
         Err(e) => {
             if !quiet_flag {
                 println!(
-                "❌ A error has occurred while connecting to the Crtsh database. Error: {}. Trying the API method...",
-                e
+                "❌ A error has occurred while connecting to the Crtsh database. Error: {e}. Trying the API method..."
             );
             }
             get_crtsh_subdomains(url_api_crtsh, quiet_flag)

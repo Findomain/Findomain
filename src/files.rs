@@ -30,10 +30,7 @@ pub fn return_file_targets(args: &Args, files: Vec<String>) -> Vec<String> {
                     println!("Can not open file {f}. Error: {e}");
                     std::process::exit(1)
                 } else if !args.quiet_flag {
-                    println!(
-                        "Can not open file {}, working with next file. Error: {}",
-                        f, e
-                    );
+                    println!("Can not open file {f}, working with next file. Error: {e}");
                 }
             }
         }
