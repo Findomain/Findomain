@@ -99,7 +99,7 @@ $ brew install findomain
 Otherwise, you can use the following commands:
 
 ```
-$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux.zip}
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux.zip
 $ unzip findomain-linux.zip
 $ chmod +x findomain
 $ sudo mv findomain /usr/bin/findomain
@@ -171,17 +171,17 @@ Please see [the documentation](docker/).
 
 # Updating Findomain to latest version
 
-To update Findomain to latest version, you can be in some scenarios:
+To update Findomain to latest version, please consider one of the following scenarios:
 
-1. **You downloaded a precompiled binary:** If you are using a precompiled binary, then you need to download the new binary.
-2. **You are using it in ArchLinux or any Arch-based distro:** Just run `pacman -Syu`
-3. **You have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
-4. **You downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
-5. **I used cargo install findomain:** then just run `cargo install findomain`.
+1. **If you downloaded a precompiled binary:** If you are using a precompiled binary, then you need to download the new binary.
+2. **If you are using it in ArchLinux or any Arch-based distro:** Just run `pacman -Syu`
+3. **If you have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
+4. **If you downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
+5. **If you used cargo install findomain:** then just run `cargo install findomain`.
 
 # Access tokens configuration
 
-In in section you can found the steps about how to configure APIs that need or can be used with access tokens.
+In this section you can found the steps about how to configure APIs that need or can be used with access tokens.
 
 # Configuring the Facebook API
 
@@ -196,7 +196,7 @@ Since Findomain 0.2.4 you don't need to explicity set the `findomain_fb_token` v
 The first step is get your Facebook application token. You need to create a Webhook, follow the next steps:
 
 1. Open https://developers.facebook.com/apps/
-2. Click in "Create App", select "None" and then "Next".
+2. Click "Create App", select "None" and then "Next".
 3. Put the "Display name" that you want and click "Next".
 4. In the next screen, search for "Webhooks" and click on "Set up".
 5. Go to "Configuration" -> "Basic" and click on "Show" in the "App secret key" option.
@@ -232,7 +232,7 @@ Put in the CMD command prompt:
 > set findomain_fb_token=YourAccessToken && findomain -(options)
 ```
 
-**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_fb_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+**Note:** In Windows you need to escape special characters like `|`, add `^` before the special character to escape it and don't quote the token. Example:  `set findomain_fb_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_fb_token` in Unix based systems like putting `export findomain_fb_token="YourAccessToken"` into your `.bashrc` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
@@ -261,7 +261,7 @@ Put in the CMD command prompt:
 > set findomain_spyse_token=YourAccessToken && findomain -(options)
 ```
 
-**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_spyse_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+**Note:** In Windows you need to escape special characters like `|`, add `^` before the special character to escape it and don't quote the token. Example:  `set findomain_spyse_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_spyse_token` in Unix based systems like putting `export findomain_spyse_token="YourAccessToken"` into your `.bashrc` and set the `findomain_spyse_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
@@ -325,14 +325,14 @@ Put in the CMD command prompt:
 > set findomain_securitytrails_token=YourAccessToken && findomain -(options)
 ```
 
-**Note:** In Windows you need to scape special characters like `|`, add `^` before the special character to scape it and don't quote the token. Example:  `set findomain_securitytrails_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
+**Note:** In Windows you need to escape special characters like `|`, add `^` before the special character to escape it and don't quote the token. Example:  `set findomain_securitytrails_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_fb_token` in Unix based systems like putting `export findomain_securitytrails_token="YourAccessToken"` into your `.bashrc` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
 
 # Subdomains Monitoring
 
-Findomain is capable of monitor a specific domain or a list of domains for new subdomains and send the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All what you need is a server or your computer with  [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
+Findomain is capable of monitoring a specific domain or a list of domains for new subdomains and sending the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All you need is a server or your computer with [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
 
@@ -371,7 +371,7 @@ findomain_telegrambot_chat_id: Unique identifier for the target chat or username
 
 **Default values while connecting to database server**
 
-Findomain have some default values that are used when they are not set. They are listed below:
+Findomain has some default values that are used when they are not set. They are listed below:
 
 1) If you only specify the `-m` flag without more arguments or don't specify one of the options Findomain sets:
 
