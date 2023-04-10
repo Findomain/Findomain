@@ -25,60 +25,39 @@ fn push_data_to_webhooks(
     let mut webhooks_data = HashMap::new();
 
     if !args.discord_webhook.is_empty() {
-        discord_parameters.insert(
-            "content",
-            misc::return_webhook_payload(new_subdomains, "discord", &args.target),
-        );
-        webhooks_data.insert(&args.discord_webhook, discord_parameters);
+        webhooks_data.clear();
+        for data in &misc::return_webhook_payload(new_subdomains, "discord", &args.target) {
+            // Add formatting to the webhook payload
+            let data = format!("```{}```", data);
+            discord_parameters.insert("content", data.to_string());
+            webhooks_data.insert(args.discord_webhook.clone(), discord_parameters.clone());
+            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
+        }
     }
 
     if !args.slack_webhook.is_empty() {
-        slack_parameters.insert(
-            "text",
-            misc::return_webhook_payload(new_subdomains, "slack", &args.target),
-        );
-        webhooks_data.insert(&args.slack_webhook, slack_parameters);
+        webhooks_data.clear();
+        for data in &misc::return_webhook_payload(new_subdomains, "slack", &args.target) {
+            // Add formatting to the webhook payload
+            let data = format!("```{}```", data);
+            slack_parameters.insert("text", data.to_string());
+            webhooks_data.insert(args.slack_webhook.clone(), slack_parameters.clone());
+            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
+        }
     }
 
     if !args.telegram_webhook.is_empty() {
-        telegram_parameters.insert(
-            "text",
-            misc::return_webhook_payload(new_subdomains, "telegram", &args.target),
-        );
         telegram_parameters.insert("chat_id", args.telegram_chat_id.clone());
         telegram_parameters.insert("parse_mode", "HTML".to_string());
-        webhooks_data.insert(&args.telegram_webhook, telegram_parameters);
-    }
-    for (webhook, webhooks_payload) in webhooks_data {
-        if !webhook.is_empty() {
-            let response = utils::return_reqwest_client(30)
-                .post(webhook)
-                .json(&webhooks_payload)
-                .send()?;
-            if (response.status() == 200 || response.status() == 204)
-                || (["408", "504", "598", "524", "460"].contains(&response.status().as_str())
-                    && args.dbpush_if_timeout)
-            {
-                if args.commit_to_db_counter == 0
-                    && !new_subdomains.is_empty()
-                    && database::commit_to_db(
-                        return_database_connection(&args.postgres_connection),
-                        &subdomains_data,
-                        &args.target,
-                        args,
-                    )
-                    .is_ok()
-                {
-                    args.commit_to_db_counter += 1
-                }
-            } else {
-                eprintln!(
-                    "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
-                    webhook, response.status()
-                )
-            }
+        for data in &misc::return_webhook_payload(new_subdomains, "telegram", &args.target) {
+            // Add formatting to the webhook payload
+            let data = format!("<code>{}</code>", data);
+            telegram_parameters.insert("text", data.to_string());
+            webhooks_data.insert(args.telegram_webhook.clone(), telegram_parameters.clone());
+            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
         }
     }
+
     args.commit_to_db_counter = 0;
     Ok(())
 }
@@ -157,5 +136,45 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
         );
         thread::sleep(Duration::from_secs(args.rate_limit))
     }
+    Ok(())
+}
+
+pub fn send_webhook_alert(
+    webhooks_data: &HashMap<String, HashMap<&str, String>>,
+    args: &mut Args,
+    new_subdomains: &HashSet<String>,
+    subdomains_data: &HashMap<String, ResolvData>,
+) -> Result<()> {
+    for (webhook, webhooks_payload) in webhooks_data {
+        if !webhook.is_empty() {
+            let response = utils::return_reqwest_client(30)
+                .post(webhook)
+                .json(&webhooks_payload)
+                .send()?;
+            if (response.status() == 200 || response.status() == 204)
+                || (["408", "504", "598", "524", "460"].contains(&response.status().as_str())
+                    && args.dbpush_if_timeout)
+            {
+                if args.commit_to_db_counter == 0
+                    && !new_subdomains.is_empty()
+                    && database::commit_to_db(
+                        return_database_connection(&args.postgres_connection),
+                        subdomains_data,
+                        &args.target,
+                        args,
+                    )
+                    .is_ok()
+                {
+                    args.commit_to_db_counter += 1
+                }
+            } else {
+                eprintln!(
+                    "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
+                    webhook, response.status()
+                )
+            }
+        }
+    }
+
     Ok(())
 }

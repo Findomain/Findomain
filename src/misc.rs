@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use {crate::utils::split_string_at_len, std::collections::HashSet};
 
 pub fn show_searching_msg(api: &str) {
     println!("Searching in the {api} API... 🔍")
@@ -15,19 +15,22 @@ pub fn return_webhook_payload(
     new_subdomains: &HashSet<String>,
     webhook_name: &str,
     target: &str,
-) -> String {
+) -> Vec<String> {
     if new_subdomains.is_empty() && webhook_name == "discord" {
-        format!(
+        vec![format!(
             "**Findomain alert:** No new subdomains found for {}",
             &target
-        )
+        )]
     } else if new_subdomains.is_empty() && webhook_name == "slack" {
-        format!("*Findomain alert:* No new subdomains found for {}", &target)
+        vec![format!(
+            "*Findomain alert:* No new subdomains found for {}",
+            &target
+        )]
     } else if new_subdomains.is_empty() && webhook_name == "telegram" {
-        format!(
+        vec![format!(
             "<b>Findomain alert:</b> No new subdomains found for {}",
             &target
-        )
+        )]
     } else {
         let webhooks_payload = new_subdomains
             .clone()
@@ -35,55 +38,31 @@ pub fn return_webhook_payload(
             .collect::<Vec<_>>()
             .join("\n");
         if webhook_name == "discord" {
-            if webhooks_payload.len() > 1900 {
-                format!(
-                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(1900).0
-                )
-            } else {
-                format!(
-                    "**Findomain alert:** {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload
-                )
-            }
+            let mut payloads = vec![format!(
+                "**Findomain alert:** {} new subdomains found for {}\n",
+                &new_subdomains.len(),
+                &target,
+            )];
+            payloads.extend(split_string_at_len(&webhooks_payload, 1900));
+            payloads
         } else if webhook_name == "slack" {
-            if webhooks_payload.len() > 15000 {
-                format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(15000).0
-                )
-            } else {
-                format!(
-                    "*Findomain alert:* {} new subdomains found for {}\n```{}```",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload
-                )
-            }
+            let mut payloads = vec![format!(
+                "*Findomain alert:* {} new subdomains found for {}\n",
+                &new_subdomains.len(),
+                &target,
+            )];
+            payloads.extend(split_string_at_len(&webhooks_payload, 15000));
+            payloads
         } else if webhook_name == "telegram" {
-            if webhooks_payload.len() > 4000 {
-                format!(
-                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload.split_at(4000).0
-                )
-            } else {
-                format!(
-                    "<b>Findomain alert:</b> {} new subdomains found for {}\n\n<code>{}</code>",
-                    &new_subdomains.len(),
-                    &target,
-                    webhooks_payload
-                )
-            }
+            let mut payloads = vec![format!(
+                "<b>Findomain alert:</b> {} new subdomains found for {}\n",
+                &new_subdomains.len(),
+                &target,
+            )];
+            payloads.extend(split_string_at_len(&webhooks_payload, 4000));
+            payloads
         } else {
-            String::new()
+            vec![]
         }
     }
 }

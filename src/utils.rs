@@ -95,3 +95,19 @@ pub fn return_random_string(strings: Vec<String>) -> String {
 pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
     hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }
+
+pub fn split_string_at_len(string: &str, len: usize) -> Vec<String> {
+    let mut strings = Vec::new();
+    let mut current_string = String::new();
+    // split at newlines to make sure we don't split a line in half
+    for line in string.split('\n') {
+        if current_string.len() + line.len() + 1 > len {
+            strings.push(current_string);
+            current_string = String::new();
+        }
+        current_string.push_str(line);
+        current_string.push('\n');
+    }
+    strings.push(current_string);
+    strings
+}
