@@ -398,3 +398,9 @@ args:
                   help: Maximum number of HTTP redirects to follow. Default 0.
                   long: max-http-redirects
                   takes_value: true
+
+        - reset-database:
+                  help: Reset the database. It will delete all the data from the database.
+                  long: reset-database
+                  takes_value: false
+                  multiple: false

@@ -1,6 +1,6 @@
 use {
     findomain::{
-        args,
+        args, database,
         errors::Result,
         files::{read_from_file, return_file_targets, string_to_file},
         get_subdomains,
@@ -12,6 +12,13 @@ use {
 
 fn run() -> Result<()> {
     let mut arguments = args::get_args();
+
+    if arguments.reset_database {
+        database::reset_database(&arguments)?;
+        println!("Database was reset successfully!");
+        std::process::exit(0)
+    }
+
     if !arguments.filter_by_string.is_empty()
         && !arguments.exclude_by_string.is_empty()
         && arguments

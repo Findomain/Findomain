@@ -5,6 +5,7 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 pub mod args;
+pub mod database;
 pub mod errors;
 pub mod files;
 pub mod logic;
@@ -12,7 +13,6 @@ pub mod structs;
 pub mod utils;
 
 mod alerts;
-mod database;
 mod external_subs;
 mod misc;
 mod networking;

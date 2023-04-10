@@ -21,9 +21,7 @@ pub fn return_database_connection(postgres_connection: &str) -> Client {
     match Client::connect(postgres_connection, tls_connector) {
         Ok(client) => client,
         Err(e) => {
-            println!(
-                "The following error happened while connecting to the database: {e}"
-            );
+            println!("The following error happened while connecting to the database: {e}");
             std::process::exit(1)
         }
     }
@@ -166,4 +164,16 @@ pub fn return_existing_subdomains(args: &Args) -> Result<HashSet<String>> {
     connection.close()?;
 
     Ok(existing_subdomains)
+}
+
+pub fn reset_database(args: &Args) -> Result<()> {
+    let mut connection = return_database_connection(&args.postgres_connection);
+
+    prepare_database(&args.postgres_connection)?;
+
+    connection.execute("TRUNCATE TABLE subdomains", &[])?;
+
+    connection.close()?;
+
+    Ok(())
 }
