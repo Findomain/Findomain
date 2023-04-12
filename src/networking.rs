@@ -14,7 +14,9 @@ use {
     },
     std::{
         collections::{HashMap, HashSet},
-        fs, thread,
+        fs,
+        net::Ipv4Addr,
+        thread,
         time::Duration,
     },
     trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
@@ -460,7 +462,13 @@ fn async_resolver_engine(
         let ips_to_scan = resolv_data
             .par_iter()
             .filter(|(_, host_resolv_data)| {
-                host_resolv_data.ip != "NOT CHECKED" && !host_resolv_data.ip.is_empty()
+                if let Ok(ip) = host_resolv_data.ip.parse::<Ipv4Addr>() {
+                    !ip.is_private()
+                        && host_resolv_data.ip != "NOT CHECKED"
+                        && !host_resolv_data.ip.is_empty()
+                } else {
+                    false
+                }
             })
             .map(|(_, host_resolv_data)| host_resolv_data.ip.clone())
             .collect::<HashSet<String>>();
