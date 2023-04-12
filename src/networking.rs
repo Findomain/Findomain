@@ -464,8 +464,6 @@ fn async_resolver_engine(
             .filter(|(_, host_resolv_data)| {
                 if let Ok(ip) = host_resolv_data.ip.parse::<Ipv4Addr>() {
                     !ip.is_private()
-                        && host_resolv_data.ip != "NOT CHECKED"
-                        && !host_resolv_data.ip.is_empty()
                 } else {
                     false
                 }
