@@ -7,11 +7,13 @@
 
 # Findomain Monitoring Service
 
-If you don't want to deal with servers and complex configurations for doing recon but also have more features in an integrated solution, Findomain offers [a subdomains monitoring service that provides:](https://findomain.app/#Pricing) **directory fuzzing/ports scan/vulnerabilities discovery (with Nuclei) - and more** that allow you to **monitor your target domains with multiple top tools** (OWASP Amass, Sublist3r, Assetfinder and Subfinder) and send alerts to Discord, Slack, Telegram, Email or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. **The only you need to do is configure a file with your email address (if applicable) or/and webhooks/Telegram chat information and put your domains in another file**, once you have done that you have a full automated subdomains monitoring service that keep you up to date with new subdomains discovered, Host IP, HTTP Status, Screenshots of the HTTP websites, Open Ports, Subdomains CNAME and more. All your data is securely saved in a relational database and you can request a dump of your data whenever you want.
+If you don't want to deal with servers and complex configurations when performing recon but would like more features in an integrated solution, Findomain offers a subdomains monitoring service that provides **directory fuzzing, port scanning, vulnerability discovery, and more**. Monitor your target domains with several popular tools (including OWASP Amass, Sublist3r, Assetfinder and Subfinder) and receive alerts through Discord, Slack, Telegram, Email, or Push Notifications (Android/iOS/Smart Watch/Desktop) when new subdomains are found. 
 
-When you finish your payment, you will receive an email with the server credentials and documentation about how to fill the configuration file and other details.
+**The only thing you need to do is configure a file with your email address, webhooks, or Telegram information, and include your domains in another file**. You will then have a fully-automated subdomain monitoring service that will keep you up to date with any new subdomains discovered, along with Host IPs, HTTP status, website screenshots, Open Ports, CNAME records, and more. User data is securely stored in a relational database -- you can request a dump of your data at any time.
 
-**Note:** Our private version is superior to the public version and you can't achieve the same results using the last one, plus if you use our service you help us to keep the project alive and we will release plus features to this repo every X time.
+When you finish your payment, you will receive an email with the server credentials and documentation regarding configuration and other details.
+
+**Note:** Our private version is superior to the public version. By purchasing our private version, you keep this project alive and allow us to continue improving it. 
 
 ## Pricing
 
@@ -21,7 +23,9 @@ When you finish your payment, you will receive an email with the server credenti
 
 ![Findomain](images/findomain.png)
 
-The complete solution for domain recognition. Supports screenshoting, port scan, HTTP check, data import from other tools, subdomain monitoring, alerts via Discord, Slack and Telegram, multiple API Keys for sources and much more.
+// START HERE NEXT TIME YOU'RE EDITING
+
+The complete solution for domain recognition. Supports screenshotting, port scanning, importing data from other tools, subdomain monitoring, and more. Be alerted on your findings through services such as Discord, Slack, and Telegram. Multiple API Keys for sources and much more.
 
 ## Chat with us
 
