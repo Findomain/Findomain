@@ -23,19 +23,15 @@ When you finish your payment, you will receive an email with the server credenti
 
 ![Findomain](images/findomain.png)
 
-// START HERE NEXT TIME YOU'RE EDITING
-
 The complete solution for domain recognition. Supports screenshotting, port scanning, importing data from other tools, subdomain monitoring, and more. Be alerted on your findings through services such as Discord, Slack, and Telegram. Multiple API Keys for sources and much more.
 
 ## Chat with us
 
 [![Chat on Discord](https://img.shields.io/discord/697050821057183777.svg?logo=discord)](https://discord.gg/y5JaRbX)
 
-The next table offers you the comparison about what is in Plus version that is not in free version (current repo).
+# What Can Findomain Do?
 
-# What Findomain can do?
-
-It table gives you a idea why you should use findomain and what it can do for you. The domain used for the test was aol.com in the following [BlackArch](https://blackarch.org) virtual machine:
+The following table demonstrates features that are available in the premium version (but not the free version) of Findomain. It aims to gives you an idea of why you should use Findomain and what it can do for you. The domain used for the test was aol.com. The details of the [BlackArch](https://blackarch.org) virtual machine used in the test are outlined below:
 
 ```
 Host: KVM/QEMU (Standard PC (i440FX + PIIX, 1996) pc-i440fx-3.1)
@@ -43,7 +39,7 @@ Kernel: 5.2.6-arch1-1-ARCH
 CPU: Intel (Skylake, IBRS) (4) @ 2.904GHz
 Memory: 139MiB / 3943MiB
 ```
-The tool used to calculate the time, is the `time` command in Linux.
+The tool used to calculate the time was Linux's `time` command.
 
 |Enumeration Tool|Search Time|Total Subdomains Found|CPU Usage|RAM Usage|
 |---|---|---|---|---|
@@ -75,14 +71,14 @@ The tool used to calculate the time, is the `time` command in Linux.
 * Support for configuration file in TOML, JSON, HJSON, INI or YAML format.
 * Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default, adjustable using the `--threads` option.
 
-# Findomain in depth
+# Findomain in Depth
 
-See [Subdomains Enumeration: what is, how to do it, monitoring automation using webhooks and centralizing your findings](https://medium.com/@edu4rdshl/subdomains-enumeration-what-is-how-to-do-it-monitoring-automation-using-webhooks-and-5e0a0c6d9127) for a detailed guide including real world examples of how you get the most out of the tool.
+See [Subdomains Enumeration: what is, how to do it, monitoring automation using webhooks and centralizing your findings](https://medium.com/@edu4rdshl/subdomains-enumeration-what-is-how-to-do-it-monitoring-automation-using-webhooks-and-5e0a0c6d9127) for a detailed guide, including real-world examples, of how to get the most out of the tool.
 
-# How it works?
-It tool doesn't use the common methods for sub(domains) discover, the tool uses Certificate Transparency logs and specific well tested APIs to find subdomains. It method make it tool the most faster and reliable. The tool make use of multiple public available APIs to perform the search. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
+# How Does It Work?
+Findomain uses Certificate Transparency logs and well-tested APIs to find subdomains. This method makes the tool much faster and more reliable than alternatives. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
-APIs that we are using at the moment:
+Findomain makes use of multiple publicly-available APIs to perform the search. The following is a list of APIs that we are using at the moment:
 
 - [Certspotter](https://api.certspotter.com/)
 - [Crt.sh Database (favorite) or Crt.sh HTTP API](https://crt.sh)
@@ -103,9 +99,9 @@ APIs that we are using at the moment:
 
 **Notes**
 
-APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `**`, **require** an access token to work. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) for help on how to configure and use it.
 
-APIs marked with `*` can *optionally* be used with an access token, create one if you start experiencing problems with that APIs. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) how to configure and use it.
+APIs marked with `*` can *optionally* be used with an access token. Create one if you start experiencing problems with that API. Search in the [Findomain documentation](docs/INSTALLATION.md#access-tokens-configuration) for help on how to configure and use it.
 
 **More APIs?**
 
@@ -113,7 +109,7 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 # Installation
 
-We offer binarys ready to use for the following platforms (all are for 64 bits only):
+We offer ready-to-use binaries for the following platforms (64-bit only):
 
 * [Linux](docs/INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
 * [Windows](docs/INSTALLATION.md#installation-windows)
@@ -122,14 +118,13 @@ We offer binarys ready to use for the following platforms (all are for 64 bits o
 * [NixOS](docs/INSTALLATION.md#installation-nixos)
 * [Docker](docs/INSTALLATION.md#installation-docker)
 
-If you need to run Findomain in another platform, continue reading the documentation.
+If you need to run Findomain on another platform, continue reading the documentation.
 
-
-# Issues and requests
+# Issues and Requests
 
 If you have a problem or a feature request, open an [issue](https://github.com/Edu4rdSHL/findomain/issues).
 
-# Stargazers over time
+# Stargazers over Time
 
 [![Stargazers over time](https://starchart.cc/Edu4rdSHL/findomain.svg)](https://starchart.cc/Edu4rdSHL/findomain)
 
