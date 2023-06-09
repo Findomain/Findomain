@@ -113,7 +113,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "reqwest",
- "serde 1.0.159",
+ "serde 1.0.164",
  "serde_json",
 ]
 
@@ -251,7 +251,7 @@ dependencies = [
  "lazy_static",
  "nom",
  "rust-ini",
- "serde 1.0.159",
+ "serde 1.0.164",
  "serde-hjson",
  "serde_json",
  "toml",
@@ -633,7 +633,7 @@ dependencies = [
  "rayon",
  "reqwest",
  "rusolver",
- "serde 1.0.159",
+ "serde 1.0.164",
  "serde_derive",
  "serde_json",
  "tokio",
@@ -878,7 +878,7 @@ dependencies = [
  "log 0.4.17",
  "rand 0.7.3",
  "regex",
- "serde 1.0.159",
+ "serde 1.0.164",
  "serde_json",
  "tempfile",
  "thiserror",
@@ -2046,7 +2046,7 @@ dependencies = [
  "pin-project-lite",
  "rustls",
  "rustls-pemfile",
- "serde 1.0.159",
+ "serde 1.0.164",
  "serde_json",
  "serde_urlencoded",
  "tokio",
@@ -2266,9 +2266,9 @@ checksum = "9dad3f759919b92c3068c696c15c3d17238234498bbdcc80f2c469606f948ac8"
 
 [[package]]
 name = "serde"
-version = "1.0.159"
+version = "1.0.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c04e8343c3daeec41f58990b9d77068df31209f2af111e059e9fe9646693065"
+checksum = "9e8c8cf938e98f769bc164923b06dce91cea1751522f46f8466461af04c9027d"
 dependencies = [
  "serde_derive",
 ]
@@ -2287,9 +2287,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.159"
+version = "1.0.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c614d17805b093df4b147b51339e7e44bf05ef59fba1e45d83500bcfb4d8585"
+checksum = "d9735b638ccc51c28bf6914d90a2e9725b377144fc612c49a611fddd1b631d68"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2304,7 +2304,7 @@ checksum = "d721eca97ac802aa7777b701877c8004d950fc142651367300d21c1cc0194744"
 dependencies = [
  "itoa 1.0.6",
  "ryu",
- "serde 1.0.159",
+ "serde 1.0.164",
 ]
 
 [[package]]
@@ -2316,7 +2316,7 @@ dependencies = [
  "form_urlencoded",
  "itoa 1.0.6",
  "ryu",
- "serde 1.0.159",
+ "serde 1.0.164",
 ]
 
 [[package]]
@@ -2445,7 +2445,7 @@ dependencies = [
  "parking_lot 0.12.1",
  "phf_shared 0.10.0",
  "precomputed-hash",
- "serde 1.0.159",
+ "serde 1.0.164",
 ]
 
 [[package]]
@@ -2690,7 +2690,7 @@ version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
 dependencies = [
- "serde 1.0.159",
+ "serde 1.0.164",
 ]
 
 [[package]]
