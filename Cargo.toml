@@ -24,7 +24,7 @@ rayon = "1.7.0"
 config = { version = "0.11.0", features = ["yaml", "json", "toml", "hjson", "ini"] }
 headless_chrome = { git = "https://github.com/atroche/rust-headless-chrome", rev = "61ce783806e5d75a03f731330edae6156bb0a2e0" }
 addr = "0.15.6"
-serde_json = "1.0.95"
+serde_json = "1.0.101"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "cf75cafee7c9d0c257c0b5a361441efc4e247e9c" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "c6ea4c6ad810061312f4b380d0ab7d51775950b1" } 
 tokio = "1.27.0"
