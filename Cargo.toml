@@ -30,7 +30,7 @@ fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "c6ea4c6ad810061312f4b38
 tokio = "1.27.0"
 crossbeam = "0.8.2"
 futures = "0.3.28"
-anyhow = "1.0.70"
+anyhow = "1.0.72"
 postgres-native-tls = "0.5.0"
 native-tls = "0.2.11"
 
