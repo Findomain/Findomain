@@ -65,6 +65,14 @@ jobs:
           path: ${{ matrix.path }}
 
   build-macos:
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+        include:
+          - target: x86_64-apple-darwin
+            arch: x86_64
+          - target: aarch64-apple-darwin
+            arch: arm64
     env:
       IN_PIPELINE: true
     runs-on: macos-latest
@@ -73,20 +81,20 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: x86_64-apple-darwin
+          target: ${{ matrix.target }}
           override: true
       - uses: actions-rs/cargo@v1
         with:
           use-cross: true
           command: build
-          args: --release --target=x86_64-apple-darwin
+          args: --release --target=${{ matrix.target }}
       - name: Strip symbols from binary
         run: |
-          strip -u -r target/x86_64-apple-darwin/release/findomain
+          strip -u -r target/${{ matrix.target }}/release/findomain
       - uses: actions/upload-artifact@v2
         with:
-          name: findomain-osx
-          path: target/x86_64-apple-darwin/release/findomain
+          name: findomain-osx-${{ matrix.arch }}
+          path: target/${{ matrix.target }}/release/findomain
 
   build-windows:
     env:
