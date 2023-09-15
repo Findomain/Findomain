@@ -236,35 +236,6 @@ Put in the CMD command prompt:
 
 **Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_fb_token` in Unix based systems like putting `export findomain_fb_token="YourAccessToken"` into your `.bashrc` and set the `findomain_fb_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
 
-# Configuring the Spyse API to use with token
-
-1. Open https://account.spyse.com/register and make the registration process (include email verification).
-2. Log in into your spyse account and go to https://account.spyse.com/user
-3. Search for the "API token" section and click in "Show".
-4. Save that access token.
-
-Now you can use that value to set the access token as following:
-
-**Unix based systems (Linux, BSD, MacOS, Android with Termux, etc):**
-
-Put in your terminal:
-
-```
-$ findomain_spyse_token="YourAccessToken" findomain -(options)
-```
-
-**Windows systems:**
-
-Put in the CMD command prompt:
-
-```
-> set findomain_spyse_token=YourAccessToken && findomain -(options)
-```
-
-**Note:** In Windows you need to escape special characters like `|`, add `^` before the special character to escape it and don't quote the token. Example:  `set findomain_spyse_token=xxxxxxx^|yyyyyyyy && findomain -(options)`
-
-**Tip:** If you don't want to write the access token everytime that you run findomain, export the `findomain_spyse_token` in Unix based systems like putting `export findomain_spyse_token="YourAccessToken"` into your `.bashrc` and set the `findomain_spyse_token` variable in your Windows system as [described here](https://www.computerhope.com/issues/ch000549.htm).
-
 # Configuring the Virustotal API to use with token
 
 1. Open https://www.virustotal.com/gui/join-us and make the registration process (include email verification).

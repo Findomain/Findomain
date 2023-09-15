@@ -13,8 +13,6 @@ slack_webhook: ""
 telegrambot_token: ""
 # Your Telegram chat ID here
 telegram_chat_id: ""
-# Your Spyse bearer tokens here, please use comma to separate if multiple are added
-spyse_token: ""
 # Your Facebook bearer tokens here, please use comma to separate if multiple are added
 fb_token: ""
 # Your VirusTotal bearer tokens here, please use comma to separate if multiple are added

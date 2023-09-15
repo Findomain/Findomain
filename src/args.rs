@@ -64,10 +64,6 @@ pub fn get_args() -> Args {
         telegram_bot_token: return_value_or_default(&settings, "telegrambot_token", String::new()),
         telegram_webhook: String::new(),
         telegram_chat_id: return_value_or_default(&settings, "telegram_chat_id", String::new()),
-        spyse_access_token: return_value_or_default(&settings, "spyse_token", String::new())
-            .split_terminator(',')
-            .map(str::to_owned)
-            .collect(),
         facebook_access_token: return_value_or_default(&settings, "fb_token", String::new())
             .split_terminator(',')
             .map(str::to_owned)

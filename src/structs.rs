@@ -14,7 +14,6 @@ pub struct Args {
     pub telegram_webhook: String,
     pub telegram_chat_id: String,
     pub version: String,
-    pub spyse_access_token: Vec<String>,
     pub facebook_access_token: Vec<String>,
     pub virustotal_access_token: Vec<String>,
     pub securitytrails_access_token: Vec<String>,

@@ -85,7 +85,6 @@ Findomain makes use of multiple publicly-available APIs to perform the search. T
 - [Virustotal](https://www.virustotal.com/ui/domains/)
 - [Sublist3r](https://api.sublist3r.com/)
 - [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
-- [Spyse (CertDB)](https://certdb.com/apidocs#/Subdomains) `*`
 - [Bufferover](http://dns.bufferover.run/)
 - [Threatcrowd](https://threatcrowd.org/)
 - [Virustotal with apikey](https://www.virustotal.com/) `**`

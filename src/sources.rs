@@ -5,7 +5,6 @@ use {
         utils::return_reqwest_client,
     },
     postgres::NoTls,
-    reqwest::header::{self, HeaderMap},
     serde::de::DeserializeOwned,
     std::{collections::HashSet, time::Duration},
 };
@@ -68,27 +67,6 @@ impl IntoSubdomains for ResponseDataFacebook {
             .into_iter()
             .flat_map(|sub| sub.domains.into_iter())
             .collect()
-    }
-}
-
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct RootDataSpyse {
-    pub data: SpyseData,
-}
-
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct SpyseData {
-    pub items: Vec<SpyseItem>,
-}
-
-#[derive(Deserialize, Eq, PartialEq, Hash)]
-struct SpyseItem {
-    pub name: String,
-}
-
-impl IntoSubdomains for RootDataSpyse {
-    fn into_subdomains(self) -> HashSet<String> {
-        self.data.items.into_iter().map(|sub| sub.name).collect()
     }
 }
 
@@ -426,58 +404,6 @@ pub fn get_fullhunt_subdomains(
         }
         Err(e) => {
             check_request_errors(e, "FullHunt");
-            None
-        }
-    }
-}
-
-pub fn get_spyse_subdomains(
-    target: &str,
-    name: &str,
-    api_key: &str,
-    quiet_flag: bool,
-) -> Option<HashSet<String>> {
-    if !quiet_flag {
-        misc::show_searching_msg(name)
-    }
-    let url = "https://api.spyse.com/v4/data/domain/search";
-    let body = serde_json::json!({
-        "limit": 100,
-        "offset": 0,
-        "search_params": [
-            {
-                "name": {
-                    "operator": "ends",
-                    "value": target,
-                }
-            }
-        ],
-    });
-    let mut headers = HeaderMap::new();
-
-    headers.insert(header::ACCEPT, "application/json".parse().unwrap());
-    headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
-
-    let mut request_builder = return_reqwest_client(60).post(url);
-    request_builder = request_builder.headers(headers);
-    request_builder = request_builder.bearer_auth(api_key);
-
-    match request_builder.json(&body).send() {
-        Ok(data) => {
-            if networking::check_http_response_code(name, &data) {
-                match data.json::<RootDataSpyse>() {
-                    Ok(json) => Some(json.into_subdomains()),
-                    Err(e) => {
-                        check_json_errors(e, name);
-                        None
-                    }
-                }
-            } else {
-                None
-            }
-        }
-        Err(e) => {
-            check_request_errors(e, name);
             None
         }
     }

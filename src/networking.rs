@@ -115,12 +115,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
                 &utils::return_random_string(args.facebook_access_token.clone()));
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
-        if args.excluded_sources.contains("spyse") || args.spyse_access_token.is_empty() { thread::spawn(|| None) }
-        else {
-            let target = base_target.clone();
-            let spyse_api_key = utils::return_random_string(args.spyse_access_token.clone());
-            thread::spawn(move || sources::get_spyse_subdomains(&target, "Spyse", &spyse_api_key, quiet_flag))
-        },
         if args.excluded_sources.contains("bufferover_free") || args.bufferover_free_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_bufferover = format!("https://tls.bufferover.run/dns?q={}", &args.target);
