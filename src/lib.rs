@@ -85,7 +85,7 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
         args.subdomains.extend(imported_subdomains);
     }
 
-    if args.subdomains.is_empty() {
+    if args.subdomains.is_empty() && !args.quiet_flag {
         eprintln!(
             "\nNo subdomains were found for the target: {} ¡😭!\n",
             &args.target
