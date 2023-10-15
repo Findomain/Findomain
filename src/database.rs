@@ -10,7 +10,7 @@ use {
     std::collections::{HashMap, HashSet},
 };
 
-pub fn return_database_connection(postgres_connection: &str) -> Client {
+#[must_use] pub fn return_database_connection(postgres_connection: &str) -> Client {
     // Lets accept self signed certificates
     let connector = TlsConnector::builder()
         .danger_accept_invalid_certs(true)
@@ -91,12 +91,12 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
         println!(
             "Searching subdomains in the Findomain database for the target {} 🔍",
             args.target
-        )
+        );
     } else if !args.quiet_flag && args.query_jobname {
         println!(
             "Searching subdomains in the Findomain database for the job name {} 🔍",
             args.jobname
-        )
+        );
     };
 
     let mut connection: postgres::Client = return_database_connection(&args.postgres_connection);

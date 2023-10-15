@@ -18,7 +18,7 @@ lazy_static! {
 pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
     let file_name = files::return_output_file(args);
     if !args.quiet_flag {
-        println!()
+        println!();
     };
 
     if (args.only_resolved || args.with_ip || args.ipv6_only)
@@ -33,7 +33,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
     } else if !args.discover_ip && !args.http_status && !args.enable_port_scan && args.with_output {
         for subdomain in &args.subdomains {
             println!("{subdomain}");
-            files::write_to_file(subdomain, &file_name)?
+            files::write_to_file(subdomain, &file_name)?;
         }
     } else {
         for subdomain in &args.subdomains {
@@ -44,7 +44,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
         println!(
             "\nJob finished in {} seconds.",
             args.time_wasted.elapsed().as_secs()
-        )
+        );
     }
     args.time_wasted = Instant::now();
     Ok(())
@@ -70,15 +70,15 @@ pub fn works_with_data(args: &mut Args) -> Result<()> {
         && args.unique_output_flag
     {
         files::check_output_file_exists(&args.file_name)?;
-        alerts::subdomains_alerts(args)?
+        alerts::subdomains_alerts(args)?;
     } else if args.monitoring_flag || args.no_monitor {
-        alerts::subdomains_alerts(args)?
+        alerts::subdomains_alerts(args)?;
     } else {
         files::check_output_file_exists(&args.file_name)?;
         logic::manage_subdomains_data(args)?;
     }
     if args.with_output && !args.quiet_flag && !args.monitoring_flag && !args.no_monitor {
-        misc::show_file_location(&args.target, &args.file_name)
+        misc::show_file_location(&args.target, &args.file_name);
     }
     if !args.quiet_flag {
         println!("\nGood luck Hax0r 💀!\n");
@@ -132,7 +132,7 @@ pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut Args) -
 
 pub fn test_database_connection(args: &mut Args) {
     if !args.quiet_flag {
-        println!("Testing connection to database server...")
+        println!("Testing connection to database server...");
     }
 
     let connection = return_database_connection(&args.postgres_connection);
@@ -146,10 +146,10 @@ pub fn test_database_connection(args: &mut Args) {
 
 pub fn test_chrome_availability(args: &mut Args) {
     if !args.quiet_flag {
-        println!("Testing Chromium/Chrome availability...")
+        println!("Testing Chromium/Chrome availability...");
     }
     let _ = utils::return_headless_browser(args.chrome_sandbox);
-    println!("Chromium/Chrome is correctly installed, performing enumeration!")
+    println!("Chromium/Chrome is correctly installed, performing enumeration!");
 }
 
 #[must_use]
@@ -179,7 +179,7 @@ pub fn print_and_write(
 ) {
     println!("{data_to_write}");
     if with_output {
-        files::write_to_file(&data_to_write, file_name).unwrap()
+        files::write_to_file(&data_to_write, file_name).unwrap();
     }
 }
 

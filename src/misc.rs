@@ -1,14 +1,14 @@
 use {crate::utils::split_string_at_len, std::collections::HashSet};
 
 pub fn show_searching_msg(api: &str) {
-    println!("Searching in the {api} API... 🔍")
+    println!("Searching in the {api} API... 🔍");
 }
 
 pub fn show_file_location(target: &str, file_name: &str) {
     println!(
         ">> 📁 Subdomains for {} were saved in: ./{} 😀",
         &target, &file_name
-    )
+    );
 }
 
 pub fn return_webhook_payload(

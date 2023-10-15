@@ -31,7 +31,7 @@ pub fn take_screenshot(
                         .replace(':', "_")
                 )),
                 jpeg_data,
-            )?
+            )?;
         }
     }
     drop(browser);

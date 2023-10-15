@@ -96,7 +96,7 @@ pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
     hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }
 
-pub fn split_string_at_len(string: &str, len: usize) -> Vec<String> {
+#[must_use] pub fn split_string_at_len(string: &str, len: usize) -> Vec<String> {
     let mut strings = Vec::new();
     let mut current_string = String::new();
     // split at newlines to make sure we don't split a line in half

@@ -204,7 +204,7 @@ pub fn get_certspotter_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("CertSpotter")
+        misc::show_searching_msg("CertSpotter");
     }
 
     let mut request = return_reqwest_client(60).get(url_api_certspotter);
@@ -241,7 +241,7 @@ pub fn get_certspotter_subdomains(
 
 pub fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Crtsh")
+        misc::show_searching_msg("Crtsh");
     }
     match return_reqwest_client(60).get(url_api_crtsh).send() {
         Ok(data_crtsh) => {
@@ -276,7 +276,7 @@ pub fn get_securitytrails_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("SecurityTrails")
+        misc::show_searching_msg("SecurityTrails");
     }
     match return_reqwest_client(60).get(url_api_securitytrails).send() {
         Ok(data_securitytrails) => {
@@ -311,7 +311,7 @@ pub fn get_crtsh_db_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Crtsh database")
+        misc::show_searching_msg("Crtsh database");
     }
     match postgres::config::Config::new()
         .connect_timeout(Duration::from_secs(5))
@@ -361,14 +361,14 @@ pub fn get_sublist3r_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Sublist3r")
+        misc::show_searching_msg("Sublist3r");
     }
     get_from_http_api::<HashSet<String>>(url_api_sublist3r, "Sublist3r")
 }
 
 pub fn get_facebook_subdomains(url_api_fb: &str, quiet_flag: bool) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Facebook")
+        misc::show_searching_msg("Facebook");
     }
     get_from_http_api::<ResponseDataFacebook>(url_api_fb, "Facebook")
 }
@@ -379,7 +379,7 @@ pub fn get_fullhunt_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("FullHunt")
+        misc::show_searching_msg("FullHunt");
     }
 
     let mut request = return_reqwest_client(60).get(url_api_fullhunt);
@@ -414,7 +414,7 @@ pub fn get_anubisdb_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("AnubisDB")
+        misc::show_searching_msg("AnubisDB");
     }
     get_from_http_api::<HashSet<String>>(url_api_anubisdb, "AnubisDB")
 }
@@ -426,7 +426,7 @@ pub fn get_bufferover_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg(name)
+        misc::show_searching_msg(name);
     }
     let mut request_builder = return_reqwest_client(60).get(url);
     request_builder = request_builder.header("x-api-key", api_key);
@@ -460,7 +460,7 @@ pub fn get_threatcrowd_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Threatcrowd")
+        misc::show_searching_msg("Threatcrowd");
     }
     get_from_http_api::<SubdomainsThreatcrowd>(url_api_threatcrowd, "Threatcrowd")
 }
@@ -480,7 +480,7 @@ pub fn get_virustotal_apikey_subdomains(
 
 pub fn get_urlscan_subdomains(url_api_urlscan: &str, quiet_flag: bool) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Urlscan.io")
+        misc::show_searching_msg("Urlscan.io");
     }
     get_from_http_api::<ResponseDataUrlscan>(url_api_urlscan, "Urlscan.io")
 }
@@ -490,14 +490,14 @@ pub fn get_threatminer_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Threatminer")
+        misc::show_searching_msg("Threatminer");
     }
     get_from_http_api::<SubdomainsThreatminer>(url_api_threatminer, "Threatminer")
 }
 
 pub fn get_c99_subdomains(url_api_c99: &str, quiet_flag: bool) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("C99")
+        misc::show_searching_msg("C99");
     }
     get_from_http_api::<ResponseDataC99>(url_api_c99, "C99")
 }
@@ -507,7 +507,7 @@ pub fn get_archiveorg_subdomains(
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
-        misc::show_searching_msg("Archive.org")
+        misc::show_searching_msg("Archive.org");
     }
     match return_reqwest_client(300).get(url_api_archiveorg).send() {
         Ok(data_archiveorg) => {

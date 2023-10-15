@@ -28,7 +28,7 @@ fn push_data_to_webhooks(
         webhooks_data.clear();
         for data in &misc::return_webhook_payload(new_subdomains, "discord", &args.target) {
             // Add formatting to the webhook payload
-            let data = format!("```{}```", data);
+            let data = format!("```{data}```");
             discord_parameters.insert("content", data.to_string());
             webhooks_data.insert(args.discord_webhook.clone(), discord_parameters.clone());
             send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
@@ -39,7 +39,7 @@ fn push_data_to_webhooks(
         webhooks_data.clear();
         for data in &misc::return_webhook_payload(new_subdomains, "slack", &args.target) {
             // Add formatting to the webhook payload
-            let data = format!("```{}```", data);
+            let data = format!("```{data}```");
             slack_parameters.insert("text", data.to_string());
             webhooks_data.insert(args.slack_webhook.clone(), slack_parameters.clone());
             send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
@@ -51,7 +51,7 @@ fn push_data_to_webhooks(
         telegram_parameters.insert("parse_mode", "HTML".to_string());
         for data in &misc::return_webhook_payload(new_subdomains, "telegram", &args.target) {
             // Add formatting to the webhook payload
-            let data = format!("<code>{}</code>", data);
+            let data = format!("<code>{data}</code>");
             telegram_parameters.insert("text", data.to_string());
             webhooks_data.insert(args.telegram_webhook.clone(), telegram_parameters.clone());
             send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
@@ -105,10 +105,10 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
         let file_name = files::return_output_file(args);
         files::check_output_file_exists(&filename)?;
         for subdomain in &new_subdomains {
-            files::write_to_file(subdomain, &file_name)?
+            files::write_to_file(subdomain, &file_name)?;
         }
         if !args.quiet_flag {
-            misc::show_file_location(&args.target, &filename)
+            misc::show_file_location(&args.target, &filename);
         }
     }
 
@@ -120,9 +120,9 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
             &resolv_data,
             &args.target,
             args,
-        )?
+        )?;
     } else if args.enable_empty_push || !new_subdomains.is_empty() {
-        push_data_to_webhooks(args, &new_subdomains, resolv_data)?
+        push_data_to_webhooks(args, &new_subdomains, resolv_data)?;
     }
 
     if !args.quiet_flag
@@ -134,7 +134,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
             "\nRate limit set to {} seconds, waiting to start next enumeration.",
             args.rate_limit
         );
-        thread::sleep(Duration::from_secs(args.rate_limit))
+        thread::sleep(Duration::from_secs(args.rate_limit));
     }
     Ok(())
 }
@@ -165,13 +165,13 @@ pub fn send_webhook_alert(
                     )
                     .is_ok()
                 {
-                    args.commit_to_db_counter += 1
+                    args.commit_to_db_counter += 1;
                 }
             } else {
                 eprintln!(
                     "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
                     webhook, response.status()
-                )
+                );
             }
         }
     }

@@ -43,7 +43,7 @@ pub fn return_file_targets(args: &Args, files: Vec<String>) -> Vec<String> {
 pub fn read_from_file(args: &mut Args) -> Result<()> {
     let file_name = args.file_name.clone();
     if args.unique_output_flag {
-        check_output_file_exists(&args.file_name)?
+        check_output_file_exists(&args.file_name)?;
     }
     if args.as_resolver {
         if !args.discover_ip && !args.http_status && !args.enable_port_scan {
@@ -71,7 +71,7 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
                 );
                 std::process::exit(1)
             }
-            logic::manage_subdomains_data(args)?
+            logic::manage_subdomains_data(args)?;
         }
     } else {
         let mut file_targets = if !args.files.is_empty() {
@@ -89,14 +89,14 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
 
         if args.randomize {
             let file_targets_hashet: HashSet<String> = HashSet::from_iter(file_targets.clone());
-            file_targets = file_targets_hashet.into_iter().collect()
+            file_targets = file_targets_hashet.into_iter().collect();
         }
 
         let mut iter = file_targets.into_iter().peekable();
 
         while let Some(domain) = iter.next() {
             if iter.peek().is_none() {
-                args.is_last_target = true
+                args.is_last_target = true;
             }
             args.target = domain;
             args.file_name = if file_name.is_empty() && !args.with_ip {
@@ -106,7 +106,7 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             } else {
                 file_name.to_string()
             };
-            crate::get_subdomains(args)?
+            crate::get_subdomains(args)?;
         }
     }
     Ok(())

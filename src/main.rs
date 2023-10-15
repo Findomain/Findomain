@@ -36,7 +36,7 @@ fn run() -> Result<()> {
             HashSet::from_iter(return_file_targets(&arguments, arguments.files.clone()));
         arguments.subdomains.retain(|sub| validate_target(sub));
         for subdomain in &arguments.subdomains {
-            println!("{subdomain}")
+            println!("{subdomain}");
         }
 
         if arguments.unique_output_flag {
@@ -56,7 +56,7 @@ fn run() -> Result<()> {
                 println!(
                     "\nValidated subdomains were written to {}. Good luck!",
                     arguments.file_name
-                )
+                );
             }
         }
         std::process::exit(0)
@@ -64,7 +64,7 @@ fn run() -> Result<()> {
 
     if arguments.bruteforce {
         arguments.wordlists_data =
-            HashSet::from_iter(return_file_targets(&arguments, arguments.wordlists.clone()))
+            HashSet::from_iter(return_file_targets(&arguments, arguments.wordlists.clone()));
     }
     if !arguments.target.is_empty() || arguments.query_jobname {
         get_subdomains(&mut arguments)
