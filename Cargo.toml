@@ -1,6 +1,6 @@
 [package]
 name = "findomain"
-version = "9.0.1"
+version = "9.0.3"
 authors = ["Eduard Tolosa <edu4rdshl@protonmail.com>"]
 edition = "2021"
 description = "The fastest and cross-platform subdomain enumerator, do not waste your time."
