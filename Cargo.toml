@@ -27,7 +27,7 @@ addr = "0.15.6"
 serde_json = "1.0.108"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", rev = "cf75cafee7c9d0c257c0b5a361441efc4e247e9c" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", rev = "513ce142003190a54acd5fff05c557fd1574edb6" } 
-tokio = "1.29.1"
+tokio = "1.35.0"
 crossbeam = "0.8.2"
 futures = "0.3.29"
 anyhow = "1.0.75"
