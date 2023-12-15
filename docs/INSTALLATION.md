@@ -335,7 +335,7 @@ The available system variables that you have are:
 findomain_discord_webhook: Discord webhook URL.
 findomain_slack_webhook: Slack webhook URL.
 findomain_telegrambot_token: Telegram bot autentication token.
-findomain_telegrambot_chat_id: Unique identifier for the target chat or username of the target channel.
+findomain_telegram_chat_id: Unique identifier for the target chat or username of the target channel.
 ```
 
 **Tip:** If you don't want to write the webhook parameters everytime that you run findomain, export the respective system variable in your OS. For Unix based systems it can be done putting `export VariableName="VariableValue"` into your `.bashrc`. For Windows system it can be done as [described here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-windows-command-line-and-registry/).
