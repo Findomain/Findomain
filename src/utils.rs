@@ -51,7 +51,7 @@ please uninstall it and reinstall without using Snap. Error: {e}");
 }
 
 #[must_use]
-pub fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
+pub const fn calculate_timeout(threads: usize, timeout: u64) -> u64 {
     if timeout <= 500 {
         if threads >= 50 {
             timeout + 200

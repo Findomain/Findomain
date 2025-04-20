@@ -19,7 +19,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
     let file_name = files::return_output_file(args);
     if !args.quiet_flag {
         println!();
-    };
+    }
 
     if (args.only_resolved || args.with_ip || args.ipv6_only)
         && !args.disable_wildcard_check
@@ -92,7 +92,7 @@ pub fn validate_target(target: &str) -> bool {
         && target.contains('.')
         && parse_domain_name(target).is_ok()
         && !target.contains(&SPECIAL_CHARS[..])
-        && target.chars().all(|c| c.is_ascii())
+        && target.is_ascii()
 }
 
 #[must_use]
@@ -112,7 +112,7 @@ pub fn validate_subdomain(base_target: &str, subdomain: &str, args: &mut Args) -
         && !subdomain.starts_with('.')
         && (subdomain.ends_with(base_target) || subdomain == args.target)
         && !subdomain.contains(&SPECIAL_CHARS[..])
-        && subdomain.chars().all(|c| c.is_ascii())
+        && subdomain.is_ascii()
         && parse_domain_name(subdomain).is_ok()
         && if args.filter_by_string.is_empty() && args.exclude_by_string.is_empty() {
             true
@@ -185,9 +185,9 @@ pub fn print_and_write(
 
 #[must_use]
 pub fn eval_http(http_status: &HttpData) -> String {
-    if !http_status.host_url.is_empty() {
-        http_status.host_url.clone()
-    } else {
+    if http_status.host_url.is_empty() {
         http_status.http_status.clone()
+    } else {
+        http_status.host_url.clone()
     }
 }

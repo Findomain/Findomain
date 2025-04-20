@@ -50,10 +50,10 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             println!("To use Findomain as resolver, use one or more of the --resolved/-r, --ip/-i, --ipv6-only, --http-status or --pscan/--iport/--lport options.");
             std::process::exit(1)
         } else {
-            args.subdomains = if !args.files.is_empty() {
-                HashSet::from_iter(return_file_targets(args, args.files.clone()))
-            } else {
+            args.subdomains = if args.files.is_empty() {
                 HashSet::from_iter(utils::read_stdin())
+            } else {
+                HashSet::from_iter(return_file_targets(args, args.files.clone()))
             };
             if args.no_resolve {
                 args.subdomains.retain(|target| {
@@ -74,10 +74,10 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
             logic::manage_subdomains_data(args)?;
         }
     } else {
-        let mut file_targets = if !args.files.is_empty() {
-            return_file_targets(args, args.files.clone())
-        } else {
+        let mut file_targets = if args.files.is_empty() {
             utils::read_stdin()
+        } else {
+            return_file_targets(args, args.files.clone())
         };
 
         file_targets.retain(|target| !target.is_empty() && logic::validate_target(target));
@@ -136,7 +136,7 @@ pub fn return_output_file(args: &Args) -> Option<File> {
 
 pub fn check_output_file_exists(file_name: &str) -> Result<()> {
     if Path::new(&file_name).exists() && Path::new(&file_name).is_file() {
-        let backup_file_name = file_name.replace(file_name.split('.').last().unwrap(), "old.txt");
+        let backup_file_name = file_name.replace(file_name.split('.').next_back().unwrap(), "old.txt");
         fs::rename(file_name, &backup_file_name).with_context(|| {
             format!(
                 "The file {} already exists but Findomain can't backup the file to {}. Please run the tool with a more privileged user or try in a different directory.",

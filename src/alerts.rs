@@ -99,7 +99,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
 
     if args.with_output && !new_subdomains.is_empty() {
         let filename = args.file_name.replace(
-            args.file_name.split('.').last().unwrap(),
+            args.file_name.split('.').next_back().unwrap(),
             "new_subdomains.txt",
         );
         let file_name = files::return_output_file(args);

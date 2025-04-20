@@ -20,7 +20,7 @@ pub fn get_amass_subdomains(
     let mut subdomains = HashSet::new();
     if !(File::create(output_filename).is_ok()
         && Command::new("amass")
-            .args(&mut vec![
+            .args(vec![
                 "enum",
                 "-passive",
                 "-d",
@@ -60,7 +60,7 @@ pub fn get_subfinder_subdomains(
     let mut subdomains = HashSet::new();
     if !(File::create(output_filename).is_ok()
         && Command::new("subfinder")
-            .args(&mut vec![
+            .args(vec![
                 "-silent",
                 "-all",
                 "-d",

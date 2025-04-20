@@ -208,10 +208,10 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
         println!();
     }
 
-    if !args.subdomains.is_empty() {
-        async_resolver_engine(args, args.subdomains.clone(), &file_name)
-    } else {
+    if args.subdomains.is_empty() {
         HashMap::new()
+    } else {
+        async_resolver_engine(args, args.subdomains.clone(), &file_name)
     }
 }
 
@@ -397,7 +397,7 @@ fn async_resolver_engine(
 
             if args.no_resolve {
                 local_resolv_data.http_data.host_url = host.clone();
-            };
+            }
 
             (host.clone(), local_resolv_data)
         })
@@ -410,40 +410,37 @@ fn async_resolver_engine(
             .unwrap();
         screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, host_resolv_data)| {
         if !host_resolv_data.http_data.host_url.is_empty() || args.no_resolve {
-            match screenshots::take_screenshot(
+            if matches!(screenshots::take_screenshot(
                 utils::return_headless_browser(args.chrome_sandbox),
                 &host_resolv_data.http_data.host_url,
                 &args.screenshots_path,
                 &args.target,
                 sub,
-            ) {
-                Ok(()) => {
-                    if args.no_resolve {
-                        println!("{}", host_resolv_data.http_data.host_url);
-                    }
+            ), Ok(())) {
+                if args.no_resolve {
+                    println!("{}", host_resolv_data.http_data.host_url);
                 }
-                Err(_) => {
-                    let mut counter = 0;
-                    while counter <= 2 {
-                        match screenshots::take_screenshot(
-                            utils::return_headless_browser(args.chrome_sandbox),
-                            &host_resolv_data.http_data.host_url,
-                            &args.screenshots_path,
-                            &args.target,
-                            sub,
-                        ) {
-                            Ok(()) => {
-                                if args.no_resolve {
-                                    println!("{}", host_resolv_data.http_data.host_url);
-                                };
-                                break;
+            } else {
+                let mut counter = 0;
+                while counter <= 2 {
+                    match screenshots::take_screenshot(
+                        utils::return_headless_browser(args.chrome_sandbox),
+                        &host_resolv_data.http_data.host_url,
+                        &args.screenshots_path,
+                        &args.target,
+                        sub,
+                    ) {
+                        Ok(()) => {
+                            if args.no_resolve {
+                                println!("{}", host_resolv_data.http_data.host_url);
                             }
-                            Err(e) => {
-                                if counter == 3 {
-                                    eprintln!("The subdomain {sub} has an active HTTP server running at {} but the screenshot was not taken. Error description: {e}", host_resolv_data.http_data.host_url);
-                                }
-                                counter += 1;
+                            break;
+                        }
+                        Err(e) => {
+                            if counter == 3 {
+                                eprintln!("The subdomain {sub} has an active HTTP server running at {} but the screenshot was not taken. Error description: {e}", host_resolv_data.http_data.host_url);
                             }
+                            counter += 1;
                         }
                     }
                 }
@@ -512,7 +509,7 @@ fn async_resolver_engine(
                     .collect();
             }
         }
-    };
+    }
 
     for (sub, host_resolv_data) in &resolv_data {
         if ip_http_ports {
@@ -701,7 +698,7 @@ pub fn check_http_response_code(api_name: &str, response: &reqwest::blocking::Re
                 api_name,
                 response.status(),
             );
-        };
+        }
         false
     }
 }

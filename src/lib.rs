@@ -72,7 +72,7 @@ pub fn get_subdomains(args: &mut Args) -> Result<()> {
     if !args.no_discover {
         let discovered_subdomains = networking::search_subdomains(args);
         args.subdomains.extend(discovered_subdomains);
-    };
+    }
 
     if !args.import_subdomains_from.is_empty() {
         let base_target = format!(".{}", args.target);

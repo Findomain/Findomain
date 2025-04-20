@@ -278,12 +278,9 @@ pub fn get_args() -> Args {
                     .unwrap()
             };
             if !file_name.is_empty() && Path::new(&file_name).exists() {
-                match File::open(&file_name) {
-                    Ok(file) => BufReader::new(file).lines().flatten().collect(),
-                    Err(_) => {
-                        eprintln!("Error reading the user agents file, please make sure that the file format is correct.");
-                        std::process::exit(1)
-                    }
+                if let Ok(file) = File::open(&file_name) { BufReader::new(file).lines().flatten().collect() } else {
+                    eprintln!("Error reading the user agents file, please make sure that the file format is correct.");
+                    std::process::exit(1)
                 }
             } else if !file_name.is_empty() && !Path::new(&file_name).exists() {
                 eprintln!("Error reading the user agents file, please make sure that the path is correct. Leaving");

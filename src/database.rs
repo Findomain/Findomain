@@ -97,7 +97,7 @@ pub fn query_findomain_database(args: &mut Args) -> Result<()> {
             "Searching subdomains in the Findomain database for the job name {} 🔍",
             args.jobname
         );
-    };
+    }
 
     let mut connection: postgres::Client = return_database_connection(&args.postgres_connection);
 
