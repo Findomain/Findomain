@@ -1,12 +1,11 @@
-use std::ffi::OsStr;
-
 use {
     crate::{args, utils},
     headless_chrome::{Browser, LaunchOptionsBuilder},
-    rand::{seq::SliceRandom, thread_rng},
+    rand::seq::IndexedRandom,
     reqwest::blocking::Client,
     std::{
         collections::HashSet,
+        ffi::OsStr,
         io::{self, Read},
     },
 };
@@ -87,7 +86,7 @@ pub fn return_random_string(strings: Vec<String>) -> String {
     if strings.is_empty() {
         String::new()
     } else {
-        strings.choose(&mut thread_rng()).unwrap().to_string()
+        strings.choose(&mut rand::rng()).unwrap().to_string()
     }
 }
 
@@ -96,7 +95,8 @@ pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
     hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }
 
-#[must_use] pub fn split_string_at_len(string: &str, len: usize) -> Vec<String> {
+#[must_use]
+pub fn split_string_at_len(string: &str, len: usize) -> Vec<String> {
     let mut strings = Vec::new();
     let mut current_string = String::new();
     // split at newlines to make sure we don't split a line in half

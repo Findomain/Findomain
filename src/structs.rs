@@ -72,7 +72,7 @@ pub struct Args {
     pub no_resolve: bool,
     pub external_subdomains: bool,
     pub validate_subdomains: bool,
-    pub disable_double_dns_check: bool,
+    pub enable_double_dns_check: bool,
     pub custom_ports_range: bool,
     pub no_discover: bool,
     pub reset_database: bool,

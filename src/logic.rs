@@ -185,9 +185,9 @@ pub fn print_and_write(
 
 #[must_use]
 pub fn eval_http(http_status: &HttpData) -> String {
-    if http_status.host_url.is_empty() {
+    if http_status.final_url.is_empty() {
         http_status.http_status.clone()
     } else {
-        http_status.host_url.clone()
+        http_status.final_url.clone()
     }
 }

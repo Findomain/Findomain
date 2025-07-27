@@ -6,7 +6,7 @@ use {
     },
     crossbeam::channel,
     fhc::structs::{HttpData, LibOptions as FhcLibOptions},
-    rand::{distributions::Alphanumeric, thread_rng as rng, Rng},
+    rand::{distr::Alphanumeric, Rng},
     rayon::prelude::*,
     rusolver::{
         dnslib::{return_hosts_data, return_tokio_asyncresolver},
@@ -17,9 +17,7 @@ use {
         fs,
         net::Ipv4Addr,
         thread,
-        time::Duration,
     },
-    trust_dns_resolver::config::{LookupIpStrategy, ResolverOpts},
 };
 
 lazy_static! {
@@ -59,7 +57,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     );
     let certspotter_token = args.certspotter_access_token.clone();
     let url_api_crtsh = format!("https://crt.sh/?q=%.{}&output=json", &args.target);
-    let crtsh_db_query = format!("SELECT ci.NAME_VALUE NAME_VALUE FROM certificate_identity ci WHERE ci.NAME_TYPE = 'dNSName' AND reverse(lower(ci.NAME_VALUE)) LIKE reverse(lower('%.{}'))", &args.target);
+    let crtsh_db_query = format!("SELECT cai.name_value FROM certificate_and_identities cai WHERE plainto_tsquery('certwatch', '{}') @@ identities(cai.CERTIFICATE) AND cai.NAME_VALUE LIKE ('%.{}') AND cai.NAME_TYPE = '2.5.4.3' LIMIT 100000;", &args.target, &args.target);
     let url_api_sublist3r = format!(
         "https://api.sublist3r.com/search.php?domain={}",
         &args.target
@@ -77,7 +75,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         "https://api.threatminer.org/v2/domain.php?q={}&api=True&rt=5",
         &args.target
     );
-    let url_api_archiveorg = format!("https://web.archive.org/cdx/search/cdx?url=*.{}/*&output=json&fl=original&collapse=urlkey&limit=100000&_=1547318148315", &args.target);
     let url_api_fullhunt = format!(
         "https://fullhunt.io/api/v1/domain/{}/subdomains",
         &args.target
@@ -156,8 +153,6 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         },
         if args.excluded_sources.contains("threatminer") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_threatminer_subdomains(&url_api_threatminer, quiet_flag))},
-        if args.excluded_sources.contains("archiveorg") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_archiveorg_subdomains(&url_api_archiveorg, quiet_flag))},
         if args.excluded_sources.contains("c99") || args.c99_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_c99 = format!(
@@ -246,40 +241,26 @@ fn async_resolver_engine(
     };
 
     let hosts_data = if !args.no_resolve && (args.enable_port_scan || args.discover_ip) {
-        let options = ResolverOpts {
-            attempts: 0,
-            timeout: Duration::from_secs(args.resolver_timeout),
-            ip_strategy: LookupIpStrategy::Ipv4Only,
-            num_concurrent_reqs: 1,
-            shuffle_dns_servers: true,
-            ..Default::default()
-        };
+        let options = rusolver::utils::return_resolver_opts(args.resolver_timeout, 2);
+        let resolver_ips: HashSet<String> = RESOLVERS.iter().cloned().collect();
+        let trustable_resolver_ips: HashSet<String> = TRUSTABLE_RESOLVERS.iter().cloned().collect();
 
-        let resolvers = return_tokio_asyncresolver(
-            RESOLVERS.iter().map(std::clone::Clone::clone).collect(),
-            options,
-        );
-        let trustable_resolver = return_tokio_asyncresolver(
-            TRUSTABLE_RESOLVERS
-                .iter()
-                .map(std::clone::Clone::clone)
-                .collect(),
-            options,
-        );
+        let resolvers = return_tokio_asyncresolver(&resolver_ips, options.clone());
+        let trustable_resolvers = return_tokio_asyncresolver(&trustable_resolver_ips, options);
 
         let rt = tokio::runtime::Runtime::new().unwrap();
         let handle = rt.handle().clone();
         let (tx, rx) = channel::bounded(1);
 
         let subdomains_for_async_resolver = subdomains.clone();
-        let disable_double_check = args.disable_double_dns_check;
+        let enable_double_check = args.enable_double_dns_check;
 
         let rusolver_liboptions = RusolverLibOptions {
             hosts: subdomains_for_async_resolver,
             resolvers,
-            trustable_resolver,
+            trustable_resolvers,
             wildcard_ips,
-            disable_double_check,
+            enable_double_check,
             threads: async_threads,
             show_ip_address: false,
             quiet_flag: true,
@@ -335,36 +316,17 @@ fn async_resolver_engine(
         }
 
         let rt = tokio::runtime::Runtime::new().unwrap();
-        let handle = rt.handle().clone();
-
-        let (tx, rx) = channel::bounded(1);
-
         let client = fhc::httplib::return_http_client(args.http_timeout, args.max_http_redirects);
 
-        let lib_options = FhcLibOptions {
-            hosts: http_hosts.clone(),
-            client,
-            user_agents: args.user_agent_strings.clone(),
-            retries: args.http_retries,
-            threads: async_threads,
-            assign_response_data: true,
-            quiet_flag: true,
-            ..Default::default()
-        };
+        let mut lib_options = FhcLibOptions::default();
+        lib_options.hosts = http_hosts;
+        lib_options.client = client;
+        lib_options.user_agents = args.user_agent_strings.clone();
+        lib_options.retries = args.http_retries;
+        lib_options.threads = async_threads;
+        lib_options.quiet_flag = true;
 
-        handle.spawn(async move {
-            let http_data = fhc::httplib::return_http_data(&lib_options).await;
-
-            let _ = tx.send(http_data);
-        });
-
-        match rx.recv() {
-            Ok(data) => data,
-            Err(e) => {
-                println!("Error in the resolution process: {e}");
-                std::process::exit(1);
-            }
-        }
+        rt.block_on(fhc::httplib::return_http_data(&lib_options, false))
     } else {
         subdomains
             .par_iter()
@@ -382,12 +344,12 @@ fn async_resolver_engine(
 
             if args.http_status
                 && !local_resolv_data.ip.is_empty()
-                && !local_fhc_data.host_url.is_empty()
+                && !local_fhc_data.final_url.is_empty()
                 && !args.no_resolve
             {
                 local_resolv_data.http_data = local_fhc_data;
             } else if (args.http_status && local_resolv_data.ip.is_empty()
-                || local_fhc_data.host_url.is_empty())
+                || local_fhc_data.final_url.is_empty())
                 && !args.no_resolve
             {
                 local_resolv_data.http_data.http_status = String::from("INACTIVE");
@@ -396,7 +358,7 @@ fn async_resolver_engine(
             }
 
             if args.no_resolve {
-                local_resolv_data.http_data.host_url = host.clone();
+                local_resolv_data.http_data.final_url = host.clone();
             }
 
             (host.clone(), local_resolv_data)
@@ -409,36 +371,36 @@ fn async_resolver_engine(
             .build()
             .unwrap();
         screenshots_pool.install(|| { resolv_data.par_iter().map(|(sub, host_resolv_data)| {
-        if !host_resolv_data.http_data.host_url.is_empty() || args.no_resolve {
+        if !host_resolv_data.http_data.final_url.is_empty() || args.no_resolve {
             if matches!(screenshots::take_screenshot(
                 utils::return_headless_browser(args.chrome_sandbox),
-                &host_resolv_data.http_data.host_url,
+                &host_resolv_data.http_data.final_url,
                 &args.screenshots_path,
                 &args.target,
                 sub,
             ), Ok(())) {
                 if args.no_resolve {
-                    println!("{}", host_resolv_data.http_data.host_url);
+                    println!("{}", host_resolv_data.http_data.final_url);
                 }
             } else {
                 let mut counter = 0;
                 while counter <= 2 {
                     match screenshots::take_screenshot(
                         utils::return_headless_browser(args.chrome_sandbox),
-                        &host_resolv_data.http_data.host_url,
+                        &host_resolv_data.http_data.final_url,
                         &args.screenshots_path,
                         &args.target,
                         sub,
                     ) {
                         Ok(()) => {
                             if args.no_resolve {
-                                println!("{}", host_resolv_data.http_data.host_url);
+                                println!("{}", host_resolv_data.http_data.final_url);
                             }
                             break;
                         }
                         Err(e) => {
                             if counter == 3 {
-                                eprintln!("The subdomain {sub} has an active HTTP server running at {} but the screenshot was not taken. Error description: {e}", host_resolv_data.http_data.host_url);
+                                eprintln!("The subdomain {sub} has an active HTTP server running at {} but the screenshot was not taken. Error description: {e}", host_resolv_data.http_data.final_url);
                             }
                             counter += 1;
                         }
@@ -610,7 +572,7 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
     for _ in 1..20 {
         generated_wildcards.insert(format!(
             "{}.{}",
-            rng()
+            rand::rng()
                 .sample_iter(Alphanumeric)
                 .take(15)
                 .map(char::from)
@@ -619,22 +581,10 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
         ));
     }
 
-    let options = ResolverOpts {
-        attempts: 0,
-        timeout: Duration::from_secs(args.resolver_timeout),
-        ip_strategy: LookupIpStrategy::Ipv4Only,
-        num_concurrent_reqs: 1,
-        shuffle_dns_servers: true,
-        ..Default::default()
-    };
+    let options = rusolver::utils::return_resolver_opts(args.resolver_timeout, 2);
+    let trustable_resolver_ips: HashSet<String> = RESOLVERS.iter().cloned().collect();
 
-    let trustable_resolver = return_tokio_asyncresolver(
-        TRUSTABLE_RESOLVERS
-            .iter()
-            .map(std::clone::Clone::clone)
-            .collect(),
-        options,
-    );
+    let trustable_resolvers = return_tokio_asyncresolver(&trustable_resolver_ips, options);
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let handle = rt.handle().clone();
@@ -643,10 +593,10 @@ pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
 
     let rusolver_liboptions = RusolverLibOptions {
         hosts: generated_wildcards,
-        resolvers: trustable_resolver.clone(),
-        trustable_resolver,
+        resolvers: trustable_resolvers.clone(),
+        trustable_resolvers,
         wildcard_ips: HashSet::new(),
-        disable_double_check: true,
+        enable_double_check: false,
         threads: 10,
         show_ip_address: false,
         quiet_flag: true,

@@ -93,7 +93,6 @@ Findomain makes use of multiple publicly-available APIs to perform the search. T
 - [SecurityTrails](https://docs.securitytrails.com/docs) `**`
 - [Threatminer](https://www.threatminer.org/api.php)
 - [C99](https://api.c99.nl/) `**`
-- [Archive.org](https://archive.org/)
 - [CTSearch](https://ui.ctsearch.entrust.com/ui/ctsearchui)
 
 **Notes**

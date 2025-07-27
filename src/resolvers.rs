@@ -15,12 +15,6 @@ pub fn return_ipv4_resolvers() -> Vec<String> {
         // Verisign
         "64.6.64.6",
         "64.6.65.6",
-        // UncensoredDNS
-        "91.239.100.100",
-        "89.233.43.71",
-        // dns.watch
-        "84.200.69.80",
-        "84.200.70.40",
     ]
     .into_iter()
     .map(str::to_owned)

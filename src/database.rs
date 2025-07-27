@@ -10,7 +10,8 @@ use {
     std::collections::{HashMap, HashSet},
 };
 
-#[must_use] pub fn return_database_connection(postgres_connection: &str) -> Client {
+#[must_use]
+pub fn return_database_connection(postgres_connection: &str) -> Client {
     // Lets accept self signed certificates
     let connector = TlsConnector::builder()
         .danger_accept_invalid_certs(true)
