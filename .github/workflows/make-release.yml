@@ -59,7 +59,7 @@ jobs:
       - name: Strip symbols from binary
         run: |
           strip -s ${{ matrix.path }} || arm-linux-gnueabihf-strip -s ${{ matrix.path }} || aarch64-linux-gnu-strip -s ${{ matrix.path }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
@@ -91,7 +91,7 @@ jobs:
       - name: Strip symbols from binary
         run: |
           strip -u -r target/${{ matrix.target }}/release/findomain
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: findomain-osx-${{ matrix.arch }}
           path: target/${{ matrix.target }}/release/findomain
