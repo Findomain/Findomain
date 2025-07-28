@@ -17,7 +17,7 @@ use {
 fn push_data_to_webhooks(
     args: &mut Args,
     new_subdomains: &HashSet<String>,
-    subdomains_data: HashMap<String, ResolvData>,
+    subdomains_data: &HashMap<String, ResolvData>,
 ) -> Result<()> {
     let mut discord_parameters = HashMap::new();
     let mut slack_parameters = HashMap::new();
@@ -31,7 +31,7 @@ fn push_data_to_webhooks(
             let data = format!("```{data}```");
             discord_parameters.insert("content", data.to_string());
             webhooks_data.insert(args.discord_webhook.clone(), discord_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
+            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
         }
     }
 
@@ -42,7 +42,7 @@ fn push_data_to_webhooks(
             let data = format!("```{data}```");
             slack_parameters.insert("text", data.to_string());
             webhooks_data.insert(args.slack_webhook.clone(), slack_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
+            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
         }
     }
 
@@ -54,7 +54,7 @@ fn push_data_to_webhooks(
             let data = format!("<code>{data}</code>");
             telegram_parameters.insert("text", data.to_string());
             webhooks_data.insert(args.telegram_webhook.clone(), telegram_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, &subdomains_data)?;
+            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
         }
     }
 
@@ -105,7 +105,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
         let file_name = files::return_output_file(args);
         files::check_output_file_exists(&filename)?;
         for subdomain in &new_subdomains {
-            files::write_to_file(subdomain, &file_name)?;
+            files::write_to_file(subdomain, file_name.as_ref())?;
         }
         if !args.quiet_flag {
             misc::show_file_location(&args.target, &filename);
@@ -122,7 +122,7 @@ pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
             args,
         )?;
     } else if args.enable_empty_push || !new_subdomains.is_empty() {
-        push_data_to_webhooks(args, &new_subdomains, resolv_data)?;
+        push_data_to_webhooks(args, &new_subdomains, &resolv_data)?;
     }
 
     if !args.quiet_flag

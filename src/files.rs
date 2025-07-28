@@ -17,13 +17,16 @@ pub fn return_file_targets(args: &Args, files: Vec<String>) -> Vec<String> {
     for f in files {
         match File::open(&f) {
             Ok(file) => {
-                for target in BufReader::new(file).lines().flatten() {
-                    if args.bruteforce || args.as_resolver || args.custom_resolvers {
-                        targets.push(target);
-                    } else {
-                        targets.push(misc::sanitize_target_string(target));
-                    }
-                }
+                BufReader::new(file)
+                    .lines()
+                    .map_while(Result::ok)
+                    .for_each(|target| {
+                        if args.bruteforce || args.as_resolver || args.custom_resolvers {
+                            targets.push(target);
+                        } else {
+                            targets.push(misc::sanitize_target_string(&target));
+                        }
+                    });
             }
             Err(e) => {
                 if args.files.len() == 1 {
@@ -112,9 +115,11 @@ pub fn read_from_file(args: &mut Args) -> Result<()> {
     Ok(())
 }
 
-pub fn write_to_file(data: &str, file_name: &Option<std::fs::File>) -> Result<()> {
-    file_name.as_ref().unwrap().write_all(data.as_bytes())?;
-    file_name.as_ref().unwrap().write_all(b"\n")?;
+pub fn write_to_file(data: &str, file_name: Option<&std::fs::File>) -> Result<()> {
+    if let Some(mut file) = file_name {
+        file.write_all(data.as_bytes())?;
+        file.write_all(b"\n")?;
+    }
     Ok(())
 }
 

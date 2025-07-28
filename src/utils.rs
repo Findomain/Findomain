@@ -19,7 +19,7 @@ lazy_static! {
 
 #[must_use]
 pub fn return_reqwest_client(secs: u64) -> Client {
-    let user_agent = utils::return_random_string(USER_AGENTS.clone());
+    let user_agent = utils::return_random_string(&USER_AGENTS);
     Client::builder()
         .user_agent(user_agent)
         .timeout(std::time::Duration::from_secs(secs))
@@ -82,7 +82,7 @@ pub fn read_stdin() -> Vec<String> {
 }
 
 #[must_use]
-pub fn return_random_string(strings: Vec<String>) -> String {
+pub fn return_random_string(strings: &[String]) -> String {
     if strings.is_empty() {
         String::new()
     } else {
@@ -91,7 +91,10 @@ pub fn return_random_string(strings: Vec<String>) -> String {
 }
 
 #[must_use]
-pub fn hashset_to_string(delimiter: &str, hashset: HashSet<String>) -> String {
+pub fn hashset_to_string<S: ::std::hash::BuildHasher>(
+    delimiter: &str,
+    hashset: HashSet<String, S>,
+) -> String {
     hashset.into_iter().collect::<Vec<String>>().join(delimiter)
 }
 

@@ -183,7 +183,7 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
                 match data.json::<T>() {
                     Ok(json) => Some(json.into_subdomains()),
                     Err(e) => {
-                        check_json_errors(e, name);
+                        check_json_errors(&e, name);
                         None
                     }
                 }
@@ -192,7 +192,7 @@ fn get_from_http_api<T: DeserializeOwned + IntoSubdomains>(
             }
         }
         Err(e) => {
-            check_request_errors(e, name);
+            check_request_errors(&e, name);
             None
         }
     }
@@ -224,7 +224,7 @@ pub fn get_certspotter_subdomains(
                             .collect(),
                     ),
                     Err(e) => {
-                        check_json_errors(e, "CertSpotter");
+                        check_json_errors(&e, "CertSpotter");
                         None
                     }
                 }
@@ -233,7 +233,7 @@ pub fn get_certspotter_subdomains(
             }
         }
         Err(e) => {
-            check_request_errors(e, "CertSpotter");
+            check_request_errors(&e, "CertSpotter");
             None
         }
     }
@@ -255,7 +255,7 @@ pub fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<Has
                             .collect(),
                     ),
                     Err(e) => {
-                        check_json_errors(e, "Crtsh");
+                        check_json_errors(&e, "Crtsh");
                         None
                     }
                 }
@@ -264,7 +264,7 @@ pub fn get_crtsh_subdomains(url_api_crtsh: &str, quiet_flag: bool) -> Option<Has
             }
         }
         Err(e) => {
-            check_request_errors(e, "Crtsh");
+            check_request_errors(&e, "Crtsh");
             None
         }
     }
@@ -290,7 +290,7 @@ pub fn get_securitytrails_subdomains(
                             .collect(),
                     ),
                     Err(e) => {
-                        check_json_errors(e, "SecurityTrails");
+                        check_json_errors(&e, "SecurityTrails");
                         None
                     }
                 }
@@ -299,7 +299,7 @@ pub fn get_securitytrails_subdomains(
             }
         }
         Err(e) => {
-            check_request_errors(e, "SecurityTrails");
+            check_request_errors(&e, "SecurityTrails");
             None
         }
     }
@@ -394,7 +394,7 @@ pub fn get_fullhunt_subdomains(
                 match data_fullhunt.json::<SubdomainsFullHunt>() {
                     Ok(domains_fullhunt) => Some(domains_fullhunt.hosts.into_iter().collect()),
                     Err(e) => {
-                        check_json_errors(e, "FullHunt");
+                        check_json_errors(&e, "FullHunt");
                         None
                     }
                 }
@@ -403,7 +403,7 @@ pub fn get_fullhunt_subdomains(
             }
         }
         Err(e) => {
-            check_request_errors(e, "FullHunt");
+            check_request_errors(&e, "FullHunt");
             None
         }
     }
@@ -440,7 +440,7 @@ pub fn get_bufferover_subdomains(
                 match data.json::<SubdomainsBufferover>() {
                     Ok(json) => Some(json.into_subdomains()),
                     Err(e) => {
-                        check_json_errors(e, name);
+                        check_json_errors(&e, name);
                         None
                     }
                 }
@@ -449,7 +449,7 @@ pub fn get_bufferover_subdomains(
             }
         }
         Err(e) => {
-            check_request_errors(e, name);
+            check_request_errors(&e, name);
             None
         }
     }

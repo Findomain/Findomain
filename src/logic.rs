@@ -33,7 +33,7 @@ pub fn manage_subdomains_data(args: &mut Args) -> Result<()> {
     } else if !args.discover_ip && !args.http_status && !args.enable_port_scan && args.with_output {
         for subdomain in &args.subdomains {
             println!("{subdomain}");
-            files::write_to_file(subdomain, &file_name)?;
+            files::write_to_file(subdomain, file_name.as_ref())?;
         }
     } else {
         for subdomain in &args.subdomains {
@@ -172,14 +172,10 @@ pub fn return_ports_string(ports: &[i32], args: &Args) -> String {
     }
 }
 
-pub fn print_and_write(
-    data_to_write: String,
-    with_output: bool,
-    file_name: &Option<std::fs::File>,
-) {
+pub fn print_and_write(data_to_write: &str, with_output: bool, file_name: Option<&std::fs::File>) {
     println!("{data_to_write}");
     if with_output {
-        files::write_to_file(&data_to_write, file_name).unwrap();
+        files::write_to_file(data_to_write, file_name).unwrap();
     }
 }
 

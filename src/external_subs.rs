@@ -10,7 +10,7 @@ use {
 
 pub fn get_amass_subdomains(
     target: &str,
-    external_subdomains_dir: String,
+    external_subdomains_dir: &str,
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
@@ -36,9 +36,12 @@ pub fn get_amass_subdomains(
     }
     match File::open(output_filename) {
         Ok(file) => {
-            for target in BufReader::new(file).lines().flatten() {
-                subdomains.insert(target);
-            }
+            BufReader::new(file)
+                .lines()
+                .map_while(Result::ok)
+                .for_each(|target| {
+                    subdomains.insert(target);
+                });
             Some(subdomains)
         }
         Err(e) => {
@@ -50,7 +53,7 @@ pub fn get_amass_subdomains(
 
 pub fn get_subfinder_subdomains(
     target: &str,
-    external_subdomains_dir: String,
+    external_subdomains_dir: &str,
     quiet_flag: bool,
 ) -> Option<HashSet<String>> {
     if !quiet_flag {
@@ -69,9 +72,12 @@ pub fn get_subfinder_subdomains(
     }
     match File::open(output_filename) {
         Ok(file) => {
-            for target in BufReader::new(file).lines().flatten() {
-                subdomains.insert(target);
-            }
+            BufReader::new(file)
+                .lines()
+                .map_while(Result::ok)
+                .for_each(|target| {
+                    subdomains.insert(target);
+                });
             Some(subdomains)
         }
         Err(e) => {

@@ -67,7 +67,7 @@ pub fn return_webhook_payload(
     }
 }
 
-pub fn sanitize_target_string(target: String) -> String {
+pub fn sanitize_target_string(target: &str) -> String {
     target
         .replace("www.", "")
         .replace("https://", "")

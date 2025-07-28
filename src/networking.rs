@@ -85,21 +85,21 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
     let external_subdomains_dir_subfinder = args.external_subdomains_dir_subfinder.clone();
 
     if args.external_subdomains {
-        fs::create_dir_all(&args.external_subdomains_dir_amass)
+        fs::create_dir_all(&external_subdomains_dir_amass)
             .expect("Failed to create amass output directory.");
-        fs::create_dir_all(&args.external_subdomains_dir_subfinder)
+        fs::create_dir_all(&external_subdomains_dir_subfinder)
             .expect("Failed to create subfinder output directory.");
     }
 
     let mut all_subdomains: HashSet<String> = vec![
         if args.external_subdomains {
-            thread::spawn(move || external_subs::get_amass_subdomains(&amass_target, external_subdomains_dir_amass, quiet_flag))
+            thread::spawn(move || external_subs::get_amass_subdomains(&amass_target, &external_subdomains_dir_amass, quiet_flag))
         } else { thread::spawn(|| None) },
         if args.external_subdomains {
-            thread::spawn(move || external_subs::get_subfinder_subdomains(&subfinder_target, external_subdomains_dir_subfinder, quiet_flag))
+            thread::spawn(move || external_subs::get_subfinder_subdomains(&subfinder_target, &external_subdomains_dir_subfinder, quiet_flag))
         }  else { thread::spawn(|| None) },
         if args.excluded_sources.contains("certspotter") { thread::spawn(|| None) }
-        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &utils::return_random_string(certspotter_token), quiet_flag)) },
+        else { thread::spawn(move || sources::get_certspotter_subdomains(&url_api_certspotter, &utils::return_random_string(&certspotter_token), quiet_flag)) },
         if args.excluded_sources.contains("crtsh") { thread::spawn(|| None) }
         else { thread::spawn(move || sources::get_crtsh_db_subdomains(&crtsh_db_query, &url_api_crtsh, quiet_flag)) },
         if args.excluded_sources.contains("sublist3r") { thread::spawn(|| None) }
@@ -109,19 +109,19 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
             let url_api_fb = format!(
                 "https://graph.facebook.com/certificates?query={}&fields=domains&limit=10000&access_token={}",
                 &args.target,
-                &utils::return_random_string(args.facebook_access_token.clone()));
+                &utils::return_random_string(&args.facebook_access_token));
             thread::spawn(move || sources::get_facebook_subdomains(&url_api_fb, quiet_flag))
         },
         if args.excluded_sources.contains("bufferover_free") || args.bufferover_free_api_key.is_empty() { thread::spawn(|| None) }
         else {
             let url_api_bufferover = format!("https://tls.bufferover.run/dns?q={}", &args.target);
-            let bufferover_free_api_key = utils::return_random_string(args.bufferover_free_api_key.clone());
+            let bufferover_free_api_key = utils::return_random_string(&args.bufferover_free_api_key);
             thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, "Bufferover Free", &bufferover_free_api_key, quiet_flag))
         },
         if args.excluded_sources.contains("bufferover_paid")  || args.bufferover_paid_api_key.is_empty() {  thread::spawn(|| None) }
         else {
             let url_api_bufferover = format!("https://bufferover-run-tls.p.rapidapi.com/ipv4/dns?q={}", &args.target);
-            let bufferover_paid_api_key = utils::return_random_string(args.bufferover_paid_api_key.clone());
+            let bufferover_paid_api_key = utils::return_random_string(&args.bufferover_paid_api_key);
             thread::spawn(move || sources::get_bufferover_subdomains(&url_api_bufferover, "Bufferover Paid", &bufferover_paid_api_key, quiet_flag))
         },
         if args.excluded_sources.contains("threatcrowd") { thread::spawn(|| None) }
@@ -131,7 +131,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         } else {
             let url_virustotal_apikey = format!(
                 "https://www.virustotal.com/vtapi/v2/domain/report?apikey={}&domain={}",
-                &utils::return_random_string(args.virustotal_access_token.clone()), &args.target
+                &utils::return_random_string(&args.virustotal_access_token), &args.target
             );
             thread::spawn(move || {
                 sources::get_virustotal_apikey_subdomains(&url_virustotal_apikey, quiet_flag)
@@ -146,7 +146,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         } else {
             let url_api_securitytrails = format!(
                 "https://api.securitytrails.com/v1/domain/{}/subdomains?apikey={}",
-                &args.target, &utils::return_random_string(args.securitytrails_access_token.clone())
+                &args.target, &utils::return_random_string(&args.securitytrails_access_token)
             );
             let target = args.target.clone();
             thread::spawn(move || sources::get_securitytrails_subdomains(&url_api_securitytrails, &target, quiet_flag))
@@ -157,8 +157,8 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         else {
             let url_api_c99 = format!(
                 "https://api.c99.nl/subdomainfinder?key={}&domain={}&json",
-                &utils::return_random_string(args.c99_api_key.clone()), &args.target
-                );
+                &utils::return_random_string(&args.c99_api_key), &args.target
+            );
             thread::spawn(move || {
                 sources::get_c99_subdomains(&url_api_c99, quiet_flag)
             })
@@ -167,7 +167,7 @@ pub fn search_subdomains(args: &mut Args) -> HashSet<String> {
         // but they are like 5 requests ¿? so I decided to exclude it if no API key is present
         if args.excluded_sources.contains("fullhunt") || args.fullhunt_api_key.is_empty() { thread::spawn(|| None) }
         else {
-            let fullhunt_api_key = utils::return_random_string(args.fullhunt_api_key.clone());
+            let fullhunt_api_key = utils::return_random_string(&args.fullhunt_api_key);
             thread::spawn(move || sources::get_fullhunt_subdomains(&url_api_fullhunt, &fullhunt_api_key, quiet_flag))
         },
     ].into_iter().map(|j| j.join().unwrap()).collect::<Vec<_>>().into_iter().flatten().flatten().map(|sub| sub.to_lowercase()).collect();
@@ -206,15 +206,15 @@ pub fn async_resolver_all(args: &Args) -> HashMap<String, ResolvData> {
     if args.subdomains.is_empty() {
         HashMap::new()
     } else {
-        async_resolver_engine(args, args.subdomains.clone(), &file_name)
+        async_resolver_engine(args, &args.subdomains, file_name.as_ref())
     }
 }
 
 #[allow(clippy::cognitive_complexity)]
 fn async_resolver_engine(
     args: &Args,
-    subdomains: HashSet<String>,
-    file_name: &Option<std::fs::File>,
+    subdomains: &HashSet<String>,
+    file_name: Option<&std::fs::File>,
 ) -> HashMap<String, ResolvData> {
     let ip_http_ports = args.discover_ip && args.http_status && args.enable_port_scan;
     let http_with_ip = args.discover_ip && args.http_status && !args.enable_port_scan;
@@ -318,13 +318,15 @@ fn async_resolver_engine(
         let rt = tokio::runtime::Runtime::new().unwrap();
         let client = fhc::httplib::return_http_client(args.http_timeout, args.max_http_redirects);
 
-        let mut lib_options = FhcLibOptions::default();
-        lib_options.hosts = http_hosts;
-        lib_options.client = client;
-        lib_options.user_agents = args.user_agent_strings.clone();
-        lib_options.retries = args.http_retries;
-        lib_options.threads = async_threads;
-        lib_options.quiet_flag = true;
+        let lib_options = FhcLibOptions {
+            hosts: http_hosts,
+            client,
+            user_agents: args.user_agent_strings.clone(),
+            retries: args.http_retries,
+            threads: async_threads,
+            quiet_flag: true,
+            ..Default::default()
+        };
 
         rt.block_on(fhc::httplib::return_http_data(&lib_options, false))
     } else {
@@ -358,7 +360,7 @@ fn async_resolver_engine(
             }
 
             if args.no_resolve {
-                local_resolv_data.http_data.final_url = host.clone();
+                local_resolv_data.http_data.final_url.clone_from(host);
             }
 
             (host.clone(), local_resolv_data)
@@ -417,11 +419,10 @@ fn async_resolver_engine(
         let ips_to_scan = resolv_data
             .par_iter()
             .filter(|(_, host_resolv_data)| {
-                if let Ok(ip) = host_resolv_data.ip.parse::<Ipv4Addr>() {
-                    !ip.is_private()
-                } else {
-                    false
-                }
+                host_resolv_data
+                    .ip
+                    .parse::<Ipv4Addr>()
+                    .map_or(false, |ip| !ip.is_private())
             })
             .map(|(_, host_resolv_data)| host_resolv_data.ip.clone())
             .collect::<HashSet<String>>();
@@ -464,7 +465,7 @@ fn async_resolver_engine(
                             .unwrap_or(&empty_ports_data);
                         let mut local_resolv_data = host_resolv_data.clone();
 
-                        local_resolv_data.open_ports = local_ports_data.clone();
+                        local_resolv_data.open_ports.clone_from(local_ports_data);
 
                         (host.clone(), local_resolv_data)
                     })
@@ -486,7 +487,7 @@ fn async_resolver_engine(
                     &logic::eval_http(&host_resolv_data.http_data),
                     logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if http_with_ip {
             if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
@@ -499,7 +500,7 @@ fn async_resolver_engine(
                     &host_resolv_data.ip,
                     &logic::eval_http(&host_resolv_data.http_data)
                 );
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if only_resolved_or_ip {
             if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
@@ -511,7 +512,7 @@ fn async_resolver_engine(
                 } else {
                     data_to_write = format!("{sub},{}", host_resolv_data.ip);
                 }
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if http_without_ip_with_ports {
             if host_resolv_data.http_data.http_status == "ACTIVE" {
@@ -521,12 +522,12 @@ fn async_resolver_engine(
                     &logic::eval_http(&host_resolv_data.http_data),
                     logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if only_http {
             if host_resolv_data.http_data.http_status == "ACTIVE" {
                 data_to_write = logic::eval_http(&host_resolv_data.http_data);
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if ports_with_ip {
             if (args.disable_wildcard_check && !host_resolv_data.ip.is_empty())
@@ -539,7 +540,7 @@ fn async_resolver_engine(
                     host_resolv_data.ip,
                     logic::return_ports_string(&host_resolv_data.open_ports, args)
                 );
-                logic::print_and_write(data_to_write, args.with_output, file_name);
+                logic::print_and_write(&data_to_write, args.with_output, file_name);
             }
         } else if only_ports && !host_resolv_data.open_ports.is_empty() {
             data_to_write = format!(
@@ -547,9 +548,9 @@ fn async_resolver_engine(
                 sub,
                 logic::return_ports_string(&host_resolv_data.open_ports, args)
             );
-            logic::print_and_write(data_to_write, args.with_output, file_name);
+            logic::print_and_write(&data_to_write, args.with_output, file_name);
         } else if (args.monitoring_flag || args.no_monitor) && !args.quiet_flag {
-            logic::print_and_write(sub.to_string(), args.with_output, file_name);
+            logic::print_and_write(sub, args.with_output, file_name);
         }
     }
     resolv_data
@@ -564,7 +565,7 @@ fn return_ip(host_data: &DomainData) -> String {
         .to_string()
 }
 
-pub fn detect_wildcard(args: &mut Args) -> HashSet<String> {
+pub fn detect_wildcard(args: &Args) -> HashSet<String> {
     if !args.quiet_flag {
         println!("Running wildcards detection for {}...", &args.target);
     }

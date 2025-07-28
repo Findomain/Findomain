@@ -267,7 +267,7 @@ pub fn get_args() -> Args {
 
     Args {
         target: {
-            let target = sanitize_target_string(cli.target.unwrap_or_else(|| String::new()));
+            let target = sanitize_target_string(&cli.target.unwrap_or_default());
             if validate_target(&target) {
                 target
             } else {
@@ -277,7 +277,7 @@ pub fn get_args() -> Args {
         file_name: if cli.output && target_value.is_some() {
             format!(
                 "{}.txt",
-                sanitize_target_string(target_value.as_ref().unwrap().clone())
+                sanitize_target_string(target_value.as_ref().unwrap())
             )
         } else if let Some(ref unique_output) = unique_output_value {
             unique_output.clone()
@@ -292,7 +292,7 @@ pub fn get_args() -> Args {
                     .unwrap_or_else(|| "postgres".to_string()),
                 cli.postgres_host.unwrap_or_else(|| "localhost".to_string()),
                 cli.postgres_port.unwrap_or(5432),
-                cli.postgres_database.unwrap_or_else(|| String::new()),
+                cli.postgres_database.unwrap_or_else(String::new),
             );
             return_value_or_default(&settings, "postgres_connection", database_connection)
         },
@@ -483,22 +483,20 @@ pub fn get_args() -> Args {
             import_subdomains_from
         },
         wordlists: cli.wordlists,
-        resolvers: if !cli.custom_resolvers.is_empty() {
-            cli.custom_resolvers
-        } else {
+        resolvers: if cli.custom_resolvers.is_empty() {
             resolvers::return_ipv4_resolvers()
+        } else {
+            cli.custom_resolvers
         },
         user_agent_strings: {
             let file_name = cli.user_agents_file.unwrap_or_else(|| {
                 return_value_or_default(&settings, "user_agents_file", String::new())
             });
             if !file_name.is_empty() && Path::new(&file_name).exists() {
-                if let Ok(file) = File::open(&file_name) {
-                    BufReader::new(file).lines().flatten().collect()
-                } else {
+                File::open(&file_name).map_or_else(|_| {
                     eprintln!("Error reading the user agents file, please make sure that the file format is correct.");
                     std::process::exit(1)
-                }
+                }, |file| BufReader::new(file).lines().map_while(Result::ok).collect())
             } else if !file_name.is_empty() && !Path::new(&file_name).exists() {
                 eprintln!("Error reading the user agents file, please make sure that the path is correct. Leaving");
                 std::process::exit(1)
@@ -517,13 +515,13 @@ pub fn get_args() -> Args {
         wilcard_ips: HashSet::new(),
         filter_by_string: cli.string_filter.into_iter().collect(),
         exclude_by_string: cli.string_exclude.into_iter().collect(),
-        excluded_sources: if !cli.exclude_sources.is_empty() {
-            cli.exclude_sources.into_iter().collect()
-        } else {
+        excluded_sources: if cli.exclude_sources.is_empty() {
             return_value_or_default(&settings, "exclude_sources", String::new())
                 .split_terminator(',')
                 .map(str::to_owned)
                 .collect()
+        } else {
+            cli.exclude_sources.into_iter().collect()
         },
         time_wasted: Instant::now(),
     }
@@ -533,10 +531,8 @@ fn return_settings(cli: &Cli, _settings: &mut config::Config) -> HashMap<String,
     let mut builder = config::Config::builder();
 
     if cli.config_file.is_some() || std::env::var("FINDOMAIN_CONFIG_FILE").is_ok() {
-        let config_filename = match std::env::var("FINDOMAIN_CONFIG_FILE") {
-            Ok(config) => config,
-            Err(_) => cli.config_file.as_ref().unwrap().clone(),
-        };
+        let config_filename = std::env::var("FINDOMAIN_CONFIG_FILE")
+            .unwrap_or_else(|_| cli.config_file.as_ref().unwrap().clone());
         builder = builder.add_source(config::File::with_name(&config_filename));
     } else if Path::new("findomain.toml").exists()
         || Path::new("findomain.json").exists()
