@@ -2269,7 +2269,7 @@ dependencies = [
  "once_cell",
  "socket2 0.5.10",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2699,8 +2699,8 @@ dependencies = [
 
 [[package]]
 name = "rusolver"
-version = "0.10.1"
-source = "git+https://github.com/Edu4rdSHL/rusolver?tag=0.10.1#28b29ca515ab299938df8e14b1424d2f5f118a51"
+version = "0.10.2"
+source = "git+https://github.com/Edu4rdSHL/rusolver?tag=0.10.2#9b329daa6ad0ebee7ba9a20caa129863ef71d8ea"
 dependencies = [
  "clap",
  "futures",
