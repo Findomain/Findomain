@@ -716,8 +716,8 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "fhc"
-version = "0.9.0"
-source = "git+https://github.com/Edu4rdSHL/fhc?tag=0.9.0#6701590efd6fb4a7aa83887e434f8fc08db4868e"
+version = "0.9.1"
+source = "git+https://github.com/Edu4rdSHL/fhc?tag=0.9.1#70ee3429aee7c82c744aeb5cf45e347867371482"
 dependencies = [
  "async-recursion",
  "clap",
