@@ -41,13 +41,13 @@ postgres-native-tls = "0.5.2"
 native-tls = "0.2.13"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.66", features = ["vendored"] }
+openssl = { version = "0.10.74", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.66", features = ["vendored"] }
+openssl = { version = "0.10.74", features = ["vendored"] }
 
 [target.armv7-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.66", features = ["vendored"] }
+openssl = { version = "0.10.74", features = ["vendored"] }
 
 [profile.release]
 lto = true
