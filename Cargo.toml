@@ -20,7 +20,7 @@ resolver = "1"
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 serde_derive = "1.0.210"
-reqwest = { version = "0.12.28", features = ["blocking", "json", "gzip"] }
+reqwest = { version = "0.13.1", features = ["blocking", "json", "gzip"] }
 hickory-resolver = "0.25.2"
 clap = { version = "4.5.53", features = ["derive"] }
 lazy_static = "1.5.0"
