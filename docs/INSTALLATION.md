@@ -161,8 +161,7 @@ You have two options to install Findomain in a docker container.
 
 ```
 $ docker pull edu4rdshl/findomain:latest
-$ docker run -it edu4rdshl/findomain:latest /bin/bash
-$ findomain
+$ docker run --rm edu4rdshl/findomain:latest -t example.com
 ```
 
 **Building the docker image:**
