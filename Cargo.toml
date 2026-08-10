@@ -38,7 +38,7 @@ crossbeam = "0.8.2"
 futures = "0.3.31"
 anyhow = "1.0.100"
 postgres-native-tls = "0.5.2"
-native-tls = "0.2.13"
+native-tls = "0.2.15"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
 openssl = { version = "0.10.75", features = ["vendored"] }
