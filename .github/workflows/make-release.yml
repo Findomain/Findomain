@@ -40,7 +40,7 @@ jobs:
             name: findomain-aarch64
             path: target/aarch64-unknown-linux-gnu/release/findomain
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -59,7 +59,7 @@ jobs:
       - name: Build
         run: cross build --release --locked --target ${{ matrix.target }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
@@ -76,7 +76,7 @@ jobs:
             arch: arm64
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -87,7 +87,7 @@ jobs:
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: findomain-osx-${{ matrix.arch }}
           path: target/${{ matrix.target }}/release/findomain
@@ -110,7 +110,7 @@ jobs:
             name: findomain-windows-i686
             path: target\i686-pc-windows-msvc\release\findomain.exe
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -120,7 +120,7 @@ jobs:
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
@@ -134,9 +134,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
