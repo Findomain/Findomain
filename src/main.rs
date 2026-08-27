@@ -1,83 +1,31 @@
 use {
-    findomain::{
-        args, database,
-        errors::Result,
-        files::{read_from_file, return_file_targets, string_to_file},
-        get_subdomains,
-        logic::validate_target,
-        utils,
-    },
-    std::{collections::HashSet, fs::OpenOptions, iter::FromIterator, path::Path},
+    clap::Parser,
+    findomain::{cli::Cli, config::Config, runner},
 };
 
-fn run() -> Result<()> {
-    let mut arguments = args::get_args();
-
-    if arguments.reset_database {
-        database::reset_database(&arguments)?;
-        println!("Database was reset successfully!");
-        std::process::exit(0)
-    }
-
-    if !arguments.filter_by_string.is_empty()
-        && !arguments.exclude_by_string.is_empty()
-        && arguments
-            .filter_by_string
-            .difference(&arguments.exclude_by_string)
-            .next()
-            .is_none()
-    {
-        eprintln!("Wait, you are filtering and excluding exactly the same keywords? Please check and try again. \nFiltering keywords: {:?} \nExcluding keywords: {:?}", arguments.filter_by_string, arguments.exclude_by_string);
-        std::process::exit(1)
-    }
-
-    if arguments.validate_subdomains {
-        arguments.subdomains =
-            HashSet::from_iter(return_file_targets(&arguments, arguments.files.clone()));
-        arguments.subdomains.retain(|sub| validate_target(sub));
-        for subdomain in &arguments.subdomains {
-            println!("{subdomain}");
-        }
-
-        if arguments.unique_output_flag {
-            let total_subs_file = OpenOptions::new()
-                .append(true)
-                .create(true)
-                .open(&arguments.file_name);
-
-            let total_subs_file_exists =
-                Path::new(&arguments.file_name).exists() && total_subs_file.is_ok();
-
-            if total_subs_file_exists {
-                string_to_file(
-                    utils::hashset_to_string("\n", arguments.subdomains.clone()),
-                    total_subs_file.unwrap(),
-                )?;
-                println!(
-                    "\nValidated subdomains were written to {}. Good luck!",
-                    arguments.file_name
-                );
-            }
-        }
-        std::process::exit(0)
-    }
-
-    if arguments.bruteforce {
-        arguments.wordlists_data =
-            HashSet::from_iter(return_file_targets(&arguments, arguments.wordlists.clone()));
-    }
-    if !arguments.target.is_empty() || arguments.query_jobname {
-        get_subdomains(&mut arguments)
-    } else if !arguments.files.is_empty() || arguments.from_stdin || arguments.query_jobname {
-        read_from_file(&mut arguments)
-    } else {
-        eprintln!("Error: Target is empty or invalid!");
-        std::process::exit(1)
+/// Dies quietly when the reader of our output goes away.
+///
+/// Rust ignores `SIGPIPE`, which turns a closed pipe into a write error that
+/// `println!` panics on: `findomain -t example.com | head` aborted and dumped
+/// core. Restoring the default makes it end the way every other Unix filter
+/// does.
+#[cfg(unix)]
+fn restore_sigpipe() {
+    // Safe: setting a signal disposition before any thread is spawned.
+    unsafe {
+        libc::signal(libc::SIGPIPE, libc::SIG_DFL);
     }
 }
 
+#[cfg(not(unix))]
+const fn restore_sigpipe() {}
+
 fn main() {
-    if let Err(err) = run() {
+    restore_sigpipe();
+
+    let config = Config::from_cli(&Cli::parse());
+
+    if let Err(err) = runner::run(&config) {
         eprintln!("\nError: {err}");
         for cause in err.chain().skip(1) {
             eprintln!("Error description: {cause}");

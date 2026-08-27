@@ -1,180 +1,297 @@
+//! Monitoring mode: diff against the database and alert on what is new.
+
 use {
     crate::{
-        database::{self, return_database_connection},
+        config::Config,
+        database, email,
         errors::Result,
-        files, logic, misc, networking,
-        structs::{Args, ResolvData},
-        utils,
+        files,
+        output::{eval_http, null_ip_checker, ports_string},
+        resolve::{self, ResolvData},
+        runner,
+        session::Session,
+        tools,
+        utils::random_from,
+        webhooks::{self, Message},
     },
+    reqwest::{blocking::Client, header::USER_AGENT, StatusCode},
     std::{
         collections::{HashMap, HashSet},
-        net::Ipv4Addr,
-        thread,
+        net::IpAddr,
         time::Duration,
     },
 };
 
-fn push_data_to_webhooks(
-    args: &mut Args,
-    new_subdomains: &HashSet<String>,
-    subdomains_data: &HashMap<String, ResolvData>,
-) -> Result<()> {
-    let mut discord_parameters = HashMap::new();
-    let mut slack_parameters = HashMap::new();
-    let mut telegram_parameters = HashMap::new();
-    let mut webhooks_data = HashMap::new();
+const WEBHOOK_TIMEOUT: Duration = Duration::from_secs(30);
 
-    if !args.discord_webhook.is_empty() {
-        webhooks_data.clear();
-        for data in &misc::return_webhook_payload(new_subdomains, "discord", &args.target) {
-            // Add formatting to the webhook payload
-            let data = format!("```{data}```");
-            discord_parameters.insert("content", data.to_string());
-            webhooks_data.insert(args.discord_webhook.clone(), discord_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
-        }
+/// Statuses that mean the webhook took too long rather than that the data was
+/// rejected, so `--mtimeout` can still commit the results.
+///
+/// 408 and 504 are the standard ones; 598 is a proxy convention that never made
+/// it into a spec, 524 is Cloudflare and 460 is an AWS load balancer. The chat
+/// services this posts to sit behind exactly those two.
+const TIMEOUT_STATUSES: [u16; 5] = [408, 504, 598, 524, 460];
+
+/// Resolves the subdomains not seen before and alerts or stores them.
+///
+/// # Errors
+///
+/// Fails when the database is unreachable or a webhook cannot be posted to.
+pub fn subdomains_alerts(config: &Config, session: &mut Session) -> Result<()> {
+    let existing = database::existing_subdomains(config, &session.target)?;
+    session.subdomains = session.subdomains.difference(&existing).cloned().collect();
+
+    let output_file = files::open_output_file(&session.file_name, config.output.enabled)?;
+    let resolv_data = resolve::resolve_all(config, session, output_file.as_ref())?;
+    let new_subdomains = summarize(config, &resolv_data);
+
+    let findings = tools::scan_live_hosts(config, &resolv_data);
+    runner::report_findings(&findings);
+
+    if config.output.enabled && !new_subdomains.is_empty() {
+        write_new_subdomains(config, session, &new_subdomains)?;
     }
 
-    if !args.slack_webhook.is_empty() {
-        webhooks_data.clear();
-        for data in &misc::return_webhook_payload(new_subdomains, "slack", &args.target) {
-            // Add formatting to the webhook payload
-            let data = format!("```{data}```");
-            slack_parameters.insert("text", data.to_string());
-            webhooks_data.insert(args.slack_webhook.clone(), slack_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
-        }
+    let monitoring = &config.monitoring;
+    let store_silently = monitoring.no_monitor && !monitoring.enabled;
+    let nothing_new =
+        new_subdomains.is_empty() && !resolv_data.is_empty() && !monitoring.push_when_empty;
+
+    if store_silently || nothing_new {
+        database::commit(config, &session.target, &resolv_data)?;
+    } else if monitoring.push_when_empty || !new_subdomains.is_empty() {
+        push_to_webhooks(config, session, &new_subdomains, &resolv_data)?;
     }
 
-    if !args.telegram_webhook.is_empty() {
-        telegram_parameters.insert("chat_id", args.telegram_chat_id.clone());
-        telegram_parameters.insert("parse_mode", "HTML".to_string());
-        for data in &misc::return_webhook_payload(new_subdomains, "telegram", &args.target) {
-            // Add formatting to the webhook payload
-            let data = format!("<code>{data}</code>");
-            telegram_parameters.insert("text", data.to_string());
-            webhooks_data.insert(args.telegram_webhook.clone(), telegram_parameters.clone());
-            send_webhook_alert(&webhooks_data, args, new_subdomains, subdomains_data)?;
-        }
-    }
+    // Last and never fatal: the results are already persisted and pushed.
+    email_report(config, session, &new_subdomains, findings);
 
-    args.commit_to_db_counter = 0;
+    runner::pause_between_targets(config, session.is_last_target, true);
     Ok(())
 }
 
-pub fn subdomains_alerts(args: &mut Args) -> Result<()> {
-    let mut new_subdomains = HashSet::new();
-
-    let existing_subdomains = database::return_existing_subdomains(args)?;
-
-    args.subdomains = args
-        .subdomains
-        .difference(&existing_subdomains)
-        .map(ToString::to_string)
-        .collect();
-
-    let resolv_data = networking::async_resolver_all(args);
-
-    for (sub, resolv_data) in &resolv_data {
-        if args.enable_port_scan || args.discover_ip || args.http_status {
-            if resolv_data.ip.parse::<Ipv4Addr>().is_ok() {
-                new_subdomains.insert(format!(
-                    "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
-                    sub,
-                    &resolv_data.ip,
-                    logic::eval_http(&resolv_data.http_data),
-                    logic::return_ports_string(&resolv_data.open_ports, args)
-                ));
-            }
-        } else {
-            new_subdomains.insert(format!(
-                "HOST: {},IP: {},HTTP/S: {},OPEN PORTS: {}",
-                sub,
-                logic::null_ip_checker(&resolv_data.ip),
-                logic::eval_http(&resolv_data.http_data),
-                logic::return_ports_string(&resolv_data.open_ports, args)
-            ));
-        }
+/// Emails the run's findings, when SMTP was configured.
+///
+/// Failures are logged rather than propagated: a notification that could not
+/// be sent must not undo results that are already stored.
+fn email_report(
+    config: &Config,
+    session: &Session,
+    new_subdomains: &HashSet<String>,
+    findings: tools::Findings,
+) {
+    if !config.email.is_configured() {
+        return;
     }
 
-    if args.with_output && !new_subdomains.is_empty() {
-        let filename = args.file_name.replace(
-            args.file_name.split('.').next_back().unwrap(),
-            "new_subdomains.txt",
-        );
-        let file_name = files::return_output_file(args);
-        files::check_output_file_exists(&filename)?;
-        for subdomain in &new_subdomains {
-            files::write_to_file(subdomain, file_name.as_ref())?;
-        }
-        if !args.quiet_flag {
-            misc::show_file_location(&args.target, &filename);
-        }
+    let mut subdomains: Vec<String> = new_subdomains.iter().cloned().collect();
+    subdomains.sort_unstable();
+
+    let report = email::Report {
+        new_subdomains: subdomains,
+        vulnerabilities: findings.vulnerabilities,
+        paths: findings.paths,
+    };
+    if let Err(e) = email::send(config, &session.target, &report) {
+        eprintln!("Could not email the report for {}: {e}", session.target);
+    }
+}
+
+/// Renders one summary line per resolved subdomain.
+///
+/// When any check ran, hosts without a usable address are left out; with no
+/// checks at all every host is reported with placeholder values. The address
+/// is parsed as either family, because `--ipv6-only` stores an IPv6 one.
+fn summarize(config: &Config, resolv_data: &HashMap<String, ResolvData>) -> HashSet<String> {
+    let checked = config.needs_network_checks();
+
+    resolv_data
+        .iter()
+        .filter(|(_, data)| !checked || data.ip.parse::<IpAddr>().is_ok())
+        .map(|(subdomain, data)| {
+            format!(
+                "HOST: {subdomain},IP: {},HTTP/S: {},OPEN PORTS: {}",
+                null_ip_checker(&data.ip),
+                eval_http(&data.http_data),
+                ports_string(&data.open_ports, config.ports.enabled),
+            )
+        })
+        .collect()
+}
+
+/// Writes the new subdomains to their own file next to the main output.
+fn write_new_subdomains(
+    config: &Config,
+    session: &Session,
+    new_subdomains: &HashSet<String>,
+) -> Result<()> {
+    let file_name = files::derived_name(&session.file_name, "new_subdomains.txt");
+    files::backup_existing(&file_name)?;
+
+    let file = files::open_output_file(&file_name, true)?;
+    for subdomain in new_subdomains {
+        files::write_line(subdomain, file.as_ref())?;
     }
 
-    if (args.no_monitor && !args.monitoring_flag)
-        || (new_subdomains.is_empty() && !resolv_data.is_empty() && !args.enable_empty_push)
-    {
-        database::commit_to_db(
-            return_database_connection(&args.postgres_connection),
-            &resolv_data,
-            &args.target,
-            args,
-        )?;
-    } else if args.enable_empty_push || !new_subdomains.is_empty() {
-        push_data_to_webhooks(args, &new_subdomains, &resolv_data)?;
-    }
-
-    if !args.quiet_flag
-        && args.rate_limit != 0
-        && (args.from_file_flag || args.from_stdin)
-        && !args.is_last_target
-    {
+    if !config.general.quiet {
         println!(
-            "\nRate limit set to {} seconds, waiting to start next enumeration.",
-            args.rate_limit
+            ">> 📁 Subdomains for {} were saved in: ./{file_name} 😀",
+            session.target
         );
-        thread::sleep(Duration::from_secs(args.rate_limit));
     }
     Ok(())
 }
 
-pub fn send_webhook_alert(
-    webhooks_data: &HashMap<String, HashMap<&str, String>>,
-    args: &mut Args,
+/// Posts every alert and stores the results once the first one goes through.
+fn push_to_webhooks(
+    config: &Config,
+    session: &Session,
     new_subdomains: &HashSet<String>,
-    subdomains_data: &HashMap<String, ResolvData>,
+    resolv_data: &HashMap<String, ResolvData>,
 ) -> Result<()> {
-    for (webhook, webhooks_payload) in webhooks_data {
-        if !webhook.is_empty() {
-            let response = utils::return_reqwest_client(30)
-                .post(webhook)
-                .json(&webhooks_payload)
-                .send()?;
-            if (response.status() == 200 || response.status() == 204)
-                || (["408", "504", "598", "524", "460"].contains(&response.status().as_str())
-                    && args.dbpush_if_timeout)
-            {
-                if args.commit_to_db_counter == 0
-                    && !new_subdomains.is_empty()
-                    && database::commit_to_db(
-                        return_database_connection(&args.postgres_connection),
-                        subdomains_data,
-                        &args.target,
-                        args,
-                    )
-                    .is_ok()
-                {
-                    args.commit_to_db_counter += 1;
-                }
-            } else {
-                eprintln!(
-                    "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
-                    webhook, response.status()
-                );
-            }
+    let client = Client::builder()
+        .timeout(WEBHOOK_TIMEOUT)
+        .build()
+        .expect("build the webhook HTTP client");
+    let mut stored = false;
+
+    for message in webhooks::messages(config, new_subdomains, &session.target) {
+        if !post(config, &client, &message)? {
+            continue;
+        }
+        if !stored && !new_subdomains.is_empty() {
+            stored = database::commit(config, &session.target, resolv_data).is_ok();
         }
     }
 
     Ok(())
+}
+
+/// Posts a single alert, reporting whether the service accepted it.
+///
+/// # Errors
+///
+/// Fails when the request itself could not be made.
+fn post(config: &Config, client: &Client, message: &Message) -> Result<bool> {
+    let response = client
+        .post(&message.url)
+        .header(USER_AGENT, random_from(&config.http.user_agents))
+        .json(&message.body)
+        .send()?;
+
+    if accepted(response.status(), config.monitoring.push_on_timeout) {
+        return Ok(true);
+    }
+
+    eprintln!(
+        "\nAn error occurred when Findomain tried to publish the data to the following webhook {}. \nError description: {}",
+        message.url,
+        response.status()
+    );
+    Ok(false)
+}
+
+/// Reports whether `status` means the alert can be considered delivered.
+fn accepted(status: StatusCode, push_on_timeout: bool) -> bool {
+    status == StatusCode::OK
+        || status == StatusCode::NO_CONTENT
+        || (push_on_timeout && TIMEOUT_STATUSES.contains(&status.as_u16()))
+}
+
+#[cfg(test)]
+mod tests {
+    use {super::*, fhc::structs::HttpData};
+
+    fn data(ip: &str, http_status: &str, ports: &[i32]) -> ResolvData {
+        ResolvData {
+            ip: ip.to_owned(),
+            http_data: HttpData {
+                http_status: http_status.to_owned(),
+                ..HttpData::default()
+            },
+            open_ports: ports.to_vec(),
+            ..ResolvData::default()
+        }
+    }
+
+    #[test]
+    fn accepted_covers_success_and_opt_in_timeouts() {
+        assert!(accepted(StatusCode::OK, false));
+        assert!(accepted(StatusCode::NO_CONTENT, false));
+        assert!(!accepted(StatusCode::REQUEST_TIMEOUT, false));
+        assert!(accepted(StatusCode::REQUEST_TIMEOUT, true));
+        assert!(accepted(StatusCode::GATEWAY_TIMEOUT, true));
+        assert!(!accepted(StatusCode::INTERNAL_SERVER_ERROR, true));
+        assert!(!accepted(StatusCode::FORBIDDEN, true));
+    }
+
+    #[test]
+    fn summarize_drops_unresolved_hosts_when_checks_ran() {
+        let mut config = Config::default();
+        config.resolution.discover_ip = true;
+
+        let resolv_data = HashMap::from([
+            ("a.example.com".to_owned(), data("1.2.3.4", "ACTIVE", &[80])),
+            ("b.example.com".to_owned(), data("", "INACTIVE", &[])),
+        ]);
+
+        let summary = summarize(&config, &resolv_data);
+        assert_eq!(
+            summary.into_iter().collect::<Vec<_>>(),
+            ["HOST: a.example.com,IP: 1.2.3.4,HTTP/S: ACTIVE,OPEN PORTS: [80]"]
+        );
+    }
+
+    #[test]
+    fn summarize_keeps_ipv6_hosts() {
+        // --ipv6-only stores an IPv6 address; filtering on IPv4 alone would
+        // leave the monitoring report empty on every run.
+        let mut config = Config::default();
+        config.resolution.discover_ip = true;
+        config.resolution.ipv6_only = true;
+
+        let resolv_data = HashMap::from([(
+            "a.example.com".to_owned(),
+            data("2606:4700::6810:2ca3", "ACTIVE", &[]),
+        )]);
+
+        let summary = summarize(&config, &resolv_data);
+        assert_eq!(summary.len(), 1);
+        assert!(summary
+            .into_iter()
+            .next()
+            .is_some_and(|line| line.contains("IP: 2606:4700::6810:2ca3")));
+    }
+
+    #[test]
+    fn summarize_keeps_every_host_when_nothing_was_checked() {
+        let config = Config::default();
+        let resolv_data = HashMap::from([
+            ("a.example.com".to_owned(), data("", "NOT CHECKED", &[])),
+            ("b.example.com".to_owned(), data("", "NOT CHECKED", &[])),
+        ]);
+
+        let summary = summarize(&config, &resolv_data);
+        assert_eq!(summary.len(), 2);
+        assert!(summary.iter().all(|line| line.contains("IP: NULL")));
+    }
+
+    #[test]
+    fn summarize_reports_open_ports_when_scanning() {
+        let mut config = Config::default();
+        config.resolution.discover_ip = true;
+        config.ports.enabled = true;
+
+        let resolv_data = HashMap::from([(
+            "a.example.com".to_owned(),
+            data("1.2.3.4", "NOT CHECKED", &[80, 443]),
+        )]);
+
+        let summary = summarize(&config, &resolv_data);
+        assert!(summary
+            .iter()
+            .next()
+            .unwrap()
+            .ends_with("OPEN PORTS: [80, 443]"));
+    }
 }
