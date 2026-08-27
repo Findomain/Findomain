@@ -1,17 +1,14 @@
 name: ci-to-dockerhub
 
+# The release is published by make-release.yml using GITHUB_TOKEN, which by
+# design raises no `release` event, so this cannot run from one. The rebuild
+# lives in make-release.yml; what is left here is the manual escape hatch.
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # The image is tagged :latest and the Dockerfile installs from
-    # releases/latest/download, which GitHub resolves to the newest stable
-    # release. Publishing a pre-release must not move either of them.
-    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
