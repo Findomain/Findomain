@@ -47,14 +47,14 @@ The tool used to calculate the time was Linux's `time` command.
 * Write to one unique output file specified by the user all or only resolved subdomains.
 * Write results to automatically named TXT output file(s).
 * Hability to query directly the Findomain database created with [Subdomains Monitoring](docs/INSTALLATION.md#subdomains-monitoring) for previous discovered subdomains.
-* Hability to import and work data discovered by other tools.
+* Hability to import and work data discovered by other tools. See [Working with other tools](README.md#working-with-other-tools).
 * Quiet mode to run it silently.
 * Cross platform support: Any platform, it's written in Rust and Rust is multiplatform. See [the documentation](docs/INSTALLATION.md#build-for-32-bits-or-another-platform) for instructions.
 * Multiple API support.
 * Possibility to use as subdomain resolver.
 * Subdomain wildcard detection for accurate results. 
 * Support for subdomain discover using bruteforce method.
-* Support for configuration file in TOML, JSON, HJSON, INI or YAML format.
+* Support for configuration file in TOML, JSON, INI or YAML format.
 * Custom DNS IP addresses for fast subdomains resolving (more than 60 per second by default, adjustable using the `--threads` option.
 
 # Findomain in Depth
@@ -64,22 +64,115 @@ See [Subdomains Enumeration: what is, how to do it, monitoring automation using 
 # How Does It Work?
 Findomain uses Certificate Transparency logs and well-tested APIs to find subdomains. This method makes the tool much faster and more reliable than alternatives. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
-Findomain makes use of multiple publicly-available APIs to perform the search. The following is a list of APIs that we are using at the moment:
+Findomain queries 54 passive sources. Every one of them parses a documented
+data format, JSON in almost every case: there is no HTML scraping anywhere, so a
+redesigned web page can never quietly turn results into noise. Paginated APIs are
+walked to the last page.
 
-- [Certspotter](https://api.certspotter.com/)
-- [Crt.sh Database (favorite) or Crt.sh HTTP API](https://crt.sh)
-- [Virustotal](https://www.virustotal.com/ui/domains/)
-- [Sublist3r](https://api.sublist3r.com/)
-- [Facebook](https://developers.facebook.com/docs/certificate-transparency) `**`
-- [Bufferover](http://dns.bufferover.run/)
-- [Threatcrowd](https://threatcrowd.org/)
-- [Virustotal with apikey](https://www.virustotal.com/) `**`
-- [AnubisDB](https://jonlu.ca/anubis/)
-- [Urlscan.io](https://urlscan.io/about-api/)
+- [360 PassiveDNS](https://passivedns.cn) `**`
+- [Ahrefs](https://ahrefs.com/api) `**`
+- [AlienVault OTX](https://otx.alienvault.com) `**`
+- [AnubisDB](https://jldc.me/anubis/)
+- [Arquivo.pt](https://arquivo.pt/api)
+- [BeVigil](https://bevigil.com/osint-api) `**`
+- [BinaryEdge](https://binaryedge.io) `**`
+- [BufferOver (free)](https://tls.bufferover.run) `**`
+- [BufferOver (paid)](https://rapidapi.com/bufferover/api/bufferover-run-tls) `**`
+- [BuiltWith](https://api.builtwith.com) `**`
+- [C99](https://api.c99.nl) `**`
+- [Censys](https://search.censys.io) `**`
+- [CertSpotter](https://sslmate.com/certspotter/) `*`
+- [Chaos](https://chaos.projectdiscovery.io) `**`
+- [CIRCL PassiveDNS](https://www.circl.lu/services/passive-dns/) `**`
+- [CommonCrawl](https://commoncrawl.org)
+- [Crt.sh (database mirror)](https://crt.sh)
+- [Deepinfo](https://deepinfo.com) `**`
+- [Detectify](https://detectify.com) `**`
+- [DigiCert CertCentral](https://daas.digicert.com) `**`
+- [DNSlytics](https://dnslytics.com) `**`
+- [DNSRepo](https://dnsrepo.noc.org) `**`
+- [Facebook CT](https://developers.facebook.com/docs/certificate-transparency) `**`
+- [Farsight DNSDB](https://www.domaintools.com/products/farsight-dnsdb/) `**`
+- [FOFA](https://fofa.info) `**`
+- [FullHunt](https://fullhunt.io) `**`
+- [HackerTarget](https://hackertarget.com) `*`
+- [Hunter.io](https://hunter.io/api-documentation) `**`
+- [IntelX](https://intelx.io) `**`
+- [LeakIX](https://leakix.net) `**`
+- [Maltiverse](https://maltiverse.com)
+- [Mnemonic PassiveDNS](https://docs.mnemonic.no/display/public/API/PassiveDNS+Overview)
+- [Netlas](https://netlas.io) `**`
+- [ONYPHE](https://www.onyphe.io) `**`
+- [PassiveTotal](https://community.riskiq.com) `**`
+- [Pentest-Tools](https://pentest-tools.com) `**`
+- [PublicWWW](https://publicwww.com) `**`
+- [Pulsedive](https://pulsedive.com) `**`
+- [Quake](https://quake.360.cn) `**`
 - [SecurityTrails](https://docs.securitytrails.com/docs) `**`
+- [Shodan](https://www.shodan.io) `**`
+- [SOCRadar](https://socradar.io) `**`
+- [Spamhaus PassiveDNS](https://www.spamhaus.com) `**`
+- [Subdomain Center](https://www.subdomain.center)
+- [Sublist3r](https://api.sublist3r.com)
+- [ThreatBook](https://threatbook.io) `**`
 - [Threatminer](https://www.threatminer.org/api.php)
-- [C99](https://api.c99.nl/) `**`
-- [CTSearch](https://ui.ctsearch.entrust.com/ui/ctsearchui)
+- [UK Web Archive](https://www.webarchive.org.uk)
+- [Urlscan.io](https://urlscan.io/about-api/)
+- [VirusTotal](https://www.virustotal.com) `**`
+- [Wayback Machine](https://archive.org/help/wayback_api.php)
+- [WhoisXMLAPI](https://subdomains.whoisxmlapi.com) `**`
+- [ZETAlytics](https://zetalytics.com) `**`
+- [ZoomEye](https://www.zoomeye.org) `**`
+
+Any source can be turned off with `--exclude-sources`, for example
+`--exclude-sources wayback,commoncrawl`.
+
+**Working with other tools**
+
+Findomain reads the results of any other enumerator through
+`--import-subdomains`, which accepts as many files as you care to give it:
+
+```
+subfinder -d example.com -silent > subfinder.txt
+amass enum -d example.com && amass subs -d example.com -names -show > amass.txt
+findomain -t example.com --import-subdomains subfinder.txt amass.txt -r
+```
+
+The imported names join the ones Findomain discovers itself, and the whole set
+goes through the same resolution, filtering and reporting. Driving those tools
+yourself means their own flags, configuration files and API keys apply, which a
+wrapper could never express.
+
+**How long the search takes**
+
+Sources are queried in parallel, so the search lasts as long as its slowest
+source rather than the sum of all of them. In practice a search settles in
+about twenty seconds, and two options bound the cases where it would not:
+
+- `--source-timeout` (default 30) is the number of seconds a single request to
+  a source may take.
+- `--source-budget` (default 300) is the number of seconds the whole search may
+  spend. This is a backstop for a source that hangs, not the thing that decides
+  how long a run takes, so a source paging through thousands of real results is
+  left to finish. Use `--source-budget 0` to remove the limit entirely.
+
+- `--archive-budget` (default 20) is the number of seconds the archive indexes
+  (Wayback, CommonCrawl, UK Web Archive and Arquivo) may spend between them.
+  They are the only sources that cannot stop on their own: a CDX index is a bulk
+  download of every URL archived under a domain, sliced into storage blocks
+  rather than into pages of distinct hostnames, so it keeps costing requests
+  long after it has stopped producing new names. Left alone, CommonCrawl spends
+  over two minutes on `google.com` to return exactly the hostnames it already
+  had after twenty seconds. Raise this if you would rather wait than miss what
+  the archives hold on a small domain, use 0 to hold them to `--source-budget`
+  like any other source, or `--exclude-sources wayback,commoncrawl` to skip
+  them. They are also the slowest sources by a wide margin, so this is the knob
+  that decides how long a run takes.
+
+Whenever a limit is reached no new request is made and whatever the source had
+already collected is kept, so a cut search returns fewer results, never none.
+All three can also be set in `findomain.toml` as `source_timeout`,
+`source_budget` and `archive_budget`.
 
 **Notes**
 

@@ -19,7 +19,7 @@ Note: You need a utility to unpack the ZIP downloaded artifacts, in Linux you ca
 Findomain requires the following software to be installed:
 
 * Google Chrome or Chromium (for the screenshoting functionality).
-* PostgreSQL (for the subdomains monitoring functionality). See [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) for more details.
+* PostgreSQL, only if you want the subdomains monitoring to use it instead of the default SQLite file. See [Subdomains Monitoring](INSTALLATION.md#subdomains-monitoring) for more details.
 
 # Build for 32 bits or another platform
 
@@ -48,13 +48,23 @@ If you want to build the tool for your 32 bits system or another platform, follo
 
 # Installation Android (Termux)
 
-Install the [Termux](https://termux.com/) package, open it and follow it commands:
+Findomain is [packaged in Termux](https://github.com/termux/termux-packages/tree/master/packages/findomain).
+Install the [Termux](https://termux.com/) app, open it and run:
 
 ```
-$ pkg install rust make perl
-$ cargo install findomain
-$ cd $HOME/.cargo/bin
-$ ./findomain
+$ pkg install findomain
+$ findomain
+```
+
+The packaged version may lag behind the latest release. To build the current
+one yourself instead:
+
+```
+$ pkg install rust make perl git
+$ git clone https://github.com/Findomain/Findomain
+$ cd Findomain
+$ cargo build --release
+$ ./target/release/findomain
 ```
 
 # Installation in Linux using source code
@@ -128,7 +138,11 @@ $ findomain --help
 
 # Installation Windows
 
-Download the binary from https://github.com/findomain/findomain/releases/latest/download/findomain-windows.exe.zip and extract it.
+Download the binary from https://github.com/findomain/findomain/releases/latest/download/findomain-windows.zip and extract it.
+On a 32 bits system, download findomain-windows-i686.zip instead.
+
+Releases before 11.0.0 named these assets findomain-windows.exe.zip and
+findomain-windows-i686.exe.zip.
 
 Open a CMD shell and go to the dir where findomain.exe was downloaded.
 
@@ -146,11 +160,22 @@ $ findomain
 ```
 **Manually from the repo:**
 
+On Apple Silicon:
+
 ```
-$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-osx.zip
-# Extract the ZIP file.
-$ chmod +x findomain.dms
-$ ./findomain.dms --help
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-osx-arm64.zip
+$ unzip findomain-osx-arm64.zip
+$ chmod +x findomain
+$ ./findomain --help
+```
+
+On Intel:
+
+```
+$ curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-osx-x86_64.zip
+$ unzip findomain-osx-x86_64.zip
+$ chmod +x findomain
+$ ./findomain --help
 ```
 
 # Installation Docker
@@ -174,9 +199,9 @@ To update Findomain to latest version, please consider one of the following scen
 
 1. **If you downloaded a precompiled binary:** If you are using a precompiled binary, then you need to download the new binary.
 2. **If you are using it in ArchLinux or any Arch-based distro:** Just run `pacman -Syu`
-3. **If you have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
-4. **If you downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
-5. **If you used cargo install findomain:** then just run `cargo install findomain`.
+3. **If you installed it in Termux:** Just run `pkg upgrade`
+4. **If you have cloned the repo and compiled it from source:** You just need to go to the folder where the repo is cloned and run: `git pull && cargo build --release`, when finish, you have your executable in `target/release/findomain`.
+5. **If you downloaded a source code release and compiled it:** You need to download the new source code release and compile it again.
 
 # Access tokens configuration
 
@@ -302,7 +327,11 @@ Put in the CMD command prompt:
 
 # Subdomains Monitoring
 
-Findomain is capable of monitoring a specific domain or a list of domains for new subdomains and sending the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks. All you need is a server or your computer with [PostgreSQL](https://www.postgresql.org/) database server installed. Have in mind that you can have only a central server/computer with PostgreSQL installed and connect to it from anywhere to perform the monitoring tasks.
+Findomain is capable of monitoring a specific domain or a list of domains for new subdomains and sending the data to [Slack](https://slack.com/), [Discord](https://discordapp.com) or [Telegram](https://telegram.org) webhooks.
+
+Results are stored in SQLite by default, in a `findomain.db` file in the working directory, so nothing has to be installed or running. Use `--sqlite` to put that file somewhere else.
+
+[PostgreSQL](https://www.postgresql.org/) is used instead as soon as the run names it, either with any of the `--postgres-*` options or with `postgres_connection` in the configuration file. That is what you want when several machines share one central database.
 
 **IMPORTANT NOTE:** Findomain is a subdomains enumeration and monitor tool, not a job scheduler. If you want to run findomain automatically then you need to configure a job scheduler like [systemd-timers](https://wiki.archlinux.org/index.php/Systemd/Timers) or the well known [CRON](https://wiki.archlinux.org/index.php/Cron) in \*NIX systems, Termux in Android or MAC and the [Windows Task Scheduler](https://docs.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page) in Windows.
 
@@ -313,6 +342,7 @@ Here's an article that covers the process of monitoring your domains with schedu
 You can set the following command line options when using the subdomains monitoring feature:
 
 ```
+        --sqlite <FILE>                            SQLite file to store results in. Defaults to findomain.db.
         --postgres-database <postgres-database>    Postgresql database.
         --postgres-host <postgres-host>            Postgresql host.
         --postgres-password <postgres-password>    Postgresql password.
