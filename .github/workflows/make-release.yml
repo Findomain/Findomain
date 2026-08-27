@@ -1,12 +1,19 @@
 name: Create release artifacts
 
 on:
+  push:
+    tags:
+      # Stable tags such as 11.0.0, and pre-releases such as 11.0.0-beta.1.
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-*"
   workflow_dispatch:
+
+env:
+  # Pinned so a new cross release cannot change how a tag builds.
+  CROSS_VERSION: v0.2.5
 
 jobs:
   build-nix:
-    env:
-      IN_PIPELINE: true
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -17,52 +24,46 @@ jobs:
             target: x86_64-unknown-linux-musl
             name: findomain-linux
             path: target/x86_64-unknown-linux-musl/release/findomain
-            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
           - type: ubuntu-x86
             os: ubuntu-latest
             target: i686-unknown-linux-musl
             name: findomain-linux-i386
             path: target/i686-unknown-linux-musl/release/findomain
-            pkg_config_path: /usr/lib/i686-linux-gnu/pkgconfig
           - type: armv7
             os: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
             name: findomain-armv7
             path: target/armv7-unknown-linux-gnueabihf/release/findomain
-            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
           - type: aarch64
             os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             name: findomain-aarch64
             path: target/aarch64-unknown-linux-gnu/release/findomain
-            pkg_config_path: /usr/lib/x86_64-linux-gnu/pkgconfig
     steps:
-      - uses: actions/checkout@v2
-      - name: Install System Dependencies
-        run: |
-          env
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libssl-dev pkg-config gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        env:
-          PKG_CONFIG_PATH: ${{ matrix.pkg_config_path }}
-          OPENSSL_DIR: /usr/lib/ssl
-        with:
-          use-cross: true
-          command: build
-          args: --release --target=${{ matrix.target }}
-      - name: Strip symbols from binary
+          targets: ${{ matrix.target }}
+
+      # cross builds inside a container that already carries the linker and the
+      # OpenSSL build for each target, so nothing has to be installed here.
+      - name: Install cross
         run: |
-          strip -s ${{ matrix.path }} || arm-linux-gnueabihf-strip -s ${{ matrix.path }} || aarch64-linux-gnu-strip -s ${{ matrix.path }}
+          curl -fsSL "https://github.com/cross-rs/cross/releases/download/${CROSS_VERSION}/cross-x86_64-unknown-linux-gnu.tar.gz" \
+            | sudo tar xz -C /usr/local/bin cross
+          cross --version
+
+      # No strip step: [profile.release] already sets strip = true, so the
+      # linker drops the symbols for every target.
+      - name: Build
+        run: cross build --release --locked --target ${{ matrix.target }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
+          if-no-files-found: error
 
   build-macos:
     strategy:
@@ -73,32 +74,26 @@ jobs:
             arch: x86_64
           - target: aarch64-apple-darwin
             arch: arm64
-    env:
-      IN_PIPELINE: true
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target=${{ matrix.target }}
-      - name: Strip symbols from binary
-        run: |
-          strip -u -r target/${{ matrix.target }}/release/findomain
+          targets: ${{ matrix.target }}
+
+      # native-tls speaks to Security.framework here, so there is no OpenSSL to
+      # cross-compile and the host toolchain covers both architectures.
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: findomain-osx-${{ matrix.arch }}
           path: target/${{ matrix.target }}/release/findomain
+          if-no-files-found: error
 
   build-windows:
-    env:
-      IN_PIPELINE: true
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -107,26 +102,79 @@ jobs:
           - type: windows-x64
             os: windows-latest
             target: x86_64-pc-windows-msvc
-            name: findomain-windows.exe
+            name: findomain-windows
             path: target\x86_64-pc-windows-msvc\release\findomain.exe
           - type: windows-x86
             os: windows-latest
             target: i686-pc-windows-msvc
-            name: findomain-windows-i686.exe
+            name: findomain-windows-i686
             path: target\i686-pc-windows-msvc\release\findomain.exe
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target=${{ matrix.target }}
+          targets: ${{ matrix.target }}
+
+      # native-tls speaks to SChannel here, so there is no OpenSSL to build.
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
+          if-no-files-found: error
+
+  release:
+    name: Attach the binaries to the release
+    needs: [build-nix, build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      # One zip per artifact, named the way every previous release named them:
+      # findomain-linux.zip holding a single findomain at the root.
+      - name: Zip each binary
+        run: |
+          cd artifacts
+          for dir in */; do
+            name="${dir%/}"
+            (cd "$name" && zip -q -r "../${name}.zip" .)
+          done
+          ls -l ./*.zip
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          # A tag such as 11.0.0-beta.1 is a pre-release; 11.0.0 is not.
+          case "$tag" in
+            *-*) prerelease="--prerelease" ;;
+            *)   prerelease="" ;;
+          esac
+
+          notes="docs/releases/${tag}.md"
+          if [ -f "$notes" ]; then
+            body="--notes-file $notes"
+          else
+            echo "::warning::$notes is missing, falling back to generated notes"
+            body="--generate-notes"
+          fi
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" artifacts/*.zip --clobber
+          else
+            # shellcheck disable=SC2086
+            gh release create "$tag" artifacts/*.zip \
+              --title "Findomain $tag" \
+              $body $prerelease
+          fi
