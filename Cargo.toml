@@ -38,7 +38,7 @@ futures = "0.3.34"
 anyhow = "1.0.104"
 postgres-native-tls = "0.5.3"
 native-tls = "0.2.18"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.41.0", features = ["bundled"] }
 quick-xml = { version = "0.42.0", features = ["serialize"] }
 lettre = { version = "0.11.23", default-features = false, features = ["smtp-transport", "builder", "native-tls", "hostname"] }
 
