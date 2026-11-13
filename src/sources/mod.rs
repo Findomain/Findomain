@@ -16,13 +16,14 @@ use {
     models::{
         AhrefsResponse, AlienVaultResponse, BinaryEdgeResponse, BufferoverResponse,
         BuiltWithResponse, C99Response, CdxRecord, CensysResponse, CertCentralResponse,
-        CertSpotterIssuance, CirclLine, CommonCrawlIndex, CommonCrawlPages, DeepinfoResponse,
-        DetectifyAsset, DnsRepoRecord, DnsdbLine, DnslyticsResponse, FacebookResponse,
-        FofaResponse, HunterResponse, IntelxResponse, IntoSubdomains, LeakixRecord,
-        MaltiverseResponse, MnemonicResponse, NamedHostList, NetlasResponse, OnypheResponse,
-        Paginated, PassiveDns360Response, PassiveTotalResponse, PentestToolsResponse,
-        PulsediveResponse, QuakeResponse, RelativeSubdomains, SocRadarResponse, SpamhausResponse,
-        ThreatBookResponse, UrlscanResponse, WhoisXmlResponse, ZetalyticsResponse, ZoomEyeResponse,
+        CertSpotterIssuance, CirclLine, CommonCrawlIndex, CommonCrawlPages, CrtNameRecord,
+        DeepinfoResponse, DetectifyAsset, DnsRepoRecord, DnsdbLine, DnslyticsResponse,
+        FacebookResponse, FofaResponse, HunterResponse, IntelxResponse, IntoSubdomains,
+        LeakixRecord, MaltiverseResponse, MnemonicResponse, NamedHostList, NetlasResponse,
+        OnypheResponse, Paginated, PassiveDns360Response, PassiveTotalResponse,
+        PentestToolsResponse, PulsediveResponse, QuakeResponse, RelativeSubdomains,
+        SocRadarResponse, SpamhausResponse, ThreatBookResponse, UrlscanResponse, WhoisXmlResponse,
+        ZetalyticsResponse, ZoomEyeResponse,
     },
     reqwest::{
         blocking::{Client, RequestBuilder, Response},
@@ -309,6 +310,21 @@ pub fn subdomain_center(context: &SourceContext, target: &str) -> Option<HashSet
 
     let request = context.get(&format!("https://api.subdomain.center/?domain={target}"));
     fetch::<HashSet<String>>(context, API, request)
+}
+
+/// crt.name's subdomain index, which only accepts a registrable domain.
+///
+/// JSON instead of its default plain text, so an error served with a 200
+/// cannot pass as hostnames.
+#[must_use]
+pub fn crtname(context: &SourceContext, target: &str) -> Option<HashSet<String>> {
+    const API: &str = "crt.name";
+    context.announce(API);
+
+    let request = context.get(&format!(
+        "https://crt.name/v1/search?apex={target}&format=json"
+    ));
+    fetch::<Vec<CrtNameRecord>>(context, API, request)
 }
 
 /// `HackerTarget`'s host search, which answers with `hostname,ip` lines.

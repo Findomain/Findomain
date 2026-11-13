@@ -68,6 +68,7 @@ type KeyedSource = fn(&SourceContext, &str, &str) -> Option<HashSet<String>>;
 /// Sources reachable without any credential.
 const PLAIN_SOURCES: &[(&str, PlainSource)] = &[
     ("crtsh", crtsh::subdomains),
+    ("crtname", sources::crtname),
     ("anubis", sources::anubisdb),
     ("arquivo", sources::arquivo),
     ("sublist3r", sources::sublist3r),
