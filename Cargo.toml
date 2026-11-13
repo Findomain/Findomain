@@ -14,46 +14,46 @@ keywords = [
     "subdomain-scanner",
 ]
 readme = "README.md"
-rust-version = "1.88"
+rust-version = "1.89"
 # Not distributed through crates.io; the resolver and HTTP checker come from git.
 publish = false
 resolver = "1"
 
 [dependencies]
 serde = { version = "1.0.229", features = ["derive"] }
-reqwest = { version = "0.13.4", features = ["blocking", "json", "gzip"] }
-hickory-resolver = "0.26.2"
-clap = { version = "4.6.6", features = ["derive"] }
-rand = "0.10.2"
+reqwest = { version = "0.13.5", features = ["blocking", "json", "gzip"] }
+hickory-resolver = "0.26.3"
+clap = { version = "4.6.7", features = ["derive"] }
+rand = "0.10.3"
 postgres = "0.19.14"
 rayon = "1.12.0"
-config = { version = "0.15.25", features = ["yaml", "json", "toml", "ini"] }
+config = { version = "0.15.27", features = ["yaml", "json", "toml", "ini"] }
 headless_chrome = "1.0.22"
 addr = "0.15.6"
-serde_json = "1.0.151"
+serde_json = "1.0.154"
 rusolver = { git = "https://github.com/Edu4rdSHL/rusolver", tag = "0.11.0" }
 fhc = { git = "https://github.com/Edu4rdSHL/fhc", tag = "0.10.0" }
-tokio = { version = "1.53.1", features = ["net", "rt-multi-thread", "time"] }
+tokio = { version = "1.54.1", features = ["net", "rt-multi-thread", "time"] }
 futures = "0.3.34"
 anyhow = "1.0.104"
 postgres-native-tls = "0.5.3"
 native-tls = "0.2.18"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.42.0", features = ["bundled"] }
 quick-xml = { version = "0.42.0", features = ["serialize"] }
 lettre = { version = "0.11.23", default-features = false, features = ["smtp-transport", "builder", "native-tls", "hostname"] }
 
 [target.'cfg(unix)'.dependencies]
 # Only to restore the default SIGPIPE disposition; already in the tree.
-libc = "0.2.189"
+libc = "0.2.191"
 
 [target.arm-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.81", features = ["vendored"] }
+openssl = { version = "0.10.82", features = ["vendored"] }
 
 [target.aarch64-unknown-linux-gnu.dependencies]
-openssl = { version = "0.10.81", features = ["vendored"] }
+openssl = { version = "0.10.82", features = ["vendored"] }
 
 [target.armv7-unknown-linux-gnueabihf.dependencies]
-openssl = { version = "0.10.81", features = ["vendored"] }
+openssl = { version = "0.10.82", features = ["vendored"] }
 
 [profile.release]
 lto = true
