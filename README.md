@@ -187,13 +187,14 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 # Installation
 
-We offer ready-to-use binaries for the following platforms (64-bit only):
+We offer ready-to-use binaries for the following platforms:
 
-* [Linux](docs/INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
+* [Linux](docs/INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Windows](docs/INSTALLATION.md#installation-windows)
 * [MacOS](docs/INSTALLATION.md#installation-macos)
-* [Aarch64 (Raspberry Pi)](docs/INSTALLATION.md#installation-aarch64-raspberry-pi)
-* [NixOS](docs/INSTALLATION.md#installation-nixos)
+* [Aarch64 (Raspberry Pi)](docs/INSTALLATION.md#installation-aarch64)
+* [ARMv7](docs/INSTALLATION.md#installation-armv7)
+* [NixOS](docs/INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Docker](docs/INSTALLATION.md#installation-docker)
 
 If you need to run Findomain on another platform, continue reading the documentation.
