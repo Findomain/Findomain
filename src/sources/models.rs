@@ -84,6 +84,21 @@ impl IntoSubdomains for Vec<CrtshEntry> {
     }
 }
 
+#[derive(Debug, Default, Deserialize)]
+pub struct CrtNameRecord {
+    #[serde(default)]
+    pub sub: String,
+}
+
+impl IntoSubdomains for Vec<CrtNameRecord> {
+    fn into_subdomains(self) -> HashSet<String> {
+        self.into_iter()
+            .map(|record| record.sub)
+            .filter(|host| !host.is_empty())
+            .collect()
+    }
+}
+
 /// Shape shared by the APIs that wrap a hostname array in a single key.
 #[derive(Debug, Default, Deserialize)]
 pub struct NamedHostList {
@@ -1113,6 +1128,17 @@ mod tests {
         assert_eq!(
             sorted(response.into_subdomains()),
             ["a.example.com", "b.example.com", "c.example.com"]
+        );
+    }
+
+    #[test]
+    fn crtname_reads_every_record_and_ignores_extra_fields() {
+        let response: Vec<CrtNameRecord> = parse(
+            r#"[{"sub":"a.example.com"},{"sub":"example.com","seen":"2024-01-01"},{"sub":""}]"#,
+        );
+        assert_eq!(
+            sorted(response.into_subdomains()),
+            ["a.example.com", "example.com"]
         );
     }
 

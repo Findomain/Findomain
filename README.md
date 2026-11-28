@@ -64,7 +64,7 @@ See [Subdomains Enumeration: what is, how to do it, monitoring automation using 
 # How Does It Work?
 Findomain uses Certificate Transparency logs and well-tested APIs to find subdomains. This method makes the tool much faster and more reliable than alternatives. If you want to know more about Certificate Transparency logs, read https://www.certificate-transparency.org/
 
-Findomain queries 54 passive sources. Every one of them parses a documented
+Findomain queries 55 passive sources. Every one of them parses a documented
 data format, JSON in almost every case: there is no HTML scraping anywhere, so a
 redesigned web page can never quietly turn results into noise. Paginated APIs are
 walked to the last page.
@@ -85,6 +85,7 @@ walked to the last page.
 - [Chaos](https://chaos.projectdiscovery.io) `**`
 - [CIRCL PassiveDNS](https://www.circl.lu/services/passive-dns/) `**`
 - [CommonCrawl](https://commoncrawl.org)
+- [crt.name](https://crt.name)
 - [Crt.sh (database mirror)](https://crt.sh)
 - [Deepinfo](https://deepinfo.com) `**`
 - [Detectify](https://detectify.com) `**`
@@ -186,13 +187,14 @@ If you know other APIs that should be added, comment [here](https://github.com/E
 
 # Installation
 
-We offer ready-to-use binaries for the following platforms (64-bit only):
+We offer ready-to-use binaries for the following platforms:
 
-* [Linux](docs/INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
+* [Linux](docs/INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Windows](docs/INSTALLATION.md#installation-windows)
 * [MacOS](docs/INSTALLATION.md#installation-macos)
-* [Aarch64 (Raspberry Pi)](docs/INSTALLATION.md#installation-aarch64-raspberry-pi)
-* [NixOS](docs/INSTALLATION.md#installation-nixos)
+* [Aarch64 (Raspberry Pi)](docs/INSTALLATION.md#installation-aarch64)
+* [ARMv7](docs/INSTALLATION.md#installation-armv7)
+* [NixOS](docs/INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Docker](docs/INSTALLATION.md#installation-docker)
 
 If you need to run Findomain on another platform, continue reading the documentation.

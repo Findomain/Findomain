@@ -1,13 +1,13 @@
 # Installation
 
-We offer binaries ready to use for the following platforms (all are for 64 bits only):
+We offer binaries ready to use for the following platforms:
 
-* [Linux](INSTALLATION.md#installation-in-linux-using-compiled-artifacts)
+* [Linux](INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Windows](INSTALLATION.md#installation-windows)
 * [MacOS](INSTALLATION.md#installation-macos)
 * [Aarch64](INSTALLATION.md#installation-aarch64)
 * [ARMv7](INSTALLATION.md#installation-armv7)
-* [NixOS](INSTALLATION.md#installation-nixos)
+* [NixOS](INSTALLATION.md#installation-in-linux-using-precompiled-artifacts)
 * [Docker](INSTALLATION.md#installation-docker)
 
 If you need to run Findomain in another platform, continue reading the documentation.
@@ -25,7 +25,7 @@ Findomain requires the following software to be installed:
 
 ## Binaries
 
-The only 32-bit platform with precompiled binaries is Linux since the 4.0.1 release, follow these steps for using the precompiled binaries:
+Precompiled 32-bit binaries exist for x86 Linux, Windows (see [Installation Windows](INSTALLATION.md#installation-windows)) and [ARMv7](INSTALLATION.md#installation-armv7). For x86 Linux:
 
 
 ```
@@ -126,6 +126,9 @@ $ sudo mv findomain /usr/bin/findomain
 $ findomain --help
 ```
 
+That build links against glibc. On Alpine or another musl system, download
+`findomain-aarch64-musl.zip` instead, a static build.
+
 # Installation ARMv7
 
 ```
@@ -194,7 +197,7 @@ $ docker run --rm edu4rdshl/findomain:latest -t example.com
 
 **Building the docker image:**
 
-Please see [the documentation](docker/).
+Please see [the documentation](../docker/).
 
 # Updating Findomain to latest version
 
